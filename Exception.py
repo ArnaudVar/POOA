@@ -1,0 +1,3 @@
+class SetterException(Exception):
+    pass
+
