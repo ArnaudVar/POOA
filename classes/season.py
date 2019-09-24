@@ -1,9 +1,9 @@
-from Exception  import SetterException
+from Exception  import SetterException, AttributeException
 
 class Season :
     """
-    Cette classe permet de rassembler les différentes informations sur les séries
-    On y trouve les identifiants uniques des séries, leurs informations principales (numéro saison, liste d'épisodes,
+    Cette classe permet de rassembler les différentes informations sur les saisons
+    On y trouve les identifiants uniques des saisons, leurs informations principales (numéro saison, liste d'épisodes,
     description de la saison, cast, notes, image
     """
 
@@ -23,15 +23,18 @@ class Season :
         self.grade = grade
         self._image = image
 
-
     def numberEpisodePlanned(self):
+        """
+        Méthode renvoyant le nombre d'épisodes prévus dans la saison
+        :return: int
+        """
         return len(self.listEpisode)
 
     def _get_listEpisode(self):
         """
         Méthode appelée lorsqu'on voudra accéder à la liste d'épisodes de la saison
         ELle renvoie la liste des épisodes de la saison pour cette série
-        :return: listEpisode (liste d'objets de la classe épisodes)
+        :return: liste d'objets episodes
         """
         return self._listEpisode
 
@@ -41,7 +44,7 @@ class Season :
         Elle renvoie une exception lorsqu'elle est invoquée, en effet ici on considère qu'on ne pourra pas changer toute la liste
         d'épisodes d'un coup mais plutôt en rajouter au fure et à mesure
         :param args: paramètres passés lors de l'appel
-        :return: raise une exception
+        :return: None
         """
         raise SetterException("l'attribu listEpisode de la classe Season ne possède pas de setter,\n \
                               essayez plutôt d'ajouter un épisode avec la méthode addEpisode")
@@ -49,7 +52,7 @@ class Season :
     def _get_image(self):
         """
         Méthode appelée lorsqu'on voudra accéder à l'image de la saison
-        :return: renvoie l'image de la saison
+        :return: image
         """
         return self._image
 
@@ -57,14 +60,14 @@ class Season :
         """
         méthode appelée lorsqu'on veut changer la valeur de l'image de la saison
         :param note: la nouvelle image de la saison
-        :return: ne renvoie rien
+        :return: None
         """
         return self._image
 
     def _get_id(self):
         """
         Méthode appelée lorsqu'on voudra accéder à l'id de la saison
-        :return: renvoie l'id de la saison
+        :return: int
         """
 
         return self._id
@@ -74,7 +77,7 @@ class Season :
         méthode appelée lorsqu'on veut changer la valeur de l'id de la saison
         Ici l'id ne peut être modifié. En effet, on veut que l'id de la série soit unique
         :param args: paramètre donné comme nouvelle valeur de id
-        :return: renvoie une exception avertissant qu'on ne peut changer l'identifiant de la série
+        :return: None
         """
 
         raise SetterException("l'attribu id de la classe Season n'est pas modifiable")
