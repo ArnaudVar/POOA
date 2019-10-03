@@ -12,3 +12,6 @@ def home():
 def login():
     return render_template('login.html', title='Sign In')
 
+@app.route('/serie')
+def serie():
+    return render_template('serie.html', title='Serie')
