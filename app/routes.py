@@ -10,7 +10,7 @@ from werkzeug.urls import url_parse
 
 
 @app.route('/')
-@app.routes('/home')
+@app.route('/home')
 @login_required
 def home():
     return render_template('home.html', title='Home')
