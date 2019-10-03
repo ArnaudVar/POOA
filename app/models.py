@@ -24,10 +24,3 @@ class User(UserMixin, db.Model):
 def user_loader(id):
     return User.query.get(int(id))
 
-
-class Season(db.model):
-    id = db.Column(db.Integer, primary_key=True)
-    listEpisodes = db.Column(db.ARRAY)
-    cast = db.Column(db.ARRAY)
-    grade = db.Column(db.Float)
-    image = db.Column(db.String)
