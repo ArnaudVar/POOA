@@ -1,4 +1,4 @@
-from serie import Serie
+from Serie import Serie
 from Exception import SetterException
 
 class User :
