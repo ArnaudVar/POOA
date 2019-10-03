@@ -1,3 +1,15 @@
 .login {
+    background: #343a40;
+    text-align: center;
+    color: white;
+}
 
+@font-face {
+    font-family: Redemption;
+    src: url(Redemption.ttf);
+}
+
+h1 {
+    font-family: Redemption;
+    font-size: 80px;
 }
