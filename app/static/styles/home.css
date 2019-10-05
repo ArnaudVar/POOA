@@ -1,0 +1,17 @@
+@font-face {
+    font-family: Redemption;
+    src: url(Redemption.ttf);
+}
+
+.home {
+    background: #F5FFFA;
+}
+
+.welcome {
+    font-family: 'Amatic SC';;
+    text-align: center
+}
+
+.card-body {
+    background: #ADD8E6;
+}

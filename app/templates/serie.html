@@ -67,8 +67,7 @@
             <li class="nav-item">
                 <a class="nav-link active">Saison {{i}} </a>
             </li>
-            {% endif %}
-            {% if activeseason !=i %}
+            {% else %}
             <li class="nav-item">
                 <a class="nav-link">Saison {{i}} </a>
             </li>
@@ -81,8 +80,7 @@
             {% for episode in episodes %}
             {% if activeepisode == episode %}
             <li class="list-group-item list-group-item-action active">Episode {{episode}}</li>
-            {% endif %}
-            {% if activeepisode != episode %}
+            {% else %}
             <li class="list-group-item list-group-item-action">Episode {{episode}}</li>
             {% endif %}
             {% endfor %}

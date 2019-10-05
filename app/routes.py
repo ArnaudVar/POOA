@@ -1,4 +1,5 @@
 from flask import render_template, redirect, url_for, flash
+import requests
 from app import app, db
 from app.forms import LoginForm, RegistrationForm
 from flask_login import current_user, login_user
@@ -11,9 +12,16 @@ from werkzeug.urls import url_parse
 
 @app.route('/')
 @app.route('/home')
-@login_required
+#@login_required
 def home():
-    return render_template('home.html', title='Home')
+    r = requests.get("https://api.themoviedb.org/3/tv/popular?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
+    g = requests.get("http://api.themoviedb.org/3/genre/tv/list?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
+    genres = g.json()['genres']
+    suggestions = r.json()['results']
+    selection = []
+    for i in range(12):
+        selection.append(suggestions[i])
+    return render_template('home.html', title='Home', suggestions=selection, nombre_series=12, genres=genres)
 
 
 @app.route('/login', methods=['GET', 'POST'])

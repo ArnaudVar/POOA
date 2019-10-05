@@ -1,0 +1,70 @@
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+          integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+          integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    <link href='https://fonts.googleapis.com/css?family=Amatic SC' rel='stylesheet'>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/side.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/head.css') }}">
+</head>
+<body>
+
+<nav class="w-100 navbar navbar-expand-lg">
+    <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
+        <div class="d-flex flex-row">
+            <div class="logo">
+                MERDIER
+            </div>
+            <form class="pl-2 form-inline my-2 my-lg-0">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+        </div>
+        <button class="btn btn-default">
+            <div>
+                Login
+                <i class="fa fa-power-off"></i>
+            </div>
+        </button>
+    </div>
+</nav>
+<div class="d-flex flex-row">
+    <nav id="sidebar">
+        <ul class="list-unstyled components">
+            <li class="active">
+                <a><i class="fa fa-home"></i> &nbsp; HOME</a>
+            </li>
+            <li class="active">
+                <a><i class="fas fa-video"></i>&nbsp; MY SERIES</a>
+            </li>
+            <li class="active">
+                <a><i class="fas fa-film"></i>&nbsp; MY MOVIES</a>
+            </li>
+            <li class="active">
+                <a><i class="fa fa-star"></i>&nbsp; BEST SERIES</a>
+            </li>
+            <li class="active">
+                <a class="dropdown-toggle" data-toggle="collapse" data-target="#genreSubmenu" role="button"
+                   aria-expanded="false" aria-controls="genreSubmenu">
+                    <i class="fa fa-list"></i> &nbsp; GENRES
+                </a>
+                <ul class="collapse list-unstyled" id="genreSubmenu">
+                    {% for genre in genres %}
+                    <li>
+                        <a>{{genre.name}}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </li>
+        </ul>
+    </nav>
+    {% block content %}
+    {% endblock %}
+</div>
+
+</body>
+</html>
