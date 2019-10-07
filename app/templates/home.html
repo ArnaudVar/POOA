@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/home.css') }}">
+</head>
+<div class="m-3 home w-100 d-flex flex-column">
+    <div class="w-100 d-flex justify-content-center welcome">
+        <h2 class="w-50">Welcome to SeriGenda, check out everything you can (binge) watch</h2>
+    </div>
+    <div class="w-100 h-50 card suggestion">
+        <div class="card-header">
+            New series
+        </div>
+        <div class="card-body list">
+            <div class="container">
+                <div class="row blog">
+                    <div class="col-md-12">
+                        <div id="blogCarousel" class="carousel slide" data-ride="carousel">
+
+                            <ol class="carousel-indicators">
+                                <li data-target="#blogCarousel" data-slide-to="0" class="active"></li>
+                                <li data-target="#blogCarousel" data-slide-to="1"></li>
+                                <li data-target="#blogCarousel" data-slide-to="2"></li>
+                            </ol>
+                            <div class="carousel-inner">
+                                {% for i in range(suggestions| length //4) %}
+                                {% if i == 0 %}
+                                <div class="carousel-item active">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="card-header name">
+                                                {{suggestions[i*4]['name']}}
+                                            </div>
+                                            <div class="p-0 card-body serie">
+                                                <a class="w-100 h-100" href="/serie/{{suggestions[i*4]['id']}}">
+                                                    <button class="btn btn-default btn-circle">
+                                                        <i class="fa fa-fw fa-plus"></i>
+                                                    </button>
+                                                </a>
+                                                <img src="https://image.tmdb.org/t/p/w500{{suggestions[i*4]['poster_path']}}"
+                                                     alt="{{suggestions[i*4]['name']}}"
+                                                     height="200px"
+                                                     width="100%"
+                                                     class="rounded">
+                                            </div>
+
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card-header name">
+                                                {{suggestions[i*4+1]['name']}}
+                                            </div>
+                                            <div class="p-0 card-body serie">
+                                                <a class="w-100 h-100" href="/serie/{{suggestions[i*4+1]['id']}}">
+                                                    <button class="btn btn-default btn-circle">
+                                                        <i class="fa fa-fw fa-plus"></i>
+                                                    </button>
+                                                </a>
+                                                <img src="https://image.tmdb.org/t/p/w500{{suggestions[i*4+1]['poster_path']}}"
+                                                     alt="{{suggestions[i*4+1]['name']}}"
+                                                     height="200px"
+                                                     width="100%"
+                                                     class="rounded">
+                                            </div>
+
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card-header name">
+                                                {{suggestions[i*4+2]['name']}}
+                                            </div>
+                                            <div class="p-0 card-body serie">
+                                                <a class="w-100 h-100" href="/serie/{{suggestions[i*4+2]['id']}}">
+                                                    <button class="btn btn-default btn-circle">
+                                                        <i class="fa fa-fw fa-plus"></i>
+                                                    </button>
+                                                </a>
+                                                <img src="https://image.tmdb.org/t/p/w500{{suggestions[4*i+2]['poster_path']}}"
+                                                     alt="{{suggestions[4*i+2]['name']}}"
+                                                     height="200px"
+                                                     width="100%"
+                                                     class="rounded">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card-header name">
+                                                {{suggestions[i*4+3]['name']}}
+                                            </div>
+                                            <div class="p-0 card-body serie">
+                                                <a class="w-100 h-100" href="/serie/{{suggestions[i*4+3]['id']}}">
+                                                    <button class="btn btn-default btn-circle">
+                                                        <i class="fa fa-fw fa-plus"></i>
+                                                    </button>
+                                                </a>
+                                                <img src="https://image.tmdb.org/t/p/w500{{suggestions[i*4+3]['poster_path']}}"
+                                                     alt="{{suggestions[i*4+3]['name']}}"
+                                                     height="200px"
+                                                     width="100%"
+                                                     class="rounded">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="carousel-item">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="card-header name">
+                                                {{suggestions[i*4]['name']}}
+                                            </div>
+                                            <div class="p-0 card-body serie">
+                                                <a class="w-100 h-100" href="/serie/{{suggestions[i*4]['id']}}">
+                                                    <button class="btn btn-default btn-circle">
+                                                        <i class="fa fa-fw fa-plus"></i>
+                                                    </button>
+                                                </a>
+                                                <img src="https://image.tmdb.org/t/p/w500{{suggestions[i*4]['poster_path']}}"
+                                                     alt="{{suggestions[i*4]['name']}}"
+                                                     height="200px"
+                                                     width="100%"
+                                                     class="rounded">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card-header name">
+                                                {{suggestions[i*4+1]['name']}}
+                                            </div>
+                                            <div class="p-0 card-body serie">
+                                                <a class="w-100 h-100" href="/serie/{{suggestions[i*4+1]['id']}}">
+                                                    <button class="btn btn-default btn-circle">
+                                                        <i class="fa fa-fw fa-plus"></i>
+                                                    </button>
+                                                </a>
+                                                <img src="https://image.tmdb.org/t/p/w500{{suggestions[i*4+1]['poster_path']}}"
+                                                     alt="{{suggestions[i*4+1]['name']}}"
+                                                     height="200px"
+                                                     width="100%"
+                                                     class="rounded">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card-header name">
+                                                {{suggestions[i*4+2]['name']}}
+                                            </div>
+                                            <div class="p-0 card-body serie">
+                                                <a class="w-100 h-100" href="/serie/{{suggestions[i*4+2]['id']}}">
+                                                    <button class="btn btn-default btn-circle">
+                                                        <i class="fa fa-fw fa-plus"></i>
+                                                    </button>
+                                                </a>
+                                                <img src="https://image.tmdb.org/t/p/w500{{suggestions[4*i+2]['poster_path']}}"
+                                                     alt="{{suggestions[4*i+2]['name']}}"
+                                                     height="200px"
+                                                     width="100%"
+                                                     class="rounded">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card-header name">
+                                                {{suggestions[i*4+3]['name']}}
+                                            </div>
+                                            <div class="p-0 card-body serie">
+                                                <a class="w-100 h-100" href="/serie/{{suggestions[i*4+3]['id']}}">
+                                                    <button class="btn btn-default btn-circle">
+                                                        <i class="fa fa-fw fa-plus"></i>
+                                                    </button>
+                                                </a>
+                                                <img src="https://image.tmdb.org/t/p/w500{{suggestions[i*4+3]['poster_path']}}"
+                                                     alt="{{suggestions[i*4+3]['name']}}"
+                                                     height="200px"
+                                                     width="100%"
+                                                     class="rounded">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+

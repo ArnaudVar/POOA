@@ -62,14 +62,14 @@
 <div class="card p-2">
     <div class="card-header serie-header">
         <ul class="nav nav-tabs card-header-tabs">
-            {% for i in saisons %}
-            {% if activeseason==i %}
+            {% for serie in serie['seasons'] %}
+            {% if activeseason == serie['season_number']  %}
             <li class="nav-item">
-                <a class="nav-link active">Saison {{i}} </a>
+                <a class="nav-link active">Season {{serie['season_number']}} </a>
             </li>
             {% else %}
             <li class="nav-item">
-                <a class="nav-link">Saison {{i}} </a>
+                <a class="nav-link">Season {{serie['season_number']}} </a>
             </li>
             {% endif %}
             {% endfor %}
@@ -77,11 +77,11 @@
     </div>
     <div class="card-body season d-flex justify-content-start pt-0 pl-0">
         <ul class="list-group">
-            {% for episode in episodes %}
-            {% if activeepisode == episode %}
-            <li class="list-group-item list-group-item-action active">Episode {{episode}}</li>
+            {% for j in range(serie['seasons'][0]['episode_count']) %}
+            {% if activeepisode == j %}
+            <li class="list-group-item list-group-item-action active">Episode {{j}}</li>
             {% else %}
-            <li class="list-group-item list-group-item-action">Episode {{episode}}</li>
+            <li class="list-group-item list-group-item-action">Episode {{j}}</li>
             {% endif %}
             {% endfor %}
         </ul>
