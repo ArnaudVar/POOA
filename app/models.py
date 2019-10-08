@@ -13,7 +13,6 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     series = db.Column(db.Text())
 
-
     def __repr__(self):
         return '<User {}>'.format(self.username)
 
@@ -23,6 +22,13 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def list_serie(self):
+        # Le format du texte est sous la forme {idserie}x{num_episode}-{idserie}x{num_episode} ...
+        serie_episode_list = self.series.split('-')
+        serie_list = []
+        for serie_episode in serie_episode_list:
+            serie_list.append(serie_episode.split('x'))
+        return serie_list
 
 @login.user_loader
 def user_loader(id):
