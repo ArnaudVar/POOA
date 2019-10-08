@@ -1,5 +1,6 @@
 from classes.Exception import SetterException, AttributeException
 
+
 class Season :
     """
     Cette classe permet de rassembler les différentes informations sur les saisons
@@ -82,7 +83,6 @@ class Season :
         raise SetterException("l'attribu id de la classe Season n'est pas modifiable")
 
     id = property(_get_id, _set_id)
-    image = property(_get_image, _set_image)
     listEpisode = property(_get_listEpisode, _set_listEpisode)
 
 
