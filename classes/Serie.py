@@ -1,4 +1,4 @@
-from Exception import SetterException
+from classes.Exception import SetterException
 
 
 class Serie():
@@ -30,6 +30,7 @@ class Serie():
         self.seasons = seasons
         self.latest = latest
         self.date = date
+        self.selected_episode = 'S1E1'
 
     def _get_id(self):
         """
@@ -118,3 +119,15 @@ class Serie():
         :return: int : le nombre de saisons
         """
         return len(self.seasons)
+
+    def set_selected_episode(self,i,j):
+        self.selected_episode = 'S'+str(i)+'E'+str(j)
+
+    def get_current_season(self):
+        season = int(self.selected_episode.split('E')[0].split('S')[1])
+        return(season)
+
+    def get_current_episode(self):
+        episode = int(self.selected_episode.split('E')[1])
+        return(episode)
+

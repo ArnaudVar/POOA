@@ -1,4 +1,4 @@
-from Exception  import SetterException, AttributeException
+from classes.Exception import SetterException, AttributeException
 
 class Season :
     """
@@ -7,19 +7,18 @@ class Season :
     description de la saison, cast, notes, image
     """
 
-    def __init__(self, id, listEpisodes, cast, grade, image):
+    def __init__(self, id,season_number, listEpisodes, grade, image):
         """
         Constructeur de notre classe saison, on considère que toutes les informations sont données par l'API lors de la
         construction d'une nouvelle série
         :param id: l'identifiant private de notre classe, elle est private et sans mutateur
         :param listEpisodes: la liste d'épisodes de notre classe, elle est private
-        :param cast: le cast de la saison, il est private
         :param notes: les notes données par les utilisateurs, elles sont private
         :param image: l'image de la saison qui est private
         """
         self._id = id
+        self.season_number = season_number
         self._listEpisode = listEpisodes
-        self.cast = cast
         self.grade = grade
         self._image = image
 
@@ -86,8 +85,6 @@ class Season :
     image = property(_get_image, _set_image)
     listEpisode = property(_get_listEpisode, _set_listEpisode)
 
-
-s1 = Season(3, ["e1","e2"], "cast", 3.5, "image")
 
 
 
