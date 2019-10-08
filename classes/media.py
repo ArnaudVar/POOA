@@ -6,7 +6,6 @@ class Media:
     def __init__(self, name, description, cast, grade, image):
         self._name = name
         self.description = description
-        self.cast = cast
         self.grade = grade
         self._image = image
 
