@@ -48,10 +48,12 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route('/serie')
+@app.route('/serie/<id>')
 @login_required
-def serie():
-    return render_template('serie.html', title='Serie')
+def serie(id):
+    s = requests.get("https://api.themoviedb.org/3/tv/" + str(id) + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
+    serie = s.json()
+    return render_template('serie.html', title='Serie', serie=serie, activeseason=1, activeepisode=1)
 
 
 @app.route('/register', methods = ['GET', 'POST'])
