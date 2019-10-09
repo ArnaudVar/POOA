@@ -10,6 +10,7 @@ from flask_login import login_required
 from werkzeug.urls import url_parse
 from classes.Serie import Serie
 from classes.season import Season
+from classes.episode import Episode
 
 
 @app.route('/')
@@ -51,19 +52,14 @@ def logout():
 
 
 @app.route('/serie/<id>')
-@login_required
+#@login_required
 def serie(id):
     s = requests.get("https://api.themoviedb.org/3/tv/" + str(id) + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
     seriejson = s.json()
-    serie = Serie(seriejson['id'],seriejson['name'],seriejson['overview'], [], seriejson['vote_average'], seriejson['poster_path'], [], seriejson['last_episode_to_air'], seriejson['next_episode_to_air']['air_date'])
-    for i,seasonjson in enumerate(s['seasons']):
-        season = Season(seasonjson['id'], i, [], -1.0, seasonjson['poster_path'])
-        for j in range(seasonjson['episode_count']):
-            episodejson = requests.get("https://api.themoviedb.org/3/tv/" + str(id)+"/season/" + str(i) +"/episode/"+ str(j) +"?api_key=11893590e2d73c103c840153c0daa770&language=en-US").json()
-            episode = Episode()
-            season.listEpisode.append(episode)
-        serie.seasons.append(season)
-    return render_template('serie.html', title='Serie', serie=serie, activeseason=1, activeepisode=1)
+    serie = Serie(seriejson['id'],seriejson['name'], seriejson['overview'], len(seriejson['seasons']), {}, seriejson['vote_average'], seriejson['poster_path'], {}, seriejson['last_episode_to_air'], seriejson['next_episode_to_air']['air_date'])
+    for season in seriejson['seasons']:
+        serie.seasons[season['season_number']] = season['episode_count']
+    return render_template('serie.html', serie=serie)
 
 
 @app.route('/register', methods = ['GET', 'POST'])

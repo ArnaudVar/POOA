@@ -1,5 +1,6 @@
 from classes.Exception import SetterException, AttributeException
-
+import requests
+from classes.episode import Episode
 
 class Season :
     """
@@ -8,20 +9,24 @@ class Season :
     description de la saison, cast, notes, image
     """
 
-    def __init__(self, id,season_number, listEpisodes, grade, image):
+    def __init__(self, id, id_serie ,season_number,episode_count, listEpisodes, grade, image):
         """
         Constructeur de notre classe saison, on considère que toutes les informations sont données par l'API lors de la
         construction d'une nouvelle série
         :param id: l'identifiant private de notre classe, elle est private et sans mutateur
-        :param listEpisodes: la liste d'épisodes de notre classe, elle est private
+        :param episode_count: le nombre d'épisodes de notre saison, elle est private
+        :param episode: le dictionnaire qui permet de stocker les épisodes déjà consultés pour la saison
         :param notes: les notes données par les utilisateurs, elles sont private
         :param image: l'image de la saison qui est private
         """
+        self.id_serie = id_serie
         self._id = id
+        self.episode_count = episode_count
         self.season_number = season_number
         self._listEpisode = listEpisodes
         self.grade = grade
         self._image = image
+        self.selected_episode = self.get_selected_episode(1)
 
     def numberEpisodePlanned(self):
         """
@@ -82,6 +87,11 @@ class Season :
 
         raise SetterException("l'attribu id de la classe Season n'est pas modifiable")
 
+    def get_selected_episode(self, i):
+        request_episode = requests.get("https://api.themoviedb.org/3/tv/" + str(self.id_serie)+"/season/"+ str(self.season_number) +"/episode/" + str(i) + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
+        episode_json = request_episode.json()
+        episode = Episode(episode_json['name'], episode_json["overview"], episode_json["guest_stars"], episode_json["vote_average"], episode_json["still_path"], self.id_serie, self.season_number, i, episode_json["air_date"])
+        return episode
     id = property(_get_id, _set_id)
     listEpisode = property(_get_listEpisode, _set_listEpisode)
 

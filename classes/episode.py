@@ -1,16 +1,18 @@
-from Exception import SetterException
-from media import Media
+from classes.Exception import SetterException
+from classes.media import Media
 
 
 class Episode(Media):
 
     def __init__(self,  name, description, cast, grade, image, id_serie, num_season, num_episode, release):
-        Media.__init__(self,  name, description, cast, grade, image)
+        Media.__init__(self, name, description, grade, image)
+
         self._id_serie = id_serie
         self.num_season = num_season
         self.num_episode = num_episode
         self.release = release
-        self.name=f"S{num_season}E{num_episode}"
+        self.cast = cast
+        self._name=f"S{num_season}E{num_episode}"
 
     def __repr__(self):
         return self.name

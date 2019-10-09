@@ -14,7 +14,7 @@
 <nav class="w-100 navbar navbar-expand-lg">
     <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
         <div class="p-2">
-            {{title}}
+            {{serie.name}}
         </div>
         <div class="container ml-3">
             <div class="row">
@@ -63,13 +63,13 @@
     <div class="card-header serie-header">
         <ul class="nav nav-tabs card-header-tabs">
             {% for season in serie.seasons %}
-            {% if serie.get_season()[0] == season.season_number  %}
+            {% if serie.get_current_season() == season.season_number  %}
             <li class="nav-item">
-                <a class="nav-link active">Season {{season.season_number}} </a>
+                <a class="nav-link active">Season {{season + 1}} </a>
             </li>
             {% else %}
             <li class="nav-item">
-                <a class="nav-link">Season {{season.season_number}} </a>
+                <a class="nav-link">Season {{season + 1}} </a>
             </li>
             {% endif %}
             {% endfor %}
@@ -77,21 +77,21 @@
     </div>
     <div class="card-body season d-flex justify-content-start pt-0 pl-0">
         <ul class="list-group">
-            {% for episode in serie.seasons[serie.get_season()].listEpisode %}
-            {% if episode.num_episode == serie.get_current_episode() %}
-            <li class="list-group-item list-group-item-action active">Episode {{episode.num_episode}}</li>
+            {% for i in range(serie.seasons[serie.get_current_season()-1]) %}
+            {% if i + 1 == serie.get_current_episode() %}
+            <li class="list-group-item list-group-item-action active">Episode {{i+1}}</li>
             {% else %}
-            <li class="list-group-item list-group-item-action">Episode {{episode.num_episode}}</li>
+            <li class="list-group-item list-group-item-action">Episode {{i+1}}</li>
             {% endif %}
             {% endfor %}
         </ul>
         <div class="w-75 card ml-3 mt-3">
             <div class="titre-episode card-header">
-                Titre de l'épisode
+                {{serie.get_selected_episode().name}}
             </div>
             <div class="card-body">
-                <img src="../static/assets/kemar.jpg">
-                EZFSRGSHTHGSFGRDTHYJJHGEERETRYJTJDTTHREGZEFRTYTYJTRHE
+                <img src="https://image.tmdb.org/t/p/w500{{serie.get_selected_episode().image}}">
+                {{serie.get_selected_episode().description}}
             </div>
         </div>
 
