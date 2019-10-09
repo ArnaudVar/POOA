@@ -14,31 +14,27 @@
 <nav class="w-100 navbar navbar-expand-lg">
     <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
         <div class="d-flex flex-row">
-            <div class="m-2 d-flex flex-row justify-content-between">
-                <a href="{{ url_for('home') }}">
-                    <i class="fa fa-3x fa-home">
-                    </i>
-                </a>
-            </div>
+            <a class="m-3" href="{{ url_for('home') }}">
+                <i class="fa fa-3x fa-home">
+                </i>
+            </a>
             <div class="ml-3">
-                <div class="d-flex flex-row justify-content-center">
-                    <div class="name">
-                        <h1>{{serie.name}}</h1>
-                    </div>
-                    <div class="rating">
-                        <input type="radio" id="star10" name="rating" value="10"/><label for="star10" title="Rocks!">5
-                        stars</label>
-                        <input type="radio" id="star9" name="rating" value="9"/><label for="star9" title="Rocks!">4
-                        stars</label>
-                        <input type="radio" id="star8" name="rating" value="8"/><label for="star8" title="Pretty good">3
-                        stars</label>
-                        <input type="radio" id="star7" name="rating" value="7"/><label for="star7" title="Pretty good">2
-                        stars</label>
-                        <input type="radio" id="star6" name="rating" value="6"/><label for="star6" title="Meh">1
-                        star</label>
-                    </div>
+                <div class="rating">
+                    <input type="radio" id="star10" name="rating" value="10"/><label for="star10" title="Rocks!">5
+                    stars</label>
+                    <input type="radio" id="star9" name="rating" value="9"/><label for="star9" title="Rocks!">4
+                    stars</label>
+                    <input type="radio" id="star8" name="rating" value="8"/><label for="star8" title="Pretty good">3
+                    stars</label>
+                    <input type="radio" id="star7" name="rating" value="7"/><label for="star7" title="Pretty good">2
+                    stars</label>
+                    <input type="radio" id="star6" name="rating" value="6"/><label for="star6" title="Meh">1
+                    star</label>
                 </div>
             </div>
+        </div>
+        <div class="name">
+            <h1>{{serie.name}}</h1>
         </div>
         <div>
             <button class="btn btn-warning mr-3">
@@ -47,16 +43,16 @@
                     <i class="fa fa-check"></i>
                 </div>
             </button>
-            {% if not(added) %}
-            <button class="btn btn-success">
-                <div>
-                    Add
-                    <i class="fa fa-plus"></i>
-                </div>
-            </button>
-            {% endif %}
-
-            {% if added %}
+            {% if user.series == None or not(user.is_in_series(serie)) %}
+            <a href="/add/{{serie.id}}">
+                <button class="btn btn-success add">
+                    <div>
+                        Add
+                        <i class="fa fa-plus"></i>
+                    </div>
+                </button>
+            </a>
+            {% else %}
             <button class="btn btn-danger">
                 <div>
                     Remove

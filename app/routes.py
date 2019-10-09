@@ -15,7 +15,7 @@ from classes.episode import Episode
 
 @app.route('/')
 @app.route('/home')
-#@login_required
+@login_required
 def home():
     r = requests.get("https://api.themoviedb.org/3/tv/popular?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
     g = requests.get("http://api.themoviedb.org/3/genre/tv/list?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
@@ -52,12 +52,15 @@ def logout():
 
 
 @app.route('/serie/<id>')
-#@login_required
+@login_required
 def serie(id):
+    print(current_user)
     s = requests.get("https://api.themoviedb.org/3/tv/" + str(id) + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
     seriejson = s.json()
-    serie = Serie(seriejson['id'],seriejson['name'], seriejson['overview'], seriejson['vote_average'], seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']), seriejson['last_episode_to_air'], seriejson['next_episode_to_air']['air_date'])
-    print(serie.seasons)
+    if seriejson['next_episode_to_air'] :
+        serie = Serie(seriejson['id'],seriejson['name'], seriejson['overview'], seriejson['vote_average'], seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']), seriejson['last_episode_to_air'], seriejson['next_episode_to_air']['air_date'])
+    else :
+        serie = Serie(seriejson['id'],seriejson['name'], seriejson['overview'], seriejson['vote_average'], seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']), seriejson['last_episode_to_air'], '')
     for season in seriejson['seasons']:
         serie.seasons[season['season_number']] = season['episode_count']
     return render_template('serie.html', serie=serie, user=current_user)
@@ -77,3 +80,8 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
+@app.route('/add/<id>')
+def add_serie(id):
+    current_user.add_serie(id)
+    print(current_user)
+    return('',204)

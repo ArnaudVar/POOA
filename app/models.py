@@ -43,11 +43,15 @@ class User(UserMixin, db.Model):
         else :
             return "The user doesn't have any series"
 
+    def is_in_series(self,serie):
+        return(str(serie.id) in self.series)
+
     def add_serie(self, id_serie):
         if self.series is None:
             self._series = f"{id_serie}xS1E1"
         else:
             self._series += f"-{id_serie}xS1E1"
+        db.session.commit()
 
 
 @login.user_loader
