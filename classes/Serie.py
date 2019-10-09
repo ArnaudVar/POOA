@@ -7,8 +7,7 @@ class Serie(Media):
     """
     Cette classe permet de rassembler les différentes informations sur les séries
     """
-    def __init__(self, id, name, description, grade, genre, image, seasons_count, seasons, latest, date):
-        """
+    def __init__(self, id, name, description, grade, genre, image, seasons, latest, date):        """
         Constructeur de notre classe Serie, on considère que toutes les informations sont données par l'API lors de la
         construction d'une nouvelle série
         :param id: identifiant de la serie
@@ -17,8 +16,7 @@ class Serie(Media):
         :param latest: dernier épisode sortie de la série
         :param date: date de diffusion du prochain épisode de la série
         """
-        Media.__init__(self, name, description, grade, image)
-        self._id = id
+        Media.__init__(self,name,description,grade,image)        self._id = id
         self._genre = genre
         self.seasons_count = seasons_count
         self.seasons = seasons
