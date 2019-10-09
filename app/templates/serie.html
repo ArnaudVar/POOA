@@ -14,8 +14,10 @@
 <nav class="w-100 navbar navbar-expand-lg">
     <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
         <div class="p-2">
-            {{serie.name}}
-        </div>
+            <a href="{{ url_for('home') }}">
+                <img class = "ml-3" src="../static/assets/home.png" width = 15% height = auto >
+            </a>
+			{{serie.name}}        </div>
         <div class="container ml-3">
             <div class="row">
                 <div class="rating">
