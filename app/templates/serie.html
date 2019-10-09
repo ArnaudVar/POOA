@@ -15,7 +15,9 @@
     <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
         <div class="p-2">
             <a href="{{ url_for('home') }}">
-                <img class = "ml-3" src="../static/assets/home.png" width = 15% height = auto >
+                <i class="fa fa-fw fa-home">
+                    Home
+                </i>
             </a>
 			{{serie.name}}        </div>
         <div class="container ml-3">
@@ -65,7 +67,7 @@
     <div class="card-header serie-header">
         <ul class="nav nav-tabs card-header-tabs">
             {% for season in serie.seasons %}
-            {% if serie.get_current_season() == season.season_number  %}
+            {% if serie.get_current_season() == season  %}
             <li class="nav-item">
                 <a class="nav-link active">Season {{season + 1}} </a>
             </li>

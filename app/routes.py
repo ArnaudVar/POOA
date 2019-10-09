@@ -56,7 +56,8 @@ def logout():
 def serie(id):
     s = requests.get("https://api.themoviedb.org/3/tv/" + str(id) + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
     seriejson = s.json()
-    serie = Serie(seriejson['id'],seriejson['name'], seriejson['overview'], len(seriejson['seasons']), {}, seriejson['vote_average'], seriejson['poster_path'], {}, seriejson['last_episode_to_air'], seriejson['next_episode_to_air']['air_date'])
+    serie = Serie(seriejson['id'],seriejson['name'], seriejson['overview'], seriejson['vote_average'], seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']), seriejson['last_episode_to_air'], seriejson['next_episode_to_air']['air_date'])
+    print(serie.seasons)
     for season in seriejson['seasons']:
         serie.seasons[season['season_number']] = season['episode_count']
     return render_template('serie.html', serie=serie)
