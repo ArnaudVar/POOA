@@ -14,7 +14,8 @@ class User(UserMixin, db.Model):
     _series = db.Column(db.Text())
 
     def __repr__(self):
-        return '<User {}>'.format(self.username)
+        return f"Username : {self.username}, Name : {self.name}, Surname : {self.surname}, Email : {self.email}," \
+               f" Series : {self.series}"
 
     def _set_series(self, *args):
         return print("Use .add_serie method instead")

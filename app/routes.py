@@ -60,7 +60,7 @@ def serie(id):
     print(serie.seasons)
     for season in seriejson['seasons']:
         serie.seasons[season['season_number']] = season['episode_count']
-    return render_template('serie.html', serie=serie)
+    return render_template('serie.html', serie=serie, user=current_user)
 
 
 @app.route('/register', methods=['GET', 'POST'])
