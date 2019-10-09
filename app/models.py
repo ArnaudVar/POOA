@@ -17,7 +17,7 @@ class User(UserMixin, db.Model):
         return '<User {}>'.format(self.username)
 
     def _set_series(self, *args):
-        return print("Use .add_serie method" instead)
+        return print("Use .add_serie method instead")
 
     def _get_series(self):
         return self._series
