@@ -13,53 +13,58 @@
 <body>
 <nav class="w-100 navbar navbar-expand-lg">
     <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
-        <div class="p-2">
-            <a href="{{ url_for('home') }}">
-                <i class="fa fa-fw fa-home">
-                    Home
-                </i>
-            </a>
-			{{serie.name}}        </div>
-        <div class="container ml-3">
-            <div class="row">
-                <div class="rating">
-                    <input type="radio" id="star10" name="rating" value="10"/><label for="star10" title="Rocks!">5
-                    stars</label>
-                    <input type="radio" id="star9" name="rating" value="9"/><label for="star9" title="Rocks!">4
-                    stars</label>
-                    <input type="radio" id="star8" name="rating" value="8"/><label for="star8" title="Pretty good">3
-                    stars</label>
-                    <input type="radio" id="star7" name="rating" value="7"/><label for="star7" title="Pretty good">2
-                    stars</label>
-                    <input type="radio" id="star6" name="rating" value="6"/><label for="star6" title="Meh">1
-                    star</label>
+        <div class="d-flex flex-row">
+            <div class="m-2 d-flex flex-row justify-content-between">
+                <a href="{{ url_for('home') }}">
+                    <i class="fa fa-3x fa-home">
+                    </i>
+                </a>
+            </div>
+            <div class="ml-3">
+                <div class="d-flex flex-row">
+                    <div class="rating">
+                        <input type="radio" id="star10" name="rating" value="10"/><label for="star10" title="Rocks!">5
+                        stars</label>
+                        <input type="radio" id="star9" name="rating" value="9"/><label for="star9" title="Rocks!">4
+                        stars</label>
+                        <input type="radio" id="star8" name="rating" value="8"/><label for="star8" title="Pretty good">3
+                        stars</label>
+                        <input type="radio" id="star7" name="rating" value="7"/><label for="star7" title="Pretty good">2
+                        stars</label>
+                        <input type="radio" id="star6" name="rating" value="6"/><label for="star6" title="Meh">1
+                        star</label>
+                    </div>
                 </div>
             </div>
         </div>
-        <button class="btn btn-warning mr-3">
-            <div>
-                Rate
-                <i class="fa fa-check"></i>
-            </div>
-        </button>
-        {% if not(added) %}
-        <button class="btn btn-success">
-            <div>
-                Add
-                <i class="fa fa-plus"></i>
-            </div>
-        </button>
-        {% endif %}
+        <div class="name">
+            <h1>{{serie.name}}</h1>
+        </div>
+        <div>
+            <button class="btn btn-warning mr-3">
+                <div>
+                    Rate
+                    <i class="fa fa-check"></i>
+                </div>
+            </button>
+            {% if not(added) %}
+            <button class="btn btn-success">
+                <div>
+                    Add
+                    <i class="fa fa-plus"></i>
+                </div>
+            </button>
+            {% endif %}
 
-        {% if added %}
-        <button class="btn btn-danger">
-            <div>
-                Remove
-                <i class="fa fa-trash"></i>
-            </div>
-        </button>
-        {% endif %}
-
+            {% if added %}
+            <button class="btn btn-danger">
+                <div>
+                    Remove
+                    <i class="fa fa-trash"></i>
+                </div>
+            </button>
+            {% endif %}
+        </div>
     </div>
 </nav>
 
@@ -67,7 +72,7 @@
     <div class="card-header serie-header">
         <ul class="nav nav-tabs card-header-tabs">
             {% for season in serie.seasons %}
-            {% if serie.get_current_season() == season  %}
+            {% if serie.get_current_season() == season %}
             <li class="nav-item">
                 <a class="nav-link active">Season {{season + 1}} </a>
             </li>

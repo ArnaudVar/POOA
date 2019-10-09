@@ -11,6 +11,10 @@
     background: #2F4F4F;
 }
 
+.name {
+    font-family: Redemption
+}
+
 .serie-header {
     border-top: 2px solid grey;
     border-left: 2px solid grey;
