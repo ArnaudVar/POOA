@@ -68,14 +68,14 @@
 <div class="d-flex flex-row">
     <nav id="sidebar">
         <ul class="list-unstyled components">
-            {% for season in serie.seasons %}
+            {% for season in serie.seasons.keys() %}
             <li class="active">
-                <a class="dropdown-toggle" data-toggle="collapse" data-target="#seasonSubmenu" role="button"
-                   aria-expanded="false" aria-controls="seasonSubmenu">
-                    Season {{season + 1}}
+                <a class="dropdown-toggle" data-toggle="collapse" data-target="#season{{season}}Submenu" role="button"
+                   aria-expanded="false" aria-controls="season{{season}}Submenu">
+                    Season {{season}}
                 </a>
-                <ul class="collapse list-unstyled" id="seasonSubmenu">
-                    {% for i in range(serie.seasons[serie.get_current_season()-1]) %}
+                <ul class="collapse list-unstyled" id="season{{season}}Submenu">
+                    {% for i in range(serie.seasons[season]) %}
                     <li>
                         <a>Episode {{i+1}}</a>
                     </li>
