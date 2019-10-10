@@ -9,9 +9,6 @@ from flask import request
 from flask_login import login_required
 from werkzeug.urls import url_parse
 from classes.Serie import Serie
-from classes.season import Season
-from classes.episode import Episode
-
 
 @app.route('/')
 @app.route('/home')
@@ -54,7 +51,7 @@ def logout():
 @app.route('/serie/<id>')
 @login_required
 def serie(id):
-    print(current_user)
+    added = current_user.is_in_series(id)
     s = requests.get("https://api.themoviedb.org/3/tv/" + str(id) + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
     seriejson = s.json()
     if seriejson['next_episode_to_air'] :
@@ -63,7 +60,7 @@ def serie(id):
         serie = Serie(seriejson['id'],seriejson['name'], seriejson['overview'], seriejson['vote_average'], seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']), seriejson['last_episode_to_air'], '')
     for season in seriejson['seasons']:
         serie.seasons[season['season_number']] = season['episode_count']
-    return render_template('serie.html', serie=serie, user=current_user)
+    return render_template('serie.html', serie=serie, user=current_user, added=added)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -83,5 +80,9 @@ def register():
 @app.route('/add/<id>')
 def add_serie(id):
     current_user.add_serie(id)
-    print(current_user)
+    return('',204)
+
+@app.route('/remove/<id>')
+def remove_serie(id):
+    current_user.remove_serie(id)
     return('',204)

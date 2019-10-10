@@ -43,7 +43,7 @@
                     <i class="fa fa-check"></i>
                 </div>
             </button>
-            {% if user.series == None or not(user.is_in_series(serie)) %}
+            {% if user.series == None or not(added) %}
             <a href="/add/{{serie.id}}">
                 <button class="btn btn-success add">
                     <div>
@@ -53,12 +53,14 @@
                 </button>
             </a>
             {% else %}
-            <button class="btn btn-danger">
-                <div>
-                    Remove
-                    <i class="fa fa-trash"></i>
-                </div>
-            </button>
+            <a href="/remove/{{serie.id}}">
+                <button class="btn btn-danger">
+                    <div>
+                        Remove
+                        <i class="fa fa-trash"></i>
+                    </div>
+                </button>
+            </a>
             {% endif %}
         </div>
     </div>
