@@ -5,16 +5,46 @@
 <head>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/home.css') }}">
 </head>
-<div>
-    {% if nb_series == 0 %}
-    <p>You don't have any series added to your list yet !</p>
-    {% else %}
-        <p>
-            {% for i in range (nb_series) %}
-            {{list_series[i]['name']}}
-            {% endfor %}
-        </p>
-    {% endif %}
+<div class="m-3 home w-100 d-flex flex-column">
+    <div class="w-100 d-flex flex-column justify-content-center welcome">
+        <h1> Hi {{current_user.username}} </h1>
+        <h2>Welcome to your Serie section, here are all the series you added to your list !</h2>
+    </div>
+    <div class="w-100 h-100% card suggestion">
+        <div class="card-header">
+            Your Series
+        </div>
+        <div class="card-body list">
+            <div class="container">
+                <div class="row blog">
+                    <div class="d-flex flex-column justify-content-between">
+                        {% if nb_series == 0 %}
+                            <p>You don't have any series added to your list yet !</p>
+                        {% else %}
+                            {% for i in range (nb_series) %}
+                                <div class="card-header name">
+                                    {{list_series[i]['name']}}
+                                </div>
+                                <div class="p-0 card-body serie">
+                                    <a class="w-100 h-100" href="/serie/{{list_series[i].id}}">
+                                        <button class="btn btn-default btn-circle">
+                                            <i class="fa fa-fw fa-minus-circle"></i>
+                                        </button>
+                                    </a>
+                                    <img src="https://image.tmdb.org/t/p/w500{{list_series[i]['image']}}"
+                                         alt="{{list_series[0]['name']}}"
+                                         height="200px"
+                                         width="100px"
+                                         class="rounded">
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </div>
 
 {% endblock %}
