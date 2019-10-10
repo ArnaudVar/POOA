@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/home.css') }}">
+</head>
+<div>
+    {% if nb_series == 0 %}
+    <p>You don't have any series added to your list yet !</p>
+    {% else %}
+        <p>
+            {% for i in range (nb_series) %}
+            {{list_series[i]['name']}}
+            {% endfor %}
+        </p>
+    {% endif %}
+</div>
+
+{% endblock %}
+
