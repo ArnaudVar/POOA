@@ -66,21 +66,23 @@ class Serie(Media):
         """
         return len(self.seasons)
 
-    def set_selected_episode(self,i,j):
+    def set_selected_episode(self, i, j):
         self.selected_episode = 'S'+str(i)+'E'+str(j)
 
     def get_current_season(self):
         step1 = self.selected_episode.split('S')
-        season = int(step1[1].split('E')[1])
+        season = int(step1[1].split('E')[0])
         return(season)
 
     def get_current_episode(self):
         episode = int(self.selected_episode.split('E')[1])
         return(episode)
 
-    def get_selected_episode(self):
+    @property
+    def get_episode(self):
         request_episode = requests.get("https://api.themoviedb.org/3/tv/" + str(self.id)+"/season/"+ str(self.get_current_season()) +"/episode/" + str(self.get_current_episode()) + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
         episode_json = request_episode.json()
-        episode = Episode(episode_json['name'], episode_json["overview"], episode_json["guest_stars"], episode_json["vote_average"], episode_json["still_path"], self.id, self.get_current_season(), self.get_current_episode(), episode_json["air_date"])
+        episode = Episode(episode_json["name"], episode_json["overview"], episode_json["guest_stars"], episode_json["vote_average"], episode_json["still_path"], self.id, self.get_current_season(), self.get_current_episode(), episode_json["air_date"])
         return episode
+
 
