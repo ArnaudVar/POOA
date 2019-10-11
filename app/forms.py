@@ -11,6 +11,10 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Sign In')
 
 
+class SearchForm(FlaskForm):
+    s = StringField('Search', validators=[DataRequired()])
+
+
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
