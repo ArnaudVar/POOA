@@ -9,11 +9,13 @@ from flask_login import logout_user
 from flask import request
 from flask_login import login_required
 from werkzeug.urls import url_parse
+from classes.Serie import Serie
 
+api_key = "11893590e2d73c103c840153c0daa770"
 
 @app.route('/')
 @app.route('/home')
-#@login_required
+@login_required
 def home():
     r = requests.get("https://api.themoviedb.org/3/tv/popular?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
     g = requests.get("http://api.themoviedb.org/3/genre/tv/list?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
@@ -52,9 +54,16 @@ def logout():
 @app.route('/serie/<id>')
 @login_required
 def serie(id):
+    added = current_user.is_in_series(id)
     s = requests.get("https://api.themoviedb.org/3/tv/" + str(id) + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
-    serie = s.json()
-    return render_template('serie.html', title='Serie', serie=serie, activeseason=1, activeepisode=1)
+    seriejson = s.json()
+    if seriejson['next_episode_to_air'] :
+        serie = Serie(seriejson['id'],seriejson['name'], seriejson['overview'], seriejson['vote_average'], seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']), seriejson['last_episode_to_air'], seriejson['next_episode_to_air']['air_date'])
+    else :
+        serie = Serie(seriejson['id'],seriejson['name'], seriejson['overview'], seriejson['vote_average'], seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']), seriejson['last_episode_to_air'], '')
+    for season in seriejson['seasons']:
+        serie.seasons[season['season_number']] = season['episode_count']
+    return render_template('serie.html', serie=serie, user=current_user, added=added)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -101,3 +110,48 @@ def reset_password(token):
         flash('Your password has been reset.')
         return redirect(url_for('login'))
     return render_template('reset_password.html', form=form)
+
+
+@app.route('/add/<id>')
+def add_serie(id):
+    current_user.add_serie(id)
+    return('',204)
+
+
+@app.route('/remove/<id>')
+def remove_serie(id):
+    current_user.remove_serie(id)
+    return('',204)
+
+
+@app.route('/myseries/<user_id>')
+@login_required
+def myserie(user_id):
+    base_url_start = "https://api.themoviedb.org/3/tv/"
+    base_url_end = f"?api_key={api_key}&language=en-US"
+    u = User.query.get(user_id)
+    list_series = u.list_serie()
+    list_serie_rendered = []
+    nb_series = 0
+    if list_series == "The user doesn't have any series":
+        list_serie_rendered = list_series
+    else:
+        for tvshow in list_series:
+            nb_series+=1
+            r = requests.get(f"{base_url_start}{tvshow[0]}{base_url_end}").json()
+            list_serie_rendered.append(Serie(r['id'],r['name'], r['overview'], r['vote_average'], r['genres'], r['poster_path'], {}, len(r['seasons']), r['last_episode_to_air'], ''))
+    return render_template('mySeries.html', title='MySeries', list_series=list_serie_rendered, nb_series=nb_series)
+
+
+@app.route('/search/<string>/<page>')
+@login_required
+def search(string, page):
+    base_url_tv = f"https://api.themoviedb.org/3/search/tv?query={string}&api_key={api_key}&language=en-US&page={page}"
+    base_url_movies = f"https://api.themoviedb.org/3/search/movie?query={string}&api_key={api_key}&language=en-US&page={page}"
+    r1 = requests.get(base_url_tv).json()
+    r2 = requests.get(base_url_movies).json()
+    list_series = r1['results']
+    print(list_series)
+    list_movies = r2['results']
+    nb_pages = max(r1['total_pages'], r2['total_pages'])
+    return render_template('search.html', title='Search', list_series=list_series, list_movies=list_movies, nb_pages=nb_pages, search = string)

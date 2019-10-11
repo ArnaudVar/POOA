@@ -16,7 +16,8 @@ class User(UserMixin, db.Model):
     _series = db.Column(db.Text())
 
     def __repr__(self):
-        return '<User {}>'.format(self.username)
+        return f"Username : {self.username}, Name : {self.name}, Surname : {self.surname}, Email : {self.email}," \
+               f" Series : {self.series}"
 
     def _set_series(self, *args):
         return print("Use .add_serie method instead")
@@ -44,11 +45,27 @@ class User(UserMixin, db.Model):
         else :
             return "The user doesn't have any series"
 
+    def is_in_series(self,id):
+        return(str(id) in self.series)
+
     def add_serie(self, id_serie):
-        if self.series is None:
+        if self.series is None or self.series == '':
             self._series = f"{id_serie}xS1E1"
         else:
             self._series += f"-{id_serie}xS1E1"
+        db.session.commit()
+
+    def remove_serie(self,id_serie):
+        string_series = self._series.split('-')
+        for i, string_serie in enumerate(string_series):
+            split_serie = string_serie.split('x')
+            if split_serie[0] == str(id_serie):
+                if i == 0 :
+                    self._series = self._series.replace(string_serie+'-','')
+                else :
+                    self._series = self._series.replace('-'+string_serie,'')
+                print(self._series)
+        db.session.commit()
 
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(

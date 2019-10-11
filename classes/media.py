@@ -1,11 +1,11 @@
-from Exception import SetterException
+from classes.Exception import SetterException
 
 
 class Media:
 
-    def __init__(self, name, description, cast, grade, image):
+    def __init__(self, name, description, grade, image):
         self._name = name
-        self.description = description
+        self._description = description
         self.grade = grade
         self._image = image
 

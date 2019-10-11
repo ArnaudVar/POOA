@@ -16,14 +16,16 @@
 <nav class="w-100 navbar navbar-expand-lg">
     <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
         <div class="d-flex flex-row">
-            <div class="logo">
-                MERDIER
-            </div>
+            <a class="m-3" href="{{ url_for('home') }}">
+                <i class="fa fa-3x fa-home">
+                </i>
+            </a>
             <form class="pl-2 form-inline my-2 my-lg-0">
                 <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
                 <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
             </form>
         </div>
+        <img src="../static/assets/LogoNom.png" height=90 width=auto class="m-2 center">
         <a href="/logout">
             <button class="btn btn-default">
                 <div>
@@ -38,10 +40,10 @@
     <nav id="sidebar">
         <ul class="list-unstyled components">
             <li class="active">
-                <a><i class="fa fa-home"></i> &nbsp; HOME</a>
+                <a href="{{ url_for('home') }}"> <i class="fa fa-home"></i> &nbsp; HOME</a>
             </li>
             <li class="active">
-                <a><i class="fas fa-video"></i>&nbsp; MY SERIES</a>
+                <a href="/myseries/{{current_user.id}}"><i class="fas fa-video" ></i>&nbsp; MY SERIES</a>
             </li>
             <li class="active">
                 <a><i class="fas fa-film"></i>&nbsp; MY MOVIES</a>

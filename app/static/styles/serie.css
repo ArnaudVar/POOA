@@ -1,3 +1,8 @@
+#sidebar {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
 .list-group {
     min-height: 300px;
     max-height: 300px;
@@ -7,18 +12,24 @@
     max-height: 35px;
 }
 
-.titre-episode {
-    background: #2F4F4F;
+.name {
+    font-family: Redemption
 }
 
-.serie-header {
-    border-top: 2px solid grey;
-    border-left: 2px solid grey;
-    border-right: 2px solid grey;
+.rounded {
+    border: 1px solid white;
 }
 
+.overview {
+    vertical-align: middle !important;
+}
+
+.episode {
+    background: url("../assets/fond2.jpg");
+    color: white;
+    max-height: 500px;
+}
 .season {
-    border: 1px solid grey;
     border-radius: 0 0 calc(.25rem - 1px) calc(.25rem - 1px);
     overflow-y: auto;
 }

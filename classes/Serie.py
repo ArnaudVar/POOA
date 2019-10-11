@@ -1,12 +1,13 @@
-from Exception import SetterException
-from media import Media
-
+from classes.Exception import SetterException
+from classes.media import Media
+import requests
+from classes.episode import Episode
 
 class Serie(Media):
     """
     Cette classe permet de rassembler les différentes informations sur les séries
     """
-    def __init__(self, id, name, description, grade, genre, image, seasons, latest, date):
+    def __init__(self, id, name, description, grade, genre, image, seasons, seasons_count, latest, date):
         """
         Constructeur de notre classe Serie, on considère que toutes les informations sont données par l'API lors de la
         construction d'une nouvelle série
@@ -19,9 +20,11 @@ class Serie(Media):
         Media.__init__(self,name,description,grade,image)
         self._id = id
         self._genre = genre
+        self.seasons_count = seasons_count
         self.seasons = seasons
         self.latest = latest
         self.date = date
+        self.selected_episode = 'S1E1'
 
     def _get_id(self):
         """
@@ -62,3 +65,22 @@ class Serie(Media):
         :return: int : le nombre de saisons
         """
         return len(self.seasons)
+
+    def set_selected_episode(self,i,j):
+        self.selected_episode = 'S'+str(i)+'E'+str(j)
+
+    def get_current_season(self):
+        step1 = self.selected_episode.split('S')
+        season = int(step1[1].split('E')[1])
+        return(season)
+
+    def get_current_episode(self):
+        episode = int(self.selected_episode.split('E')[1])
+        return(episode)
+
+    def get_selected_episode(self):
+        request_episode = requests.get("https://api.themoviedb.org/3/tv/" + str(self.id)+"/season/"+ str(self.get_current_season()) +"/episode/" + str(self.get_current_episode()) + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
+        episode_json = request_episode.json()
+        episode = Episode(episode_json['name'], episode_json["overview"], episode_json["guest_stars"], episode_json["vote_average"], episode_json["still_path"], self.id, self.get_current_season(), self.get_current_episode(), episode_json["air_date"])
+        return episode
+

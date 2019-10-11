@@ -13,11 +13,12 @@
 <body>
 <nav class="w-100 navbar navbar-expand-lg">
     <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
-        <div class="p-2">
-            {{title}}
-        </div>
-        <div class="container ml-3">
-            <div class="row">
+        <div class="d-flex flex-row">
+            <a class="m-3" href="{{ url_for('home') }}">
+                <i class="fa fa-3x fa-home">
+                </i>
+            </a>
+            <div class="ml-3">
                 <div class="rating">
                     <input type="radio" id="star10" name="rating" value="10"/><label for="star10" title="Rocks!">5
                     stars</label>
@@ -32,69 +33,70 @@
                 </div>
             </div>
         </div>
-        <button class="btn btn-warning mr-3">
-            <div>
-                Rate
-                <i class="fa fa-check"></i>
-            </div>
-        </button>
-        {% if not(added) %}
-        <button class="btn btn-success">
-            <div>
-                Add
-                <i class="fa fa-plus"></i>
-            </div>
-        </button>
-        {% endif %}
-
-        {% if added %}
-        <button class="btn btn-danger">
-            <div>
-                Remove
-                <i class="fa fa-trash"></i>
-            </div>
-        </button>
-        {% endif %}
-
+        <div class="name">
+            <h1>{{serie.name}}</h1>
+        </div>
+        <div>
+            <button class="btn btn-warning mr-3">
+                <div>
+                    Rate
+                    <i class="fa fa-check"></i>
+                </div>
+            </button>
+            {% if user.series == None or not(added) %}
+            <a href="/add/{{serie.id}}">
+                <button class="btn btn-success add">
+                    <div>
+                        Add
+                        <i class="fa fa-plus"></i>
+                    </div>
+                </button>
+            </a>
+            {% else %}
+            <a href="/remove/{{serie.id}}">
+                <button class="btn btn-danger">
+                    <div>
+                        Remove
+                        <i class="fa fa-trash"></i>
+                    </div>
+                </button>
+            </a>
+            {% endif %}
+        </div>
     </div>
 </nav>
-
-<div class="card p-2">
-    <div class="card-header serie-header">
-        <ul class="nav nav-tabs card-header-tabs">
-            {% for serie in serie['seasons'] %}
-            {% if activeseason == serie['season_number']  %}
-            <li class="nav-item">
-                <a class="nav-link active">Season {{serie['season_number']}} </a>
+<div class="d-flex flex-row">
+    <nav id="sidebar">
+        <ul class="list-unstyled components">
+            {% for season in serie.seasons.keys() %}
+            <li class="active">
+                <a class="dropdown-toggle" data-toggle="collapse" data-target="#season{{season}}Submenu" role="button"
+                   aria-expanded="false" aria-controls="season{{season}}Submenu">
+                    Season {{season}}
+                </a>
+                <ul class="collapse list-unstyled" id="season{{season}}Submenu">
+                    {% for i in range(serie.seasons[season]) %}
+                    <li>
+                        <a>Episode {{i+1}}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
             </li>
-            {% else %}
-            <li class="nav-item">
-                <a class="nav-link">Season {{serie['season_number']}} </a>
-            </li>
-            {% endif %}
             {% endfor %}
         </ul>
-    </div>
-    <div class="card-body season d-flex justify-content-start pt-0 pl-0">
-        <ul class="list-group">
-            {% for j in range(serie['seasons'][0]['episode_count']) %}
-            {% if activeepisode == j %}
-            <li class="list-group-item list-group-item-action active">Episode {{j}}</li>
-            {% else %}
-            <li class="list-group-item list-group-item-action">Episode {{j}}</li>
-            {% endif %}
-            {% endfor %}
-        </ul>
-        <div class="w-75 card ml-3 mt-3">
-            <div class="titre-episode card-header">
-                Titre de l'épisode
+    </nav>
+    <div class="card episode ml-3 mt-3 mb-3">
+        <div class="titre-episode card-header">
+            {{serie.get_selected_episode().name}}
+        </div>
+        <div class="card-body d-flex flex-row justify-content-between">
+            <div>
+                <img class="rounded" src="https://image.tmdb.org/t/p/w500{{serie.get_selected_episode().image}}">
             </div>
-            <div class="card-body">
-                <img src="../static/assets/kemar.jpg">
-                EZFSRGSHTHGSFGRDTHYJJHGEERETRYJTJDTTHREGZEFRTYTYJTRHE
+            <div class="m-2 overview">
+                {{serie.get_selected_episode().description}}
             </div>
         </div>
-
     </div>
 </div>
 
