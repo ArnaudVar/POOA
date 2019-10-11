@@ -86,3 +86,4 @@ def add_serie(id):
 def remove_serie(id):
     current_user.remove_serie(id)
     return('',204)
+
