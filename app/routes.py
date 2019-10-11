@@ -96,11 +96,6 @@ def reset_password_request():
                            title='Reset Password', form=form)
 
 
-@app.route('/request_confirmed')
-def request_confirmed():
-    return render_template('request_confirmed.html', title='Request confirmed')
-
-
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     if current_user.is_authenticated:
