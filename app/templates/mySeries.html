@@ -16,31 +16,36 @@
         </div>
         <div class="card-body list">
             <div class="container">
-                <div class="row blog">
-                    <div class="d-flex flex-column">
                         {% if nb_series == 0 %}
                             <p>You don't have any series added to your list yet !</p>
                         {% else %}
-                            {% for i in range (nb_series) %}
-                                <div class="card-header name">
-                                    {{list_series[i]['name']}}
-                                </div>
-                                <div class="p-0 card-body serie">
-                                    <a class="w-100 h-100" href="/serie/{{list_series[i].id}}">
-                                        <button class="btn btn-default btn-circle">
-                                            <i class="fa fa-fw fa-minus-circle"></i>
-                                        </button>
-                                    </a>
-                                    <img src="https://image.tmdb.org/t/p/w500{{list_series[i]['image']}}"
-                                         alt="{{list_series[0]['name']}}"
-                                         height="200px"
-                                         width="100px"
-                                         class="rounded">
+                            {% for i in range (1+nb_series // 4)  %}
+                                <div class="d-flex flex-row justify-content-around m-3">
+                                    {% for j in range (4) %}
+                                        {% if 4*i + j < nb_series %}
+                                            <div class="col-md-3 justify-content-center">
+                                                <div class="card-header name justify-content-center ">
+                                                    {{list_series[4*i + j]['name']}}
+                                                </div>
+                                                <div class="p-0 card-body serie">
+                                                    <a class="w-100 h-100 justify-content-center"
+                                                       href="/serie/{{list_series[4*i + j].id}}">
+                                                        <button class="btn btn-default btn-circle   ">
+                                                            <i class="fa fa-fw fa-minus"></i>
+                                                        </button>
+                                                    </a>
+                                                    <img src="https://image.tmdb.org/t/p/w500{{list_series[4*i + j]['image']}}"
+                                                         alt="{{list_series[4*i + j]['name']}}"
+                                                         height="250px"
+                                                         width="125px"
+                                                         class="rounded">
+                                                </div>
+                                            </div>
+                                        {%endif%}
+                                    {% endfor %}
                                 </div>
                             {% endfor %}
                         {% endif %}
-                    </div>
-                </div>
             </div>
         </div>
 

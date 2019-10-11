@@ -11,6 +11,10 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Sign In')
 
 
+class SearchForm(FlaskForm):
+    s = StringField('Search', validators=[DataRequired()])
+
+
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
@@ -31,3 +35,14 @@ class RegistrationForm(FlaskForm):
         if user is not None:
             raise ValidationError('This e-mail is already used, please use a different email address.')
 
+
+class ResetPasswordRequestForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Request Password Reset')
+
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired()])
+    password2 = PasswordField(
+        'Repeat Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Request Password Reset')

@@ -1,7 +1,9 @@
-from app import db
-from werkzeug.security import  generate_password_hash, check_password_hash
+from app import db, login, app
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-from app import login
+import jwt
+from time import time
+
 
 
 class User(UserMixin, db.Model):
@@ -45,7 +47,7 @@ class User(UserMixin, db.Model):
 
 
     def is_in_series(self,id):
-        return(str(id) in self.series)
+        return(self.series is not None and str(id) in self.series)
 
     def add_serie(self, id_serie):
         if self.series is None or self.series == '':
@@ -65,6 +67,20 @@ class User(UserMixin, db.Model):
                     self._series = self._series.replace('-'+string_serie,'')
                 print(self._series)
         db.session.commit()
+
+    def get_reset_password_token(self, expires_in=600):
+        return jwt.encode(
+            {'reset_password': self.id, 'exp': time() + expires_in},
+            app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+
+    @staticmethod
+    def verify_reset_password_token(token):
+        try:
+            id = jwt.decode(token, app.config['SECRET_KEY'],
+                            algorithms=['HS256'])['reset_password']
+        except:
+            return
+        return User.query.get(id)
 
 
 @login.user_loader
