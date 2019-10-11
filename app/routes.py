@@ -1,7 +1,8 @@
 from flask import render_template, redirect, url_for, flash
 import requests
 from app import app, db
-from app.forms import LoginForm, RegistrationForm
+from app.forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm
+from app.mail import send_password_reset_email
 from flask_login import current_user, login_user
 from app.models import User
 from flask_login import logout_user
@@ -79,18 +80,53 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
+
+@app.route('/reset_password_request', methods=['GET', 'POST'])
+def reset_password_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = ResetPasswordRequestForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            send_password_reset_email(user)
+        flash('Check your email for the instructions to reset your password')
+        return redirect(url_for('login'))
+    return render_template('reset_password_request.html',
+                           title='Reset Password', form=form)
+
+
+@app.route('/request_confirmed')
+def request_confirmed():
+    return render_template('request_confirmed.html', title='Request confirmed')
+
+
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    user = User.verify_reset_password_token(token)
+    if not user:
+        return redirect(url_for('index'))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user.set_password(form.password.data)
+        db.session.commit()
+        flash('Your password has been reset.')
+        return redirect(url_for('login'))
+    return render_template('reset_password.html', form=form)
+
+
 @app.route('/add/<id>')
 def add_serie(id):
     current_user.add_serie(id)
     return('',204)
 
+
 @app.route('/remove/<id>')
 def remove_serie(id):
     current_user.remove_serie(id)
     return('',204)
-
-
-
 
 
 @app.route('/myseries/<user_id>')
@@ -110,6 +146,7 @@ def myserie(user_id):
             r = requests.get(f"{base_url_start}{tvshow[0]}{base_url_end}").json()
             list_serie_rendered.append(Serie(r['id'],r['name'], r['overview'], r['vote_average'], r['genres'], r['poster_path'], {}, len(r['seasons']), r['last_episode_to_air'], ''))
     return render_template('mySeries.html', title='MySeries', list_series=list_serie_rendered, nb_series=nb_series)
+
 
 @app.route('/search/<string>/<page>')
 @login_required
