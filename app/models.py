@@ -46,7 +46,7 @@ class User(UserMixin, db.Model):
             return "The user doesn't have any series"
 
     def is_in_series(self,id):
-        return(str(id) in self.series)
+        return(self.series is not None and str(id) in self.series)
 
     def add_serie(self, id_serie):
         if self.series is None or self.series == '':
