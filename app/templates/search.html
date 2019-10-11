@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/home.css') }}">
+</head>
+<div class="m-3 home w-100 d-flex flex-column">
+    <div class="w-100 d-flex flex-column justify-content-center welcome">
+        <h1> Search Results for {{search}}</h1>
+    </div>
+    <div class="w-100 h-100% card suggestion">
+        <div class="card-header">
+            Results corresponding to your search :
+        </div>
+        <div class="card-body list">
+            <div class="container">
+                <div class="row blog">
+                    <div class="col-md-12">
+                        <h2 class="card-header name">Series results</h2>
+                        {% if list_series == [] %}
+                            <p>Your search returned no results... Please try again with broader terms !</p>
+                        {% else %}
+                            {% for serie in list_series %}
+                            <div class="card-header name">
+                                    {{serie['name']}}
+                            </div>
+                            <div class="p-0 card-body serie">
+                                <a class="w-100 h-100" href="/serie/{{serie['id']}}">
+                                    <button class="btn btn-default btn-circle">
+                                        <i class="fa fa-fw fa-plus"></i>
+                                    </button>
+                                </a>
+                                <img src="https://image.tmdb.org/t/p/w500{{serie['poster_path']}}"
+                                     alt="{{serie['name']}}"
+                                     height="200px"
+                                     width="100px"
+                                     class="rounded">
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="col-md-12">
+                        <h2 class="card-header name">Movies results</h2>
+                        {% if list_movies == [] %}
+                            <p>Your search returned no results... Please try again with broader terms !</p>
+                        {% else %}
+                            {% for movie in list_movies %}
+                            <div class="card-header name">
+                                    {{movie['name']}}
+                            </div>
+                            <div class="p-0 card-body serie">
+                                <img src="https://image.tmdb.org/t/p/w500{{movie['poster_path']}}"
+                                     alt="{{movie['name']}}"
+                                     height="200px"
+                                     width="100px"
+                                     class="rounded">
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
