@@ -169,9 +169,9 @@ def search(string, page):
                            tv_genres=tv_genres, movie_genres=movie_genres)
 
 
-@app.route('/genre/<media>/<genre>')
+@app.route('/genre/<media>/<genre>/<page>')
 @login_required
-def genre(media, genre):
+def genre(media, genre, page):
     genres_url = f"https://api.themoviedb.org/3/genre/{media}/list?api_key={api_key}&language=en-US"
     genres_request = requests.get(genres_url).json()
     list_genres = genres_request['genres']
@@ -181,7 +181,10 @@ def genre(media, genre):
             id_genre = i
     id_genre = list_genres[id_genre]['id']
     url = f"http://api.themoviedb.org/3/discover/{media}?api_key={api_key}" \
-                 f"&with_genres={id_genre}&sort_by=popularity.desc"
+          f"&with_genres={id_genre}&sort_by=popularity.desc&language=en-US&page={page}"
+    request = requests.get(url).json()
+    r = request['results']
+    nb_pages = int(request['total_pages'])
     r = requests.get(url).json()['results']
     return render_template('genre.html', genre=genre, list_medias=r, media=media,
-                           tv_genres=tv_genres, movie_genres=movie_genres)
+                           tv_genres=tv_genres, movie_genres=movie_genres, current_page=int(page), nb_pages = nb_pages)
