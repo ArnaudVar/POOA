@@ -20,18 +20,12 @@
                 <i class="fa fa-3x fa-home">
                 </i>
             </a>
-            {% if g.search_form %}
-                <form class="pl-2 form-inline my-2 my-lg-0" method="get"
-                        action="/search">
-                    <div class="form-group mr-1">
-                        {{ g.search_form.s(size=20, class='form-control',
-                            placeholder=g.search_form.s.label.text) }}
-                    </div>
-                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-                </form>
-            {% endif %}
+            <form class="pl-2 form-inline my-2 my-lg-0">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
         </div>
-        <img src={{image}} height=90 width=auto class="m-2 center">
+        <img src="../static/assets/LogoNom.png" height=90 width=auto class="m-2 center">
         <a href="/logout">
             <button class="btn btn-default">
                 <div>
