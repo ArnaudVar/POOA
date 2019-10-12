@@ -25,13 +25,13 @@
                                 <div class="d-flex flex-row justify-content-around m-1">
                                     {% for j in range(2) %}
                                         {% if 2*i + j < (list_series| length) %}
-                                            <div class="col justify-content-center">
-                                                <div class="card-header name justify-content-center ">
+                                            <div class="col justify-content-center pr-1">
+                                                <div class="card-header name justify-content-left pr-2">
                                                         {{list_series[2*i+j]['name']}}
                                                 </div>
-                                                <div class="p-0 card-body serie justify-content-center">
+                                                <div class="p-0 card-body serie">
                                                     <a class="w-100 h-100" href="/serie/{{list_series[2*i+j]['id']}}">
-                                                        <button class="btn btn-default btn-circle justify-content-center">
+                                                        <button class="btn btn-default btn-circle">
                                                             <i class="fa fa-fw fa-plus"></i>
                                                         </button>
                                                     </a>
@@ -39,7 +39,7 @@
                                                          alt="{{list_series[2*i+j]['name']}}"
                                                          height="200px"
                                                          width="100px"
-                                                         class="rounded justify-content-center">
+                                                         class="rounded">
                                                 </div>
                                             </div>
                                         {% endif %}
@@ -57,13 +57,13 @@
                                 <div class="d-flex flex-row justify-content-around m-1">
                                     {% for j in range(2) %}
                                         {% if 2*i + j < (list_movies| length) %}
-                                             <div class="col justify-content-center">
-                                                <div class="card-header name justify-content-center ">
+                                            <div class="col justify-content-center">
+                                                <div class="card-header name justify-content-center">
                                                         {{list_movies[2*i+j]['title']}}
                                                 </div>
                                                 <div class="p-0 card-body serie">
                                                     <a class="w-100 h-100" href="/serie/{{list_movies[2*i+j]['id']}}">
-                                                        <button class="btn btn-default btn-circle justify-content-center">
+                                                        <button class="btn btn-default btn-circle">
                                                             <i class="fa fa-fw fa-plus"></i>
                                                         </button>
                                                     </a>
@@ -71,7 +71,7 @@
                                                          alt="{{list_movies[2*i+j]['title']}}"
                                                          height="200px"
                                                          width="100px"
-                                                         class="rounded justify-content-center">
+                                                         class="rounded">
                                                 </div>
                                             </div>
                                         {% endif %}
