@@ -15,68 +15,47 @@
         </div>
         <div class="card-body list">
             <div class="container">
-                <div class="d-flex flex-row justify-content-around m-1">
-                    <div class="col-m-1">
+                <div class="row blog">
+                    <div class="col-md-12">
                         <h2 class="card-header name">Series results</h2>
                         {% if list_series == [] %}
                             <p>Your search returned no results... Please try again with broader terms !</p>
                         {% else %}
-                            {% for i in range(1 + (list_series| length)//2) %}
-                                <div class="d-flex flex-row justify-content-around m-1">
-                                    {% for j in range(2) %}
-                                        {% if 2*i + j < (list_series| length) %}
-                                            <div class="col justify-content-center pr-1">
-                                                <div class="card-header name justify-content-left pr-2">
-                                                        {{list_series[2*i+j]['name']}}
-                                                </div>
-                                                <div class="p-0 card-body serie">
-                                                    <a class="w-100 h-100" href="/serie/{{list_series[2*i+j]['id']}}">
-                                                        <button class="btn btn-default btn-circle">
-                                                            <i class="fa fa-fw fa-plus"></i>
-                                                        </button>
-                                                    </a>
-                                                    <img src="https://image.tmdb.org/t/p/w500{{list_series[2*i+j]['poster_path']}}"
-                                                         alt="{{list_series[2*i+j]['name']}}"
-                                                         height="200px"
-                                                         width="100px"
-                                                         class="rounded">
-                                                </div>
-                                            </div>
-                                        {% endif %}
-                                    {% endfor%}
-                                </div>
+                            {% for serie in list_series %}
+                            <div class="card-header name">
+                                    {{serie['name']}}
+                            </div>
+                            <div class="p-0 card-body serie">
+                                <a class="w-100 h-100" href="/serie/{{serie['id']}}">
+                                    <button class="btn btn-default btn-circle">
+                                        <i class="fa fa-fw fa-plus"></i>
+                                    </button>
+                                </a>
+                                <img src="https://image.tmdb.org/t/p/w500{{serie['poster_path']}}"
+                                     alt="{{serie['name']}}"
+                                     height="200px"
+                                     width="100px"
+                                     class="rounded">
+                            </div>
                             {% endfor %}
                         {% endif %}
                     </div>
-                    <div class="col-m-1">
+                    <div class="col-md-12">
                         <h2 class="card-header name">Movies results</h2>
                         {% if list_movies == [] %}
                             <p>Your search returned no results... Please try again with broader terms !</p>
                         {% else %}
-                            {% for i in range(1 + (list_movies| length)//2) %}
-                                <div class="d-flex flex-row justify-content-around m-1">
-                                    {% for j in range(2) %}
-                                        {% if 2*i + j < (list_movies| length) %}
-                                            <div class="col justify-content-center">
-                                                <div class="card-header name justify-content-center">
-                                                        {{list_movies[2*i+j]['title']}}
-                                                </div>
-                                                <div class="p-0 card-body serie">
-                                                    <a class="w-100 h-100" href="/serie/{{list_movies[2*i+j]['id']}}">
-                                                        <button class="btn btn-default btn-circle">
-                                                            <i class="fa fa-fw fa-plus"></i>
-                                                        </button>
-                                                    </a>
-                                                    <img src="https://image.tmdb.org/t/p/w500{{list_movies[2*i+j]['poster_path']}}"
-                                                         alt="{{list_movies[2*i+j]['title']}}"
-                                                         height="200px"
-                                                         width="100px"
-                                                         class="rounded">
-                                                </div>
-                                            </div>
-                                        {% endif %}
-                                    {% endfor %}
-                                </div>
+                            {% for movie in list_movies %}
+                            <div class="card-header name">
+                                    {{movie['name']}}
+                            </div>
+                            <div class="p-0 card-body serie">
+                                <img src="https://image.tmdb.org/t/p/w500{{movie['poster_path']}}"
+                                     alt="{{movie['name']}}"
+                                     height="200px"
+                                     width="100px"
+                                     class="rounded">
+                            </div>
                             {% endfor %}
                         {% endif %}
                     </div>
