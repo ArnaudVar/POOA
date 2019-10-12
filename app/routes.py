@@ -9,13 +9,16 @@ from flask_login import logout_user
 from flask_login import login_required
 from werkzeug.urls import url_parse
 from classes.Serie import Serie
+from datetime import datetime
+
 
 api_key = "11893590e2d73c103c840153c0daa770"
 tv_g = requests.get(f"http://api.themoviedb.org/3/genre/tv/list?api_key={api_key}&language=en-US")
 tv_genres = tv_g.json()['genres']
 movie_g = requests.get(f"http://api.themoviedb.org/3/genre/movie/list?api_key={api_key}&language=en-US")
 movie_genres = movie_g.json()['genres']
-from datetime import datetime
+logo_nom_source = "../static/assets/LogoNom.png"
+logo_source = "../static/assets/Logo.png"
 
 @app.route('/')
 @app.route('/home')
@@ -45,7 +48,7 @@ def login():
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('home')
         return redirect(next_page)
-    return render_template('login.html', title='Sign In', form=form)
+    return render_template('login.html', title='Sign In', form=form, src = logo_source)
 
 
 @app.route('/logout')
@@ -81,7 +84,7 @@ def register():
         db.session.commit()
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('login'))
-    return render_template('register.html', title='Register', form=form)
+    return render_template('register.html', title='Register', form=form, src = logo_source)
 
 
 @app.route('/reset_password_request', methods=['GET', 'POST'])
@@ -98,12 +101,12 @@ def reset_password_request():
         else:
             form.email.errors.append("No user has this email adress")
     return render_template('reset_password_request.html',
-                           title='Reset Password', form=form)
+                           title='Reset Password', form=form, src = logo_nom_source)
 
 
 @app.route('/request_confirmed')
 def request_confirmed():
-    return render_template('request_confirmed.html', title='Request confirmed')
+    return render_template('request_confirmed.html', title='Request confirmed', src = logo_nom_source)
 
 
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
