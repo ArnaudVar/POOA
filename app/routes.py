@@ -161,12 +161,11 @@ def search(string, page):
     base_url_movies = f"https://api.themoviedb.org/3/search/movie?query={string}&api_key={api_key}&language=en-US&page={page}"
     r1 = requests.get(base_url_tv).json()
     r2 = requests.get(base_url_movies).json()
-    list_series = r1['results']
-    print(list_series)
+    list_series = r1['results'] 
     list_movies = r2['results']
-    nb_pages = max(r1['total_pages'], r2['total_pages'])
-    return render_template('mySeries.html', title='MySeries', list_series=list_serie_rendered, nb_series=nb_series,
-                           tv_genres=tv_genres, movie_genres=movie_genres)
+    nb_pages = max(int(r1['total_pages']), int(r2['total_pages']))
+    return render_template('search.html', title='Search', list_series=list_series,
+                           list_movies=list_movies, nb_pages=nb_pages, current_page=int(page), search=string)
 
 
 @app.route('/genre/<media>/<genre>/<page>')
@@ -188,3 +187,9 @@ def genre(media, genre, page):
     r = requests.get(url).json()['results']
     return render_template('genre.html', genre=genre, list_medias=r, media=media,
                            tv_genres=tv_genres, movie_genres=movie_genres, current_page=int(page), nb_pages = nb_pages)
+
+
+@app.route('/pagination/<page>/<nb_pags>')
+@login_required
+def pagination(page, nb_pages):
+    return render_template('pagination.html', page=page, nb_pages=nb_pages)
