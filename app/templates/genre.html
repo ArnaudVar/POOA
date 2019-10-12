@@ -1,0 +1,61 @@
+@@ -0,0 +1,60 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/home.css') }}">
+</head>
+<div class="m-3 home w-100 d-flex flex-column">
+    <div class="w-100 d-flex flex-column justify-content-center welcome">
+        <h1> Search Results for {{genre}} {{media}}s</h1>
+    </div>
+    <div class="w-100 h-100% card suggestion">
+        <div class="card-header">
+            Results corresponding to {{genre}} {{media}}s:
+        </div>
+        <div class="card-body list">
+            <div class="container">
+                <div class="d-flex flex-row justify-content-around m-1">
+                    <div class="col-m-1">
+                        <h2 class="card-header name">{{media}} results</h2>
+                        {% if list_medias == [] %}
+                            <p>Your search returned no results... Please try again with broader terms !</p>
+                        {% else %}
+                            {% for i in range(1 + (list_medias| length)//4) %}
+                                <div class="d-flex flex-row justify-content-around m-1">
+                                    {% for j in range(4) %}
+                                        {% if 4*i + j < (list_medias| length) %}
+                                            <div class="col justify-content-center">
+                                                <div class="card-header name justify-content-center ">
+                                                    {% if media == 'tv' %}
+                                                        {{list_medias[4*i+j]['name']}}
+                                                    {% else %}
+                                                        {{list_medias[4*i+j]['title']}}
+                                                    {% endif %}
+                                                </div>
+                                                <div class="p-0 card-body serie justify-content-center">
+                                                    <a class="w-100 h-100" href="/serie/{{list_medias[4*i+j]['id']}}">
+                                                        <button class="btn btn-default btn-circle justify-content-center">
+                                                            <i class="fa fa-fw fa-plus"></i>
+                                                        </button>
+                                                    </a>
+                                                    <img src="https://image.tmdb.org/t/p/w500{{list_medias[4*i+j]['poster_path']}}"
+                                                         alt="{{list_medias[4*i+j]['name']}}"
+                                                         height="200px"
+                                                         width="100px"
+                                                         class="rounded justify-content-center">
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor%}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

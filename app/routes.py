@@ -12,19 +12,22 @@ from werkzeug.urls import url_parse
 from classes.Serie import Serie
 
 api_key = "11893590e2d73c103c840153c0daa770"
+tv_g = requests.get(f"http://api.themoviedb.org/3/genre/tv/list?api_key={api_key}&language=en-US")
+tv_genres = tv_g.json()['genres']
+movie_g = requests.get(f"http://api.themoviedb.org/3/genre/movie/list?api_key={api_key}&language=en-US")
+movie_genres = movie_g.json()['genres']
 
 @app.route('/')
 @app.route('/home')
 @login_required
 def home():
     r = requests.get("https://api.themoviedb.org/3/tv/popular?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
-    g = requests.get("http://api.themoviedb.org/3/genre/tv/list?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
-    genres = g.json()['genres']
     suggestions = r.json()['results']
     selection = []
     for i in range(12):
         selection.append(suggestions[i])
-    return render_template('home.html', title='Home', suggestions=selection, nombre_series=12, genres=genres)
+    return render_template('home.html', title='Home', suggestions=selection, nombre_series=12,
+                           tv_genres=tv_genres, movie_genres=movie_genres)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -147,7 +150,8 @@ def myserie(user_id):
             nb_series+=1
             r = requests.get(f"{base_url_start}{tvshow[0]}{base_url_end}").json()
             list_serie_rendered.append(Serie(r['id'],r['name'], r['overview'], r['vote_average'], r['genres'], r['poster_path'], {}, len(r['seasons']), r['last_episode_to_air'], ''))
-    return render_template('mySeries.html', title='MySeries', list_series=list_serie_rendered, nb_series=nb_series)
+    return render_template('mySeries.html', title='MySeries', list_series=list_serie_rendered, nb_series=nb_series,
+                           tv_genres=tv_genres, movie_genres=movie_genres)
 
 
 @app.route('/search/<string>/<page>')
@@ -161,4 +165,23 @@ def search(string, page):
     print(list_series)
     list_movies = r2['results']
     nb_pages = max(r1['total_pages'], r2['total_pages'])
-    return render_template('search.html', title='Search', list_series=list_series, list_movies=list_movies, nb_pages=nb_pages, search = string)
+    return render_template('mySeries.html', title='MySeries', list_series=list_serie_rendered, nb_series=nb_series,
+                           tv_genres=tv_genres, movie_genres=movie_genres)
+
+
+@app.route('/genre/<media>/<genre>')
+@login_required
+def genre(media, genre):
+    genres_url = f"https://api.themoviedb.org/3/genre/{media}/list?api_key={api_key}&language=en-US"
+    genres_request = requests.get(genres_url).json()
+    list_genres = genres_request['genres']
+    id_genre = -1
+    for i in range(len(list_genres)):
+        if list_genres[i]['name'] == genre:
+            id_genre = i
+    id_genre = list_genres[id_genre]['id']
+    url = f"http://api.themoviedb.org/3/discover/{media}?api_key={api_key}" \
+                 f"&with_genres={id_genre}&sort_by=popularity.desc"
+    r = requests.get(url).json()['results']
+    return render_template('genre.html', genre=genre, list_medias=r, media=media,
+                           tv_genres=tv_genres, movie_genres=movie_genres)

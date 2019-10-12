@@ -54,12 +54,25 @@
             <li class="active">
                 <a class="dropdown-toggle" data-toggle="collapse" data-target="#genreSubmenu" role="button"
                    aria-expanded="false" aria-controls="genreSubmenu">
-                    <i class="fa fa-list"></i> &nbsp; GENRES
+                    <i class="fa fa-list"></i> &nbsp; TV GENRES
                 </a>
                 <ul class="collapse list-unstyled" id="genreSubmenu">
-                    {% for genre in genres %}
+                    {% for genre in tv_genres %}
                     <li>
-                        <a>{{genre.name}}</a>
+                        <a href="/genre/tv/{{genre.name}}">{{genre.name}}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </li>
+            <li class="active">
+                <a class="dropdown-toggle" data-toggle="collapse" data-target="#genreSubmenu2" role="button"
+                   aria-expanded="false" aria-controls="genreSubmenu">
+                    <i class="fa fa-list"></i> &nbsp; MOVIE GENRES
+                </a>
+                <ul class="collapse list-unstyled" id="genreSubmenu2">
+                    {% for genre in movie_genres %}
+                    <li>
+                        <a href="/genre/movie/{{genre.name}}">{{genre.name}}</a>
                     </li>
                     {% endfor %}
                 </ul>
