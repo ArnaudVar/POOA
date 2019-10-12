@@ -1,12 +1,11 @@
-from flask import render_template, redirect, url_for, flash
+from flask import render_template, redirect, url_for, flash, request, g
 import requests
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm
+from app.forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm, SearchForm
 from app.mail import send_password_reset_email
 from flask_login import current_user, login_user
 from app.models import User
 from flask_login import logout_user
-from flask import request
 from flask_login import login_required
 from werkzeug.urls import url_parse
 from classes.Serie import Serie
@@ -16,6 +15,7 @@ tv_g = requests.get(f"http://api.themoviedb.org/3/genre/tv/list?api_key={api_key
 tv_genres = tv_g.json()['genres']
 movie_g = requests.get(f"http://api.themoviedb.org/3/genre/movie/list?api_key={api_key}&language=en-US")
 movie_genres = movie_g.json()['genres']
+from datetime import datetime
 
 @app.route('/')
 @app.route('/home')
@@ -154,18 +154,35 @@ def myserie(user_id):
                            tv_genres=tv_genres, movie_genres=movie_genres)
 
 
-@app.route('/search/<string>/<page>')
+@app.route('/search2/<string>/<page>')
 @login_required
-def search(string, page):
-    base_url_tv = f"https://api.themoviedb.org/3/search/tv?query={string}&api_key={api_key}&language=en-US&page={page}"
-    base_url_movies = f"https://api.themoviedb.org/3/search/movie?query={string}&api_key={api_key}&language=en-US&page={page}"
+def search2(string, page):
+    base_url_tv = f"https://api.themoviedb.org/3/search/tv?query={string}&api_key={api_key}&" \
+                  f"language=en-US&page={page}&sort_by=popularity.desc"
+    base_url_movies = f"https://api.themoviedb.org/3/search/movie?query={string}&api_key={api_key}&" \
+                      f"language=en-US&page={page}&sort_by=popularity.desc"
     r1 = requests.get(base_url_tv).json()
     r2 = requests.get(base_url_movies).json()
-    list_series = r1['results'] 
+    list_series = r1['results']
     list_movies = r2['results']
     nb_pages = max(int(r1['total_pages']), int(r2['total_pages']))
     return render_template('search.html', title='Search', list_series=list_series,
                            list_movies=list_movies, nb_pages=nb_pages, current_page=int(page), search=string)
+
+
+@app.before_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.utcnow()
+        db.session.commit()
+        g.search_form = SearchForm()
+    g.locale = 'en'
+
+
+@app.route('/search')
+@login_required
+def search():
+    return redirect(f'/search2/{g.search_form.s.data}/1')
 
 
 @app.route('/genre/<media>/<genre>/<page>')
@@ -187,9 +204,3 @@ def genre(media, genre, page):
     r = requests.get(url).json()['results']
     return render_template('genre.html', genre=genre, list_medias=r, media=media,
                            tv_genres=tv_genres, movie_genres=movie_genres, current_page=int(page), nb_pages = nb_pages)
-
-
-@app.route('/pagination/<page>/<nb_pags>')
-@login_required
-def pagination(page, nb_pages):
-    return render_template('pagination.html', page=page, nb_pages=nb_pages)
