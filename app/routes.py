@@ -1,15 +1,16 @@
 from flask import render_template, redirect, url_for, flash
 import requests
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm
+from app.forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm, SearchForm
 from app.mail import send_password_reset_email
 from flask_login import current_user, login_user
 from app.models import User
 from flask_login import logout_user
-from flask import request
+from flask import request, g
 from flask_login import login_required
 from werkzeug.urls import url_parse
 from classes.Serie import Serie
+from datetime import datetime
 
 api_key = "11893590e2d73c103c840153c0daa770"
 
@@ -146,19 +147,36 @@ def myserie(user_id):
         for tvshow in list_series:
             nb_series+=1
             r = requests.get(f"{base_url_start}{tvshow[0]}{base_url_end}").json()
-            list_serie_rendered.append(Serie(r['id'],r['name'], r['overview'], r['vote_average'], r['genres'], r['poster_path'], {}, len(r['seasons']), r['last_episode_to_air'], ''))
+            list_serie_rendered.append(Serie(r['id'],r['name'], r['overview'],
+                                             r['vote_average'], r['genres'], r['poster_path'], {}, len(r['seasons']),
+                                             r['last_episode_to_air'], ''))
     return render_template('mySeries.html', title='MySeries', list_series=list_serie_rendered, nb_series=nb_series)
 
 
-@app.route('/search/<string>/<page>')
+@app.route('/search2/<string>/<page>')
 @login_required
-def search(string, page):
+def search2(string, page):
     base_url_tv = f"https://api.themoviedb.org/3/search/tv?query={string}&api_key={api_key}&language=en-US&page={page}"
     base_url_movies = f"https://api.themoviedb.org/3/search/movie?query={string}&api_key={api_key}&language=en-US&page={page}"
     r1 = requests.get(base_url_tv).json()
     r2 = requests.get(base_url_movies).json()
     list_series = r1['results']
-    print(list_series)
     list_movies = r2['results']
     nb_pages = max(r1['total_pages'], r2['total_pages'])
-    return render_template('search.html', title='Search', list_series=list_series, list_movies=list_movies, nb_pages=nb_pages, search = string)
+    return render_template('search.html', title='Search', list_series=list_series,
+                           list_movies=list_movies, nb_pages=nb_pages, search=string)
+
+
+@app.before_request
+@login_required
+def before_request():
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.utcnow()
+        db.session.commit()
+        g.search_form = SearchForm()
+
+
+@app.route('/search')
+@login_required
+def search():
+    return redirect(f'/search2/{g.search_form.s.data}/1.html')
