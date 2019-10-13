@@ -60,16 +60,20 @@ def logout():
 @app.route('/serie/<id>')
 @login_required
 def serie(id):
-    added = current_user.is_in_series(id)
-    s = requests.get("https://api.themoviedb.org/3/tv/" + str(id) + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
+    s = requests.get(
+        "https://api.themoviedb.org/3/tv/" + str(id) + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
     seriejson = s.json()
-    if seriejson['next_episode_to_air'] :
-        serie = Serie(seriejson['id'],seriejson['name'], seriejson['overview'], seriejson['vote_average'], seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']), seriejson['last_episode_to_air'], seriejson['next_episode_to_air']['air_date'])
-    else :
-        serie = Serie(seriejson['id'],seriejson['name'], seriejson['overview'], seriejson['vote_average'], seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']), seriejson['last_episode_to_air'], '')
-    for season in seriejson['seasons']:
-        serie.seasons[season['season_number']] = season['episode_count']
-    return render_template('serie.html', serie=serie, user=current_user, added=added)
+    if seriejson['next_episode_to_air']:
+        serie = Serie(seriejson['id'], seriejson['name'], seriejson['overview'], seriejson['vote_average'],
+                      seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']),
+                      seriejson['last_episode_to_air'], seriejson['next_episode_to_air']['air_date'])
+    else:
+        serie = Serie(seriejson['id'], seriejson['name'], seriejson['overview'], seriejson['vote_average'],
+                      seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']),
+                      seriejson['last_episode_to_air'], '')
+        for season in seriejson['seasons']:
+            serie.seasons[season['season_number']] = season['episode_count']
+    return render_template('serie.html', serie=serie, user=current_user)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -207,3 +211,23 @@ def genre(media, genre, page):
     r = requests.get(url).json()['results']
     return render_template('genre.html', genre=genre, list_medias=r, media=media,
                            tv_genres=tv_genres, movie_genres=movie_genres, current_page=int(page), nb_pages = nb_pages)
+
+
+@app.route('/serie/<id>/season/<season>/episode/<episode>')
+def select_episode(id, season, episode):
+    s = requests.get(
+        "https://api.themoviedb.org/3/tv/" + str(id) + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
+    seriejson = s.json()
+    if seriejson['next_episode_to_air']:
+        serie = Serie(seriejson['id'], seriejson['name'], seriejson['overview'], seriejson['vote_average'],
+                      seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']),
+                      seriejson['last_episode_to_air'], seriejson['next_episode_to_air']['air_date'])
+    else:
+        serie = Serie(seriejson['id'], seriejson['name'], seriejson['overview'], seriejson['vote_average'],
+                      seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']),
+                      seriejson['last_episode_to_air'], '')
+    for seasonz in seriejson['seasons']:
+        serie.seasons[seasonz['season_number']] = seasonz['episode_count']
+
+    serie.selected_episode = 'S' + str(season) + 'E' + str(episode)
+    return render_template('serie.html', serie=serie, user=current_user)
