@@ -73,7 +73,7 @@ def serie(id):
                       seriejson['last_episode_to_air'], '')
         for season in seriejson['seasons']:
             serie.seasons[season['season_number']] = season['episode_count']
-    return render_template('serie.html', serie=serie, user=current_user)
+    return render_template('serie.html', serie=serie, user=current_user, tv_genres=tv_genres, movie_genres=movie_genres)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -173,7 +173,7 @@ def search2(string, page):
     list_series = r1['results']
     list_movies = r2['results']
     nb_pages = max(int(r1['total_pages']), int(r2['total_pages']))
-    return render_template('search.html', title='Search', list_series=list_series,
+    return render_template('search.html', title='Search', list_series=list_series, tv_genres=tv_genres, movie_genres=movie_genres,
                            list_movies=list_movies, nb_pages=nb_pages, current_page=int(page), search=string)
 
 
@@ -230,4 +230,4 @@ def select_episode(id, season, episode):
         serie.seasons[seasonz['season_number']] = seasonz['episode_count']
 
     serie.selected_episode = 'S' + str(season) + 'E' + str(episode)
-    return render_template('serie.html', serie=serie, user=current_user)
+    return render_template('serie.html', serie=serie, user=current_user, tv_genres=tv_genres, movie_genres=movie_genres)
