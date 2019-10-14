@@ -7,7 +7,11 @@
     background: #F5FFFA;
 }
 
-
+img {
+  max-width:100%;
+  max-height:250px;
+  display:block;
+}
 
 .welcome {
     font-family: 'Amatic SC';;
@@ -28,8 +32,8 @@
     text-align: center;
     font-size: 12px;
     line-height: 1.42857;
-    top: 125px;
-    right: 100px;
+    top: 150px;
+    right: 120px;
 }
 
 .list {
