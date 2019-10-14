@@ -86,4 +86,3 @@ class Serie(Media):
         episode = Episode(episode_code, episode_json["name"], episode_json["overview"], episode_json["guest_stars"], episode_json["vote_average"], episode_json["still_path"], self.id, self.get_current_season(), self.get_current_episode(), episode_json["air_date"])
         return episode
 
-

@@ -52,9 +52,8 @@
 </nav>
 {% endblock %}
 {% block content %}
-
 <div class="d-flex flex-row">
-    <div class="card episode m-3">
+     <div class="card episode m-3">
         <div class="titre-episode card-header d-flex flex-row justify-content-between">
             {{serie.get_episode.name}}
             {% if user.is_in_series(serie.id) %}
@@ -98,3 +97,5 @@
 </div>
 {% endblock %}
 
+</body>
+</html>
