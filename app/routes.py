@@ -71,8 +71,8 @@ def serie(id):
         serie = Serie(seriejson['id'], seriejson['name'], seriejson['overview'], seriejson['vote_average'],
                       seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']),
                       seriejson['last_episode_to_air'], '')
-        for season in seriejson['seasons']:
-            serie.seasons[season['season_number']] = season['episode_count']
+    for season in seriejson['seasons']:
+        serie.seasons[season['season_number']] = season['episode_count']
     return render_template('serie.html', serie=serie, user=current_user, tv_genres=tv_genres, movie_genres=movie_genres)
 
 
