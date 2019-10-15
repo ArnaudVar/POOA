@@ -96,10 +96,7 @@ class User(UserMixin, db.Model):
 
     def add_serie(self, id_serie):
         list_serie = self.list_serie()
-        print(list_serie)
-        print(id_serie)
         if id_serie not in list_serie:
-            print(self.series)
             if self.series is None or self.series == '':
                 self._series = f"{id_serie}xS1E1"
             else:
