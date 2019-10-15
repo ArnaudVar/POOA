@@ -82,6 +82,7 @@ class Serie(Media):
     def get_episode(self):
         request_episode = requests.get("https://api.themoviedb.org/3/tv/" + str(self.id)+"/season/"+ str(self.get_current_season()) +"/episode/" + str(self.get_current_episode()) + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
         episode_json = request_episode.json()
-        episode = Episode(episode_json["name"], episode_json["overview"], episode_json["guest_stars"], episode_json["vote_average"], episode_json["still_path"], self.id, self.get_current_season(), self.get_current_episode(), episode_json["air_date"])
+        episode_code = 'S' + str(episode_json['season_number']) + 'E' + str(episode_json['episode_number'])
+        episode = Episode(episode_code, episode_json["name"], episode_json["overview"], episode_json["guest_stars"], episode_json["vote_average"], episode_json["still_path"], self.id, self.get_current_season(), self.get_current_episode(), episode_json["air_date"])
         return episode
 

@@ -73,8 +73,12 @@ def serie(id):
                       seriejson['last_episode_to_air'], '')
     for season in seriejson['seasons']:
         serie.seasons[season['season_number']] = season['episode_count']
-    return render_template('serie.html', serie=serie, user=current_user, tv_genres=tv_genres, movie_genres=movie_genres)
-
+    if current_user.is_in_series(id) :
+        user_series = current_user.series.split('-')
+        for user_serie in user_series :
+            if user_serie.split('x')[0] == str(id) :
+                serie.selected_episode = user_serie.split('x')[1]
+    return render_template('serie.html', serie=serie, user=current_user)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -132,7 +136,7 @@ def reset_password(token):
 @app.route('/add/<id>')
 def add_serie(id):
     current_user.add_serie(id)
-    return('',204)
+    return ('', 204)
 
 
 @app.route('/remove/<id>')
@@ -230,4 +234,10 @@ def select_episode(id, season, episode):
         serie.seasons[seasonz['season_number']] = seasonz['episode_count']
 
     serie.selected_episode = 'S' + str(season) + 'E' + str(episode)
-    return render_template('serie.html', serie=serie, user=current_user, tv_genres=tv_genres, movie_genres=movie_genres)
+    return render_template('serie.html', serie=serie, user=current_user)
+
+@app.route('/serie/<id>/season/<season>/episode/<episode>/view')
+def next_episode(id, season, episode):
+    string_episode = 'S' + str(season) + 'E' + str(episode)
+    current_user.view_episode(string_episode, id)
+    return('',204)

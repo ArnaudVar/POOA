@@ -19,8 +19,8 @@ class User(UserMixin, db.Model):
         return f"Username : {self.username}, Name : {self.name}, Surname : {self.surname}, Email : {self.email}," \
                f" Series : {self.series}"
 
-    def _set_series(self, *args):
-        return print("Use .add_serie method instead")
+    def _set_series(self, series):
+        self._series = series
 
     def _get_series(self):
         return self._series
@@ -46,7 +46,31 @@ class User(UserMixin, db.Model):
             return "The user doesn't have any series"
 
     def is_in_series(self,id):
+        db.session.commit()
         return(self.series is not None and str(id) in self.series)
+
+    def is_after(self, episode, serie):
+        if str(serie) not in self.series:
+            return True
+        else :
+            series_strings = self.series.split('-')
+            for serie_string in series_strings :
+                if int(serie_string.split('x')[0]) == serie :
+                    code = serie_string.split('x')[1]
+                    code_last = code.split('E')
+            return(int(code_last[0].split('S')[1]) > episode.num_season or (int(code_last[0].split('S')[1]) == episode.num_season and int(code_last[1]) < episode.num_episode) )
+
+
+
+    def view_episode(self, episode, serie):
+        user_series = self.series.split('-')
+        for userserie in user_series :
+            if userserie.split('x')[0] == str(serie) :
+                last_episode_watched = userserie.split('x')[1]
+                new_series = self.series.replace(userserie, userserie.replace(last_episode_watched, episode))
+                print('new',new_series)
+                self._set_series(new_series)
+                db.session.commit()
 
     def add_serie(self, id_serie):
         if self.series is None or self.series == '':
