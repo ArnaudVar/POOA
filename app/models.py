@@ -74,6 +74,13 @@ class User(UserMixin, db.Model):
         list_movie = self.list_movie()
         return self.movies is not None and str(id) in list_movie
 
+    def get_last_episode_viewed(self,id):
+        series_strings = self.series.split('-')
+        for serie_string in series_strings:
+            serieid = serie_string.split('x')[0]
+            if serieid == str(id):
+                return(serie_string.split('x')[1])
+
     def is_after(self, season, episode, serie):
         if str(serie) not in self.series:
             return True
