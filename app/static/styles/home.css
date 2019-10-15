@@ -23,6 +23,19 @@ img {
     display:none;
 }
 
+
+.serie-search {
+    padding: 0px
+}
+
+.series-results {
+    border-right : 2px solid white
+}
+
+.movie-search {
+    padding: 0px
+}
+
 .serie:hover .btn-circle{
     display: block;
     position: absolute;
@@ -44,7 +57,6 @@ img {
 }
 
 .name {
-    max-width: 215px;
     white-space:nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -53,8 +65,30 @@ img {
     padding-left: 0px;
 }
 
+.search {
+    max-width: 203px;
+}
+
+.genre {
+    max-width: 215px;
+}
+
 .add {
     position: relative;
     vertical-align: middle;
     text-align: center;
+}
+
+.episode-string {
+    display: none
+}
+
+.serie:hover .episode-string {
+    display: block;
+    position: absolute;
+    color: white;
+    background : grey;
+    top: 150px;
+    right: 100px;
+    width: 30%;
 }

@@ -163,7 +163,7 @@ def myserie(user_id):
             r = requests.get(f"{base_url_start}{tvshow[0]}{base_url_end}").json()
             list_serie_rendered.append(Serie(r['id'],r['name'], r['overview'], r['vote_average'], r['genres'], r['poster_path'], {}, len(r['seasons']), r['last_episode_to_air'], ''))
     return render_template('mySeries.html', title='MySeries', list_series=list_serie_rendered, nb_series=nb_series,
-                           tv_genres=tv_genres, movie_genres=movie_genres)
+                           tv_genres=tv_genres, movie_genres=movie_genres, user=current_user)
 
 
 @app.route('/search2/<string>/<page>')
