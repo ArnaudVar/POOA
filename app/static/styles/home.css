@@ -44,6 +44,7 @@ img {
 }
 
 .name {
+    max-width: 215px;
     white-space:nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
