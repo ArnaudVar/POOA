@@ -19,7 +19,7 @@
             </div>
         </div>
         <div class="name">
-            <h1>{{serie.name}}</h1>
+            <h1>{{movie.name}}</h1>
         </div>
         <div>
             <button class="btn btn-warning mr-3">
@@ -28,8 +28,8 @@
                     <i class="fa fa-check"></i>
                 </div>
             </button>
-            {% if user.series == None or not(user.is_in_series(serie.id)) %}
-            <a href="/add_serie/{{serie.id}}">
+            {% if user.movies == None or not(user.has_movie(movie.id))%}
+            <a href="/add_movie/{{movie.id}}">
                 <button class="btn btn-success add">
                     <div>
                         Add
@@ -38,7 +38,7 @@
                 </button>
             </a>
             {% else %}
-            <a href="/remove_serie/{{serie.id}}">
+            <a href="/remove_movie/{{movie.id}}">
                 <button class="btn btn-danger">
                     <div>
                         Remove
@@ -52,53 +52,18 @@
 </nav>
 {% endblock %}
 {% block content %}
-<div class="d-flex flex-row justify-content-between">
+<div class="d-flex flex-row">
      <div class="card episode m-3">
         <div class="titre-episode card-header d-flex flex-row justify-content-between">
-            {{ serie.get_episode.name }}
-            {% if user.is_in_series(serie.id) %}
-            {% if user.is_after(serie.get_episode.num_season, serie.get_episode.num_episode, serie.id) %}
-            <a href="/serie/{{serie.id}}/season/{{serie.get_episode.num_season}}/episode/{{serie.get_episode.num_episode}}/view" class="btn bton-dark">
-                <i class="fa fa-eye-slash">&nbsp; Not viewed</i>
-            </a>
-            {% else %}
-            <a class="btn bton-dark">
-                <i class="fa fa-eye">&nbsp; Viewed</i>
-            </a>
-            {% endif %}
-            {% endif %}
+            {{movie.name}}
         </div>
         <div class="card-body d-flex flex-row justify-content-between">
-            {% if serie.get_episode.image == None %}
-            <img class="rounded im-episode" src="{{url_for('static', filename='assets/LogoNom.png') }}">
-            {% else %}
-            <img class="rounded im-episode" src="https://image.tmdb.org/t/p/w500{{serie.get_episode.image}}">
-            {% endif %}
-
+            <img class="rounded im-episode" src="https://image.tmdb.org/t/p/w500{{movie.image}}">
             <div class="m-2">
-                {{serie.get_episode.description}}
+                {{movie.description}}
             </div>
         </div>
     </div>
-    <nav id="sidebar">
-        <ul class="list-unstyled components" id="seasons">
-            {% for season in serie.seasons.keys() %}
-            <li class="active">
-                <a class="dropdown-toggle" data-toggle="collapse" data-target="#season{{season}}Submenu" role="button"
-                   aria-expanded="false" aria-controls="season{{season}}Submenu">
-                    Season {{season}}
-                </a>
-                <ul class="collapse list-unstyled" id="season{{season}}Submenu" data-parent="#seasons">
-                    {% for i in range(serie.seasons[season]) %}
-                    <li>
-                        <a href="/serie/{{serie.id}}/season/{{season}}/episode/{{i+1}}">Episode {{i+1}}</a>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </li>
-            {% endfor %}
-        </ul>
-    </nav>
 </div>
 {% endblock %}
 
