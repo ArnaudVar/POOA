@@ -43,7 +43,7 @@ class User(UserMixin, db.Model):
     def list_serie(self):
         # Le format du texte est sous la forme {idserie}x{Snum_saisonEnum_episode}-{idserie}x{Snum_saisonEnum_episode} .
         # Renvoie une liste de id_serie
-        if self.series is not None and self.movies != '':
+        if self.series is not None and self.series != '':
             serie_episode_list = self.series.split('-')
             serie_list = []
             for serie in serie_episode_list:
@@ -85,8 +85,6 @@ class User(UserMixin, db.Model):
                     code_last = code.split('E')
             return(int(code_last[0].split('S')[1]) > season or (int(code_last[0].split('S')[1]) == season and int(code_last[1]) < episode) )
 
-
-
     def view_episode(self, episode, serie):
         user_series = self.series.split('-')
         for userserie in user_series :
@@ -98,7 +96,10 @@ class User(UserMixin, db.Model):
 
     def add_serie(self, id_serie):
         list_serie = self.list_serie()
+        print(list_serie)
+        print(id_serie)
         if id_serie not in list_serie:
+            print(self.series)
             if self.series is None or self.series == '':
                 self._series = f"{id_serie}xS1E1"
             else:
