@@ -12,6 +12,12 @@
     max-height: 35px;
 }
 
+.im-episode {
+    float: left;
+    max-width: 50%;
+    max-height: 300px;
+}
+
 .name {
     font-family: Redemption
 }
@@ -27,7 +33,8 @@
 .episode {
     background: url("../assets/fond2.jpg");
     color: white;
-    max-height: 500px;
+    max-height: 400px;
+    overflow-y: auto;
 }
 .season {
     border-radius: 0 0 calc(.25rem - 1px) calc(.25rem - 1px);

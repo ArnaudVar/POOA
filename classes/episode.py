@@ -4,7 +4,7 @@ from classes.media import Media
 
 class Episode(Media):
 
-    def __init__(self,  name, description, cast, grade, image, id_serie, num_season, num_episode, release):
+    def __init__(self, id,  name, description, cast, grade, image, id_serie, num_season, num_episode, release):
         Media.__init__(self, name, description, grade, image)
 
         self._id_serie = id_serie
@@ -12,7 +12,7 @@ class Episode(Media):
         self.num_episode = num_episode
         self.release = release
         self.cast = cast
-        self._name=f"S{num_season}E{num_episode}"
+        self._id=f"S{num_season}E{num_episode}"
 
     def __repr__(self):
         return self.name
