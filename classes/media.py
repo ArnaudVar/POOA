@@ -1,6 +1,5 @@
 from classes.Exception import SetterException
 
-
 class Media:
 
     def __init__(self, name, description, grade, image):
