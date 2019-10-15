@@ -9,10 +9,14 @@ from flask_login import logout_user
 from flask_login import login_required
 from werkzeug.urls import url_parse
 from classes.Serie import Serie
+from classes.movie import Movie
 from datetime import datetime
 
 
 api_key = "11893590e2d73c103c840153c0daa770"
+base_url_serie = "https://api.themoviedb.org/3/tv/"
+base_url_movie = "https://api.themoviedb.org/3/movie/"
+base_url_end = f"?api_key={api_key}&language=en-US"
 tv_g = requests.get(f"http://api.themoviedb.org/3/genre/tv/list?api_key={api_key}&language=en-US")
 tv_genres = tv_g.json()['genres']
 movie_g = requests.get(f"http://api.themoviedb.org/3/genre/movie/list?api_key={api_key}&language=en-US")
@@ -80,6 +84,18 @@ def serie(id):
                 serie.selected_episode = user_serie.split('x')[1]
     return render_template('serie.html', serie=serie, user=current_user)
 
+
+@app.route('/movie/<id>')
+@login_required
+def movie(id):
+    m = requests.get(
+        f"https://api.themoviedb.org/3/movie/{id}?api_key={api_key}&language=en-US")
+    moviejson = m.json()
+    movie = Movie(id=moviejson['id'], name=moviejson['title'], description=moviejson['overview'], grade=moviejson['vote_average'],
+                  image=moviejson['poster_path'], genre=moviejson['genres'][0]['name'], date=moviejson['release_date'])
+    return render_template('movie.html', movie=movie, user=current_user)
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -133,23 +149,33 @@ def reset_password(token):
     return render_template('reset_password.html', form=form)
 
 
-@app.route('/add/<id>')
+@app.route('/add_serie/<id>')
 def add_serie(id):
     current_user.add_serie(id)
     return ('', 204)
 
 
-@app.route('/remove/<id>')
+@app.route('/remove_serie/<id>')
 def remove_serie(id):
     current_user.remove_serie(id)
-    return('',204)
+    return ('', 204)
+
+
+@app.route('/add_movie/<id>')
+def add_movie(id):
+    current_user.add_movie(id)
+    return ('', 204)
+
+
+@app.route('/remove_movie/<id>')
+def remove_movie(id):
+    current_user.remove_movie(id)
+    return ('', 204)
 
 
 @app.route('/myseries/<user_id>')
 @login_required
 def myserie(user_id):
-    base_url_start = "https://api.themoviedb.org/3/tv/"
-    base_url_end = f"?api_key={api_key}&language=en-US"
     u = User.query.get(user_id)
     list_series = u.list_serie()
     list_serie_rendered = []
@@ -159,10 +185,31 @@ def myserie(user_id):
     else:
         for tvshow in list_series:
             nb_series+=1
-            r = requests.get(f"{base_url_start}{tvshow[0]}{base_url_end}").json()
+            r = requests.get(f"{base_url_serie}{tvshow}{base_url_end}").json()
             list_serie_rendered.append(Serie(r['id'],r['name'], r['overview'], r['vote_average'], r['genres'], r['poster_path'], {}, len(r['seasons']), r['last_episode_to_air'], ''))
     return render_template('mySeries.html', title='MySeries', list_series=list_serie_rendered, nb_series=nb_series,
                            tv_genres=tv_genres, movie_genres=movie_genres)
+
+
+@app.route('/mymovies/<user_id>')
+@login_required
+def mymovies(user_id):
+    u = User.query.get(user_id)
+    list_movies = u.list_movie()
+    list_movies_rendered = []
+    nb_movies = 0
+    print(list_movies)
+    if list_movies == "The user doesn't have any movie":
+        list_movies_rendered = list_movies
+    else:
+        for movie in list_movies:
+            nb_movies+=1
+            r = requests.get(f"{base_url_movie}{movie}{base_url_end}").json()
+            list_movies_rendered.append(Movie(id=r['id'], name=r['title'], description=r['overview'],
+                                              grade=r['vote_average'], image=r['poster_path'],
+                                              genre=r['genres'][0]['name'], date=r['release_date']))
+    return  render_template('myMovies.html', title='MyMovies', list_movies=list_movies_rendered, nb_movies=nb_movies,
+                            tv_genre=tv_genres, movie_genres=movie_genres)
 
 
 @app.route('/search2/<string>/<page>')

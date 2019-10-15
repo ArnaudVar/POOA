@@ -3,6 +3,7 @@ from classes.media import Media
 import requests
 from classes.episode import Episode
 
+
 class Serie(Media):
     """
     Cette classe permet de rassembler les différentes informations sur les séries

@@ -5,7 +5,6 @@ import jwt
 from time import time
 
 
-
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
@@ -14,6 +13,7 @@ class User(UserMixin, db.Model):
     surname = db.Column(db.String(64))
     password_hash = db.Column(db.String(128))
     _series = db.Column(db.Text())
+    _movies = db.Column(db.Text())
 
     def __repr__(self):
         return f"Username : {self.username}, Name : {self.name}, Surname : {self.surname}, Email : {self.email}," \
@@ -25,7 +25,14 @@ class User(UserMixin, db.Model):
     def _get_series(self):
         return self._series
 
+    def _set_movies(self, movies):
+        self._movies = movies
+
+    def _get_movies(self):
+        return self._movies
+
     series = property(_get_series,_set_series)
+    movies = property(_get_movies,_set_movies)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -35,19 +42,37 @@ class User(UserMixin, db.Model):
 
     def list_serie(self):
         # Le format du texte est sous la forme {idserie}x{Snum_saisonEnum_episode}-{idserie}x{Snum_saisonEnum_episode} .
-        # Renvoie une liste de couple (id serie, Snum_saisonEnum_episode)
-        if self.series is not None :
+        # Renvoie une liste de id_serie
+        if self.series is not None and self.movies != '':
             serie_episode_list = self.series.split('-')
             serie_list = []
-            for serie_episode in serie_episode_list:
-                serie_list.append((serie_episode.split('x')[0],serie_episode.split('x')[1]))
+            for serie in serie_episode_list:
+                serie_list.append(serie.split('x')[0])
             return serie_list
         else :
             return "The user doesn't have any series"
 
+    def list_movie(self):
+        #Le format du texte est sous la forme {idmovie}-{idmovie}
+        #Renvoie une liste de idmovie
+        if self.movies is not None and self.movies != '':
+            moviestring = self.movies.split('-')
+            movie_list = []
+            for movie in moviestring:
+                movie_list.append(movie)
+            return movie_list
+        else:
+            return "The user doesn't have any movie"
+
     def is_in_series(self,id):
         db.session.commit()
-        return(self.series is not None and str(id) in self.series)
+        list_serie = self.list_serie()
+        return self.series is not None and str(id) in list_serie
+
+    def has_movie(self,id):
+        db.session.commit()
+        list_movie = self.list_movie()
+        return self.movies is not None and str(id) in list_movie
 
     def is_after(self, episode, serie):
         if str(serie) not in self.series:
@@ -58,9 +83,7 @@ class User(UserMixin, db.Model):
                 if int(serie_string.split('x')[0]) == serie :
                     code = serie_string.split('x')[1]
                     code_last = code.split('E')
-            return(int(code_last[0].split('S')[1]) > episode.num_season or (int(code_last[0].split('S')[1]) == episode.num_season and int(code_last[1]) < episode.num_episode) )
-
-
+            return int(code_last[0].split('S')[1]) > episode.num_season or (int(code_last[0].split('S')[1]) == episode.num_season and int(code_last[1]) < episode.num_episode)
 
     def view_episode(self, episode, serie):
         user_series = self.series.split('-')
@@ -73,23 +96,50 @@ class User(UserMixin, db.Model):
                 db.session.commit()
 
     def add_serie(self, id_serie):
-        if self.series is None or self.series == '':
-            self._series = f"{id_serie}xS1E1"
-        else:
-            self._series += f"-{id_serie}xS1E1"
-        db.session.commit()
+        list_serie = self.list_serie()
+        if id not in list_serie:
+            if self.series is None or self.series == '':
+                self._series = f"{id_serie}xS1E1"
+            else:
+                self._series += f"-{id_serie}xS1E1"
+            db.session.commit()
 
     def remove_serie(self,id_serie):
         string_series = self._series.split('-')
+        print(string_series)
         for i, string_serie in enumerate(string_series):
             split_serie = string_serie.split('x')
             if split_serie[0] == str(id_serie):
                 if i == 0 :
-                    self._series = self._series.replace(string_serie+'-','')
+                    if len(string_series) == 1:
+                        self._series = self._series.replace(string_serie, '')
+                    else:
+                        self._series = self._series.replace(string_serie+'-','')
                 else :
                     self._series = self._series.replace('-'+string_serie,'')
-                print(self._series)
         db.session.commit()
+
+    def add_movie(self, id_movie):
+        list_movie = self.list_movie()
+        if id_movie not in list_movie:
+            if self.movies is None or self.movies == '':
+                self._movies = f"{id_movie}"
+            else:
+                self._movies += f"-{id_movie}"
+            db.session.commit()
+
+    def remove_movie(self, id_movie):
+        list_movie = self.list_movie()
+        if id_movie in list_movie:
+            i = list_movie.index(id_movie)
+            if i == 0:
+                if len(list_movie) == 1:
+                    self._movies = self._movies.replace(str(id_movie) , '')
+                else:
+                    self._movies = self._movies.replace(str(id_movie)+'-','')
+            else:
+                self._movies = self._movies.replace('-'+str(id_movie),'')
+            db.session.commit()
 
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
