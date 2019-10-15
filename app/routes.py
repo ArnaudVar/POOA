@@ -1,5 +1,6 @@
 from flask import render_template, redirect, url_for, flash, request, g
 import requests
+from app.api import Api
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm, SearchForm
 from app.mail import send_password_reset_email
@@ -26,16 +27,18 @@ movie_genres = movie_g.json()['genres']
 logo_nom_source = "../static/assets/LogoNom.png"
 logo_source = "../static/assets/Logo.png"
 
+
 @app.route('/')
 @app.route('/home')
 @login_required
 def home():
-    r = requests.get("https://api.themoviedb.org/3/tv/popular?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
-    suggestions = r.json()['results']
-    selection = []
+    suggestions_serie, suggestions_movie = Api.get_popular()
+    selection_serie, selection_movie = [], []
     for i in range(12):
-        selection.append(suggestions[i])
-    return render_template('home.html', title='Home', suggestions=selection, nombre_series=12,
+        selection_serie.append(suggestions_serie[i])
+        selection_movie.append(suggestions_movie[i])
+    return render_template('home.html', title='Home', suggestions_serie=selection_serie,
+                           suggestions_movie=selection_movie, nombre_series=12,
                            tv_genres=tv_genres, movie_genres=movie_genres)
 
 
@@ -66,19 +69,7 @@ def logout():
 @app.route('/serie/<id>')
 @login_required
 def serie(id):
-    s = requests.get(
-        "https://api.themoviedb.org/3/tv/" + str(id) + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
-    seriejson = s.json()
-    if seriejson['next_episode_to_air']:
-        serie = Serie(seriejson['id'], seriejson['name'], seriejson['overview'], seriejson['vote_average'],
-                      seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']),
-                      seriejson['last_episode_to_air'], seriejson['next_episode_to_air']['air_date'])
-    else:
-        serie = Serie(seriejson['id'], seriejson['name'], seriejson['overview'], seriejson['vote_average'],
-                      seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']),
-                      seriejson['last_episode_to_air'], '')
-    for season in seriejson['seasons']:
-        serie.seasons[season['season_number']] = season['episode_count']
+    serie = Api.get_serie(id)
     if current_user.is_in_series(id) :
         user_series = current_user.series.split('-')
         for user_serie in user_series :
@@ -90,11 +81,7 @@ def serie(id):
 @app.route('/movie/<id>')
 @login_required
 def movie(id):
-    m = requests.get(
-        f"https://api.themoviedb.org/3/movie/{id}?api_key={api_key}&language=en-US")
-    moviejson = m.json()
-    movie = Movie(id=moviejson['id'], name=moviejson['title'], description=moviejson['overview'], grade=moviejson['vote_average'],
-                  image=moviejson['poster_path'], genre=moviejson['genres'][0]['name'], date=moviejson['release_date'])
+    movie = Api.get_movie(id)
     return render_template('movie.html', movie=movie, user=current_user)
 
 
