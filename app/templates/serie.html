@@ -55,9 +55,9 @@
 <div class="d-flex flex-row justify-content-between">
      <div class="card episode m-3">
         <div class="titre-episode card-header d-flex flex-row justify-content-between">
-            {{serie.get_episode.name}}
+            {{ serie.get_episode.name }}
             {% if user.is_in_series(serie.id) %}
-            {% if user.is_after(serie.get_episode, serie.id) %}
+            {% if user.is_after(serie.get_episode.num_season, serie.get_episode.num_episode, serie.id) %}
             <a href="/serie/{{serie.id}}/season/{{serie.get_episode.num_season}}/episode/{{serie.get_episode.num_episode}}/view" class="btn bton-dark">
                 <i class="fa fa-eye-slash">&nbsp; Not viewed</i>
             </a>
