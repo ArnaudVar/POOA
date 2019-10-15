@@ -52,7 +52,7 @@
 </nav>
 {% endblock %}
 {% block content %}
-<div class="d-flex flex-row">
+<div class="d-flex flex-row justify-content-between">
      <div class="card episode m-3">
         <div class="titre-episode card-header d-flex flex-row justify-content-between">
             {{serie.get_episode.name}}
@@ -69,7 +69,12 @@
             {% endif %}
         </div>
         <div class="card-body d-flex flex-row justify-content-between">
+            {% if serie.get_episode.image == None %}
+            <img class="rounded im-episode" src="{{url_for('static', filename='assets/LogoNom.png') }}">
+            {% else %}
             <img class="rounded im-episode" src="https://image.tmdb.org/t/p/w500{{serie.get_episode.image}}">
+            {% endif %}
+
             <div class="m-2">
                 {{serie.get_episode.description}}
             </div>
