@@ -11,6 +11,8 @@ from werkzeug.urls import url_parse
 from classes.Serie import Serie
 from classes.movie import Movie
 from datetime import datetime
+import tkinter
+from tkinter import messagebox
 
 
 api_key = "11893590e2d73c103c840153c0daa770"
@@ -152,25 +154,25 @@ def reset_password(token):
 @app.route('/add_serie/<id>')
 def add_serie(id):
     current_user.add_serie(id)
-    return ('', 204)
-
+    return(serie(id))
 
 @app.route('/remove_serie/<id>')
 def remove_serie(id):
     current_user.remove_serie(id)
-    return ('', 204)
+    return(serie(id))
+
 
 
 @app.route('/add_movie/<id>')
 def add_movie(id):
     current_user.add_movie(id)
-    return ('', 204)
+    return (movie(id))
 
 
 @app.route('/remove_movie/<id>')
 def remove_movie(id):
     current_user.remove_movie(id)
-    return ('', 204)
+    return (movie(id))
 
 
 @app.route('/myseries/<user_id>')
@@ -287,4 +289,4 @@ def select_episode(id, season, episode):
 def next_episode(id, season, episode):
     string_episode = 'S' + str(season) + 'E' + str(episode)
     current_user.view_episode(string_episode, id)
-    return('',204)
+    return(serie(id))

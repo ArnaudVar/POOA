@@ -74,7 +74,7 @@ class User(UserMixin, db.Model):
         list_movie = self.list_movie()
         return self.movies is not None and str(id) in list_movie
 
-    def is_after(self, episode, serie):
+    def is_after(self, season, episode, serie):
         if str(serie) not in self.series:
             return True
         else :
@@ -83,7 +83,9 @@ class User(UserMixin, db.Model):
                 if int(serie_string.split('x')[0]) == serie :
                     code = serie_string.split('x')[1]
                     code_last = code.split('E')
-            return int(code_last[0].split('S')[1]) > episode.num_season or (int(code_last[0].split('S')[1]) == episode.num_season and int(code_last[1]) < episode.num_episode)
+            return(int(code_last[0].split('S')[1]) > season or (int(code_last[0].split('S')[1]) == season and int(code_last[1]) < episode) )
+
+
 
     def view_episode(self, episode, serie):
         user_series = self.series.split('-')
@@ -91,7 +93,6 @@ class User(UserMixin, db.Model):
             if userserie.split('x')[0] == str(serie) :
                 last_episode_watched = userserie.split('x')[1]
                 new_series = self.series.replace(userserie, userserie.replace(last_episode_watched, episode))
-                print('new',new_series)
                 self._set_series(new_series)
                 db.session.commit()
 

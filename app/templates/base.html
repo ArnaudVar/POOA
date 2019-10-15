@@ -11,6 +11,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/side.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/head.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/serie.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/home.css') }}">
 </head>
 <body>
 
@@ -29,7 +30,7 @@
                 </form>
             {% endif %}
         </div>
-        <img src="../static/assets/LogoNom.png" height=90 width=auto class="m-2 center">
+        <img src="{{url_for('static', filename='assets/LogoNom.png') }}" height=90 width=auto class="m-2 center">
         <a href="/logout">
             <button class="btn btn-default">
                 <div>
@@ -41,7 +42,7 @@
     </div>
 </nav>
 {% endblock %}
-<div class="d-flex flex-row">
+<div class="d-flex flex-row justify-content-between">
     <nav id="sidebar">
         <ul class="list-unstyled components">
             <li class="active">
