@@ -55,10 +55,10 @@
 <div class="d-flex flex-row justify-content-between">
      <div class="card episode m-3">
         <div class="titre-episode card-header d-flex flex-row justify-content-between">
-            {{ serie.get_episode.name }}
+            {{ episode.name }}
             {% if user.is_in_series(serie.id) %}
-            {% if user.is_after(serie.get_episode.num_season, serie.get_episode.num_episode, serie.id) %}
-            <a href="/serie/{{serie.id}}/season/{{serie.get_episode.num_season}}/episode/{{serie.get_episode.num_episode}}/view" class="btn bton-dark">
+            {% if user.is_after(episode.num_season, episode.num_episode, serie.id) %}
+            <a href="/serie/{{serie.id}}/season/{{episode.num_season}}/episode/{{episode.num_episode}}/view" class="btn bton-dark">
                 <i class="fa fa-eye-slash">&nbsp; Not viewed</i>
             </a>
             {% else %}
@@ -69,14 +69,14 @@
             {% endif %}
         </div>
         <div class="card-body d-flex flex-row justify-content-between">
-            {% if serie.get_episode.image == None %}
+            {% if episode.image == None %}
             <img class="rounded im-episode" src="{{url_for('static', filename='assets/LogoNom.png') }}">
             {% else %}
-            <img class="rounded im-episode" src="https://image.tmdb.org/t/p/w500{{serie.get_episode.image}}">
+            <img class="rounded im-episode" src="https://image.tmdb.org/t/p/w500{{episode.image}}">
             {% endif %}
 
             <div class="m-2">
-                {{serie.get_episode.description}}
+                {{episode.description}}
             </div>
         </div>
     </div>

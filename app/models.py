@@ -112,7 +112,6 @@ class User(UserMixin, db.Model):
 
     def remove_serie(self,id_serie):
         string_series = self._series.split('-')
-        print(string_series)
         for i, string_serie in enumerate(string_series):
             split_serie = string_serie.split('x')
             if split_serie[0] == str(id_serie):
