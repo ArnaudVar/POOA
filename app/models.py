@@ -105,10 +105,7 @@ class User(UserMixin, db.Model):
 
     def add_serie(self, id_serie):
         list_serie = self.list_serie()
-        print(list_serie)
-        print(id_serie)
         if id_serie not in list_serie:
-            print(self.series)
             if self.series is None or self.series == '':
                 self._series = f"{id_serie}xS1E1"
             else:
@@ -117,7 +114,6 @@ class User(UserMixin, db.Model):
 
     def remove_serie(self,id_serie):
         string_series = self._series.split('-')
-        print(string_series)
         for i, string_serie in enumerate(string_series):
             split_serie = string_serie.split('x')
             if split_serie[0] == str(id_serie):
