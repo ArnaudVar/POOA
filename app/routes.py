@@ -269,7 +269,8 @@ def select_episode(id, season, episode):
     for seasonz in seriejson['seasons']:
         serie.seasons[seasonz['season_number']] = seasonz['episode_count']
 
-    serie.selected_episode = 'S' + str(season) + 'E' + str(episode)
+    serie.set_selected_episode(season, episode)
+    print('selected', serie.selected_episode)
     return render_template('serie.html', serie=serie, user=current_user)
 
 @app.route('/serie/<id>/season/<season>/episode/<episode>/view')
