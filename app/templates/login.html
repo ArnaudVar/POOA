@@ -11,6 +11,15 @@
     </head>
     <body>
         <div class="h-100 login">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <ul>
+                    {% for message in messages %}
+                        <div class="alert alert-info" role="alert">{{ message }}</div>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
             <h1 class="pt-5">Sign in to SerieGenda !</h1>
             <div class="w-100 d-flex flex-row justify-content-center">
                 <form action="" method="post" novalidate class="w-50 login-input">
