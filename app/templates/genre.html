@@ -214,7 +214,7 @@
                                         {% for j in range(4) %}
                                             {% if 4*i + j < (list_medias| length) %}
                                                 <div class="col justify-content-center">
-                                                    <div class="card-header name">
+                                                    <div class="card-header name genre">
                                                         {% if media == 'tv' %}
                                                             {{list_medias[4*i+j]['name']}}
                                                         {% else %}
@@ -222,7 +222,7 @@
                                                         {% endif %}
                                                     </div>
                                                     <div class="p-0 card-body serie justify-content-center">
-                                                        <a class="w-100 h-100" href="/serie/{{list_medias[4*i+j]['id']}}">
+                                                        <a class="w-100 h-100" href="/{{media}}/{{list_medias[4*i+j]['id']}}">
                                                             <button class="btn btn-default btn-circle justify-content-center">
                                                                 <i class="fa fa-fw fa-plus"></i>
                                                             </button>

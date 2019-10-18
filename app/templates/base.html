@@ -30,7 +30,7 @@
                 </form>
             {% endif %}
         </div>
-        <img src="{{url_for('static', filename='assets/LogoNom.png') }}" height=90 width=auto class="m-2 center">
+        <img src="{{url_for('static', filename='assets/LogoNom.png') }}" height=90 width=auto class="center">
         <a href="/logout">
             <button class="btn btn-default">
                 <div>
@@ -52,7 +52,7 @@
                 <a href="/myseries/{{current_user.id}}"><i class="fas fa-video" ></i>&nbsp; MY SERIES</a>
             </li>
             <li class="active">
-                <a><i class="fas fa-film"></i>&nbsp; MY MOVIES</a>
+                <a href="/mymovies/{{current_user.id}}"><i class="fas fa-film"></i>&nbsp; MY MOVIES</a>
             </li>
             <li class="active">
                 <a><i class="fa fa-star"></i>&nbsp; BEST SERIES</a>

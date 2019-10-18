@@ -90,6 +90,12 @@ a, a:hover, a:focus {
 #genreSubmenu {
     background: #5e6164;
 }
+
+#genreSubmenu2 {
+    background: #5e6164;
+}
+
+
 ul ul a {
     font-size: 0.9em !important;
     padding-left: 30px !important;

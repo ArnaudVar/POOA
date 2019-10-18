@@ -1,6 +1,8 @@
 from classes.Exception import SetterException, AttributeException
 import requests
 from classes.episode import Episode
+from app.api import Api
+
 
 class Season :
     """
@@ -26,7 +28,7 @@ class Season :
         self._listEpisode = listEpisodes
         self.grade = grade
         self._image = image
-        self.selected_episode = self.get_selected_episode(1)
+        self.selected_episode = Api.get_episode(self.id_serie, self.season_number, 1)
 
     def numberEpisodePlanned(self):
         """
@@ -87,11 +89,6 @@ class Season :
 
         raise SetterException("l'attribu id de la classe Season n'est pas modifiable")
 
-    def get_selected_episode(self, i):
-        request_episode = requests.get("https://api.themoviedb.org/3/tv/" + str(self.id_serie)+"/season/"+ str(self.season_number) +"/episode/" + str(i) + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
-        episode_json = request_episode.json()
-        episode = Episode(episode_json['name'], episode_json["overview"], episode_json["guest_stars"], episode_json["vote_average"], episode_json["still_path"], self.id_serie, self.season_number, i, episode_json["air_date"])
-        return episode
     id = property(_get_id, _set_id)
     listEpisode = property(_get_listEpisode, _set_listEpisode)
 
