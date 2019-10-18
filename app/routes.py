@@ -40,11 +40,15 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
-        if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
+        if user is None :
+            app.logger.info(msg='Invalid Username !')
+            return redirect(url_for('login'))
+        elif not user.check_password(form.password.data):
+            app.logger.info(msg='Invalid Password !')
             return redirect(url_for('login'))
         login_user(user, remember = form.remember_me.data)
         next_page = request.args.get('next')
+        app.logger.info(msg='Successful Login !')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('home')
         return redirect(next_page)
@@ -54,6 +58,7 @@ def login():
 @app.route('/logout')
 def logout():
     logout_user()
+    app.logger.info(msg='Successful Logout !')
     return redirect(url_for('login'))
 
 
@@ -80,6 +85,7 @@ def serie(id):
                 serie.selected_episode = user_serie.split('x')[1]
     return render_template('serie.html', serie=serie, user=current_user)
 
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -90,7 +96,7 @@ def register():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash('Congratulations, you are now a registered user!')
+        app.logger.info(msg='Successful registry')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form, src = logo_source)
 
