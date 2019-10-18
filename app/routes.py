@@ -231,9 +231,10 @@ def genre(media, genre, page):
 
 @app.route('/serie/<id>/season/<season>/episode/<episode>')
 def select_episode(id, season, episode):
-    Api.get_serie(id)
+    serie = Api.get_serie(id)
     serie.selected_episode = 'S' + str(season) + 'E' + str(episode)
-    return render_template('serie.html', serie=serie, user=current_user)
+    episode = serie.get_episode
+    return render_template('serie.html', serie=serie, user=current_user, episode=episode)
 
 @app.route('/serie/<id>/season/<season>/episode/<episode>/view')
 def next_episode(id, season, episode):

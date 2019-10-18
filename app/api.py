@@ -15,7 +15,7 @@ class Api:
         for x in r['genres']:
             genre_list.append(x['name'])
         return Movie(id=r['id'], name=r['title'], description=r['overview'], grade=r['vote_average'],
-                     image=r['poster_path'], genres=genre_list, date=r['release_date'])
+                     image=r['poster_path'], genre=genre_list, date=r['release_date'])
 
     @staticmethod
     def get_serie(id):
