@@ -75,14 +75,14 @@ def serie(id):
         for user_serie in user_series :
             if user_serie.split('x')[0] == str(id) :
                 serie.selected_episode = user_serie.split('x')[1]
-    return render_template('serie.html', serie=serie, user=current_user)
+    return render_template('serie.html', serie=serie, user=current_user,tv_genres=tv_genres, movie_genres=movie_genres)
 
 
 @app.route('/movie/<id>')
 @login_required
 def movie(id):
     movie = Api.get_movie(id)
-    return render_template('movie.html', movie=movie, user=current_user)
+    return render_template('movie.html', movie=movie, user=current_user, tv_genres=tv_genres, movie_genres=movie_genres)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -198,7 +198,7 @@ def mymovies(user_id):
                                               grade=r['vote_average'], image=r['poster_path'],
                                               genre=r['genres'][0]['name'], date=r['release_date']))
     return  render_template('myMovies.html', title='MyMovies', list_movies=list_movies_rendered, nb_movies=nb_movies,
-                            tv_genre=tv_genres, movie_genres=movie_genres)
+                            tv_genres=tv_genres, movie_genres=movie_genres)
 
 
 @app.route('/search2/<string>/<page>')
@@ -277,3 +277,20 @@ def next_episode(id, season, episode):
     string_episode = 'S' + str(season) + 'E' + str(episode)
     current_user.view_episode(string_episode, id)
     return(serie(id))
+
+@app.route('/serie/<id>/rate/i')
+def rate_serie(id,i):
+    current_user.grade('serie',id, float(i*2))
+
+@app.route('/movie/<id>/rate/i')
+def rate_movie(id,i):
+    current_user.grade('movie',id, float(i*2))
+
+@app.route('/serie/<id>/post/grade', methods=['POST'])
+def post_series_grade(id):
+    grade = float(current_user.get_grade('serie',id))
+    requests.post("https://api.themoviedb.org/3/tv/" + str(id)+'/rating' + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US", data = { "value" : grade})
+
+
+
+

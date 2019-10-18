@@ -2,63 +2,60 @@
 {% block header %}
 <nav class="w-100 navbar navbar-expand-lg">
     <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
-        <div class="d-flex flex-row">
-            <div class="ml-3">
-                <div class="rating">
-                    <input type="radio" id="star10" name="rating" value="10"/><label for="star10" title="Rocks!">5
-                    stars</label>
-                    <input type="radio" id="star9" name="rating" value="9"/><label for="star9" title="Rocks!">4
-                    stars</label>
-                    <input type="radio" id="star8" name="rating" value="8"/><label for="star8" title="Pretty good">3
-                    stars</label>
-                    <input type="radio" id="star7" name="rating" value="7"/><label for="star7" title="Pretty good">2
-                    stars</label>
-                    <input type="radio" id="star6" name="rating" value="6"/><label for="star6" title="Meh">1
-                    star</label>
-                </div>
+        <div class="rate">
+            <input type="radio" id="star5" name="rate" value="5"/>
+            <label for="star5" title="text">5 stars</label>
+            <input type="radio" id="star4" name="rate" value="4"/>
+            <label for="star4" title="text">4 stars</label>
+            <input type="radio" id="star3" name="rate" value="3"/>
+            <label for="star3" title="text">3 stars</label>
+            <input type="radio" id="star2" name="rate" value="2"/>
+            <label for="star2" title="text">2 stars</label>
+            <input type="radio" id="star1" name="rate" value="1"/>
+            <label for="star1" title="text">1 star</label>
+        </div>
+    <div class="name">
+        <h1>{{serie.name}}</h1>
+    </div>
+    <div>
+        <button class="btn btn-warning mr-3">
+            <div>
+                Rate
+                <i class="fa fa-check"></i>
             </div>
-        </div>
-        <div class="name">
-            <h1>{{serie.name}}</h1>
-        </div>
-        <div>
-            <button class="btn btn-warning mr-3">
+        </button>
+        {% if user.series == None or not(user.is_in_series(serie.id)) %}
+        <a href="/add_serie/{{serie.id}}">
+            <button class="btn btn-success add">
                 <div>
-                    Rate
-                    <i class="fa fa-check"></i>
+                    Add
+                    <i class="fa fa-plus"></i>
                 </div>
             </button>
-            {% if user.series == None or not(user.is_in_series(serie.id)) %}
-            <a href="/add_serie/{{serie.id}}">
-                <button class="btn btn-success add">
-                    <div>
-                        Add
-                        <i class="fa fa-plus"></i>
-                    </div>
-                </button>
-            </a>
-            {% else %}
-            <a href="/remove_serie/{{serie.id}}">
-                <button class="btn btn-danger">
-                    <div>
-                        Remove
-                        <i class="fa fa-trash"></i>
-                    </div>
-                </button>
-            </a>
-            {% endif %}
-        </div>
+        </a>
+        {% else %}
+        <a href="/remove_serie/{{serie.id}}">
+            <button class="btn btn-danger">
+                <div>
+                    Remove
+                    <i class="fa fa-trash"></i>
+                </div>
+            </button>
+        </a>
+        {% endif %}
+    </div>
     </div>
 </nav>
 {% endblock %}
 {% block content %}
 <div class="d-flex flex-row justify-content-between">
-     <div class="card episode m-3">
+    <div class="card episode m-3">
         <div class="titre-episode card-header d-flex flex-row justify-content-between">
             {{ serie.get_episode.name }}
             {% if user.is_in_series(serie.id) %}
             {% if user.is_after(serie.get_episode.num_season, serie.get_episode.num_episode, serie.id) %}
-            <a href="/serie/{{serie.id}}/season/{{serie.get_episode.num_season}}/episode/{{serie.get_episode.num_episode}}/view" class="btn bton-dark">
+            <a href="/serie/{{serie.id}}/season/{{serie.get_episode.num_season}}/episode/{{serie.get_episode.num_episode}}/view"
+               class="btn bton-dark">
                 <i class="fa fa-eye-slash">&nbsp; Not viewed</i>
             </a>
             {% else %}

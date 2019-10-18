@@ -18,7 +18,7 @@ class Serie(Media):
         :param latest: dernier épisode sortie de la série
         :param date: date de diffusion du prochain épisode de la série
         """
-        Media.__init__(self,name,description,grade,image)
+        Media.__init__(self,name,description, grade, image)
         self._id = id
         self._genre = genre
         self.seasons_count = seasons_count
