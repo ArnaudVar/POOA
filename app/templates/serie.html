@@ -2,48 +2,56 @@
 {% block header %}
 <nav class="w-100 navbar navbar-expand-lg">
     <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
-        <div class="rate">
-            <input type="radio" id="star5" name="rate" value="5"/>
-            <label for="star5" title="text">5 stars</label>
-            <input type="radio" id="star4" name="rate" value="4"/>
-            <label for="star4" title="text">4 stars</label>
-            <input type="radio" id="star3" name="rate" value="3"/>
-            <label for="star3" title="text">3 stars</label>
-            <input type="radio" id="star2" name="rate" value="2"/>
-            <label for="star2" title="text">2 stars</label>
-            <input type="radio" id="star1" name="rate" value="1"/>
-            <label for="star1" title="text">1 star</label>
+        <div class="rating">
+            <a href="/rate/5/" title="Donner 5 étoiles">☆</a>
+            <a href="/rate/4" title="Donner 4 étoiles">☆</a>
+            <a href="/rate/3" title="Donner 3 étoiles">☆</a>
+            <a href="/rate/2" title="Donner 2 étoiles">☆</a>
+            <a href="/rate/1" title="Donner 1 étoile">☆</a>
         </div>
-    <div class="name">
-        <h1>{{serie.name}}</h1>
-    </div>
-    <div>
-        <button class="btn btn-warning mr-3">
-            <div>
-                Rate
-                <i class="fa fa-check"></i>
-            </div>
-        </button>
-        {% if user.series == None or not(user.is_in_series(serie.id)) %}
-        <a href="/add_serie/{{serie.id}}">
-            <button class="btn btn-success add">
-                <div>
-                    Add
-                    <i class="fa fa-plus"></i>
-                </div>
-            </button>
-        </a>
-        {% else %}
-        <a href="/remove_serie/{{serie.id}}">
-            <button class="btn btn-danger">
-                <div>
-                    Remove
-                    <i class="fa fa-trash"></i>
-                </div>
-            </button>
-        </a>
-        {% endif %}
-    </div>
+        <div class="name">
+            <h1>{{serie.name}}</h1>
+        </div>
+        <div>
+            {% if user.is_graded('serie', serie.id) %}
+            Rated : {{user.get_grade('serie', serie.id)}}
+            <a href="/serie/{{serie.id}}/unrate">
+                <button class="btn btn-info mr-3">
+                    Unrate
+                    <i class="fa fa-times"></i>
+                </button>
+            </a>
+
+            {% else %}
+            <a href="/serie/{{serie.id}}/post/grade">
+                <button class="btn btn-warning mr-3">
+                    Rate
+                    <i class="fa fa-clipboard"></i>
+                </button>
+            </a>
+            {% endif %}
+
+
+            {% if user.series == None or not(user.is_in_series(serie.id)) %}
+            <a href="/add_serie/{{serie.id}}">
+                <button class="btn btn-success add">
+                    <div>
+                        Add
+                        <i class="fa fa-plus"></i>
+                    </div>
+                </button>
+            </a>
+            {% else %}
+            <a href="/remove_serie/{{serie.id}}">
+                <button class="btn btn-danger">
+                    <div>
+                        Remove
+                        <i class="fa fa-trash"></i>
+                    </div>
+                </button>
+            </a>
+            {% endif %}
+        </div>
     </div>
 </nav>
 {% endblock %}

@@ -16,6 +16,7 @@ class User(UserMixin, db.Model):
     _movies = db.Column(db.Text())
     series_grades = db.Column(db.Text())
     movies_grades = db.Column(db.Text())
+    current_grade = db.Column(db.Float)
 
     def __repr__(self):
         return f"Username : {self.username}, Name : {self.name}, Surname : {self.surname}, Email : {self.email}," \
@@ -32,6 +33,7 @@ class User(UserMixin, db.Model):
 
     def _get_movies(self):
         return self._movies
+
 
     series = property(_get_series,_set_series)
     movies = property(_get_movies,_set_movies)
@@ -84,7 +86,6 @@ class User(UserMixin, db.Model):
                 return(serie_string.split('x')[1])
 
     def is_after(self, season, episode, serie):
-        print(episode,season)
         if str(serie) not in self.series:
             return True
         else :
@@ -150,22 +151,47 @@ class User(UserMixin, db.Model):
                 self._movies = self._movies.replace('-'+str(id_movie),'')
             db.session.commit()
 
-    def grade(self,id ,type, grade):
+    def update_grade(self, new_grade):
+        self.current_grade = new_grade
+        db.session.commit()
+
+    def grade(self, id ,type, grade):
         if type =='serie':
-            if len(self.series_grades) == 0 :
-                self.series_grades += str(id) + 'x' + str(grade)
+            if self.series_grades is None or self.series_grades == '' :
+                self.series_grades = str(id) + 'x' + str(grade)
             else :
                 self.series_grades += '-' + str(id) + 'x' + str(grade)
         else :
             if type == 'movie':
-                if len(self.movies_grades) == 0 :
-                    self.movies_grades += str(id) + 'x' + str(grade)
+                if self.movies_grades is None or self.movies_grades == '' :
+                    self.movies_grades = str(id) + 'x' + str(grade)
                 else :
                     self.movies_grades += '-' + str(id) + 'x' + str(grade)
         db.session.commit()
 
+    def unrate(self,type,id):
+        if type == 'serie':
+            grades = self.series_grades.split('-')
+            for i, grade in enumerate(grades) :
+                if grade.split('x')[0] == str(id):
+                    if i == 0 :
+                        self.series_grades = self.series_grades.replace(grade,'')
+                    else :
+                        self.series_grades = self.series_grades.replace('-'+ grade,'')
+        elif type == 'movie':
+            grades = self.movies_grades.split('-')
+            for i, grade in enumerate(grades) :
+                if grade.split('x')[0] == str(id):
+                    if i == 0 :
+                        self.series_grades = self.series_grades.replace(grade,'')
+                    else :
+                        self.series_grades = self.series_grades.replace('-'+ grade,'')
+        db.session.commit()
 
-    def is_graded(self,type, id):
+
+    def is_graded(self, type, id):
+        if self.series_grades is None :
+            return(False)
         if type == 'serie' :
             return(str(id) in self.series_grades)
         elif type == 'movie':
@@ -175,6 +201,7 @@ class User(UserMixin, db.Model):
 
     def get_grade(self, type, id):
         if type == 'serie' :
+            print(self.series_grades)
             grades = self.series_grades.split('-')
             for grade in grades :
                 if grade.split('x')[0] == str(id):

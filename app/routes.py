@@ -75,6 +75,7 @@ def serie(id):
         for user_serie in user_series :
             if user_serie.split('x')[0] == str(id) :
                 serie.selected_episode = user_serie.split('x')[1]
+    print(current_user.series_grades)
     return render_template('serie.html', serie=serie, user=current_user,tv_genres=tv_genres, movie_genres=movie_genres)
 
 
@@ -187,7 +188,6 @@ def mymovies(user_id):
     list_movies = u.list_movie()
     list_movies_rendered = []
     nb_movies = 0
-    print(list_movies)
     if list_movies == "The user doesn't have any movie":
         list_movies_rendered = list_movies
     else:
@@ -270,7 +270,6 @@ def select_episode(id, season, episode):
         serie.seasons[seasonz['season_number']] = seasonz['episode_count']
 
     serie.set_selected_episode(season, episode)
-    print('selected', serie.selected_episode)
     return render_template('serie.html', serie=serie, user=current_user)
 
 @app.route('/serie/<id>/season/<season>/episode/<episode>/view')
@@ -279,19 +278,24 @@ def next_episode(id, season, episode):
     current_user.view_episode(string_episode, id)
     return(serie(id))
 
-@app.route('/serie/<id>/rate/i')
-def rate_serie(id,i):
-    current_user.grade('serie',id, float(i*2))
+@app.route('/rate/<i>')
+def rate(i):
+    current_user.update_grade(float(2*int(i)))
+    return('',204)
 
-@app.route('/movie/<id>/rate/i')
-def rate_movie(id,i):
-    current_user.grade('movie',id, float(i*2))
 
-@app.route('/serie/<id>/post/grade', methods=['POST'])
+@app.route('/serie/<id>/post/grade')
 def post_series_grade(id):
-    grade = float(current_user.get_grade('serie',id))
-    requests.post("https://api.themoviedb.org/3/tv/" + str(id)+'/rating' + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US", data = { "value" : grade})
+    grade = current_user.current_grade
+    current_user.grade(id, 'serie', grade)
+    # requests.post("https://api.themoviedb.org/3/tv/" + str(id)+'/rating' + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US", data = { "value" : grade})
+    return(serie(id))
 
 
+@app.route('/serie/<id>/unrate')
+
+def unrate_serie(id):
+    current_user.unrate('serie', id)
+    return(serie(id))
 
 

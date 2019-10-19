@@ -5,6 +5,11 @@
     padding-left: 0px !important;
 }
 
+.nav-home {
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
 .logo {
     padding: 10px;
     min-width: 200px !important;
