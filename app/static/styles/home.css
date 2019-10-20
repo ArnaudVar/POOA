@@ -47,7 +47,7 @@ img {
     font-size: 12px;
     line-height: 1.42857;
     top: 150px;
-    right: 130px;
+    right: 120px;
 }
 
 .list {
@@ -63,17 +63,10 @@ img {
     color: white;
     padding-right: 0px;
     padding-left: 0px;
-    font-size: 20px;
-    font-family: 'Playfair Display', serif;
 }
 
 .search {
     max-width: 203px;
-}
-
-.list {
-    padding-left: 0px;
-    padding-right: 0px;
 }
 
 .genre {
@@ -98,32 +91,4 @@ img {
     top: 150px;
     right: 100px;
     width: 30%;
-}
-
-.movie-search:hover .btn-circle{
-    display: block;
-    position: absolute;
-    width: 50px;
-    height: 50px;
-    padding: 6px 0px;
-    border-radius: 15px;
-    text-align: center;
-    font-size: 12px;
-    line-height: 1.42857;
-    top: 150px;
-    right: 120px;
-}
-
-.serie-search:hover .btn-circle{
-    display: block;
-    position: absolute;
-    width: 50px;
-    height: 50px;
-    padding: 6px 0px;
-    border-radius: 15px;
-    text-align: center;
-    font-size: 12px;
-    line-height: 1.42857;
-    top: 150px;
-    right: 120px;
 }
