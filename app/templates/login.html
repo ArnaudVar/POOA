@@ -13,7 +13,7 @@
         <div class="h-100 login">
             {% with messages = get_flashed_messages() %}
                 {% if messages %}
-                    <ul>
+                    <ul class="pr-3">
                     {% for message in messages %}
                         <div class="alert alert-info" role="alert">{{ message }}</div>
                     {% endfor %}
