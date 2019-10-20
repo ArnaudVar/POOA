@@ -90,7 +90,7 @@ class User(UserMixin, db.Model):
                 if int(serie_string.split('x')[0]) == serie :
                     code = serie_string.split('x')[1]
                     code_last = code.split('E')
-            return(int(code_last[0].split('S')[1]) > season or (int(code_last[0].split('S')[1]) == season and int(code_last[1]) < episode) )
+            return(int(code_last[0].split('S')[1]) < season or (int(code_last[0].split('S')[1]) == season and int(code_last[1]) < episode) )
 
     def view_episode(self, episode, serie):
         user_series = self.series.split('-')

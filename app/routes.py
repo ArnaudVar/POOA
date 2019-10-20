@@ -35,6 +35,7 @@ def home():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    app.logger.info(msg='The user is logging in')
     if current_user.is_authenticated:
         return redirect(url_for('home'))
     form = LoginForm()
@@ -66,20 +67,30 @@ def logout():
 @login_required
 def serie(id):
     serie = Api.get_serie(id)
-    if current_user.is_in_series(id) :
-        user_series = current_user.series.split('-')
-        for user_serie in user_series :
-            if user_serie.split('x')[0] == str(id) :
-                serie.selected_episode = user_serie.split('x')[1]
-    episode = serie.get_episode
-    return render_template('serie.html', serie=serie, user=current_user, episode=episode)
+    if serie is None :
+        app.logger.info(msg=f'Incorrect Serie id')
+        return render_template('404.html')
+    else :
+        if current_user.is_in_series(id) :
+            user_series = current_user.series.split('-')
+            for user_serie in user_series :
+                if user_serie.split('x')[0] == str(id) :
+                    serie.selected_episode = user_serie.split('x')[1]
+        episode = serie.get_episode
+        app.logger.info(msg=f'Successful query for the Serie id={serie.id} page')
+        return render_template('serie.html', serie=serie, user=current_user, episode=episode)
 
 
 @app.route('/movie/<id>')
 @login_required
 def movie(id):
     movie = Api.get_movie(id)
-    return render_template('movie.html', movie=movie, user=current_user)
+    if movie is None :
+        app.logger.info(msg=f'Incorrect Movie id')
+        return render_template('404.html')
+    else :
+        app.logger.info(msg=f'Successful query for the Movie id={id} page')
+        return render_template('movie.html', movie=movie, user=current_user)
 
 
 
@@ -137,61 +148,78 @@ def reset_password(token):
 
 
 @app.route('/add_serie/<id>')
+@login_required
 def add_serie(id):
     current_user.add_serie(id)
-    return(serie(id))
+    app.logger.info(msg=f'Serie {id} successfully added')
+    return serie(id)
+
 
 @app.route('/remove_serie/<id>')
+@login_required
 def remove_serie(id):
     current_user.remove_serie(id)
-    return(serie(id))
+    app.logger.info(msg=f'Serie {id} successfully removed')
+    return serie(id)
 
 
 
 @app.route('/add_movie/<id>')
+@login_required
 def add_movie(id):
     current_user.add_movie(id)
+    app.logger.info(msg=f'Movie {id} successfully added')
     return (movie(id))
 
 
 @app.route('/remove_movie/<id>')
+@login_required
 def remove_movie(id):
     current_user.remove_movie(id)
+    app.logger.info(msg=f'Movie {id} successfully removed')
     return (movie(id))
 
 
-@app.route('/myseries/<user_id>')
+@app.route('/myseries')
 @login_required
-def myserie(user_id):
+def myserie():
+    user_id = current_user.id
     u = User.query.get(user_id)
     list_series = u.list_serie()
     list_serie_rendered = []
     nb_series = 0
     if list_series == "The user doesn't have any series":
         list_serie_rendered = list_series
+        app.logger.info(msg=f'MySeries page rendered without series')
     else:
         for tvshow in list_series:
             nb_series+=1
             serie = Api.get_serie(tvshow)
             list_serie_rendered.append(serie)
+        app.logger.info(msg=f'MySeries page rendered')
+        app.logger.info(msg=f'The series list has {nb_series} series')
     return render_template('mySeries.html', title='MySeries', list_series=list_serie_rendered, nb_series=nb_series,
                            tv_genres=tv_genres, movie_genres=movie_genres, user=current_user)
 
 
-@app.route('/mymovies/<user_id>')
+@app.route('/mymovies')
 @login_required
-def mymovies(user_id):
+def mymovies():
+    user_id = current_user.id
     u = User.query.get(user_id)
     list_movies = u.list_movie()
     list_movies_rendered = []
     nb_movies = 0
     if list_movies == "The user doesn't have any movie":
         list_movies_rendered = list_movies
+        app.logger.info(msg=f'MyMovies page rendered without movies')
     else:
         for movie in list_movies:
             nb_movies+=1
             m = Api.get_movie(movie)
             list_movies_rendered.append(m)
+        app.logger.info(msg=f'MyMovies page rendered')
+        app.logger.info(msg=f'The movies list has {nb_movies} movies')
     return  render_template('myMovies.html', title='MyMovies', list_movies=list_movies_rendered, nb_movies=nb_movies,
                             tv_genre=tv_genres, movie_genres=movie_genres)
 
@@ -200,6 +228,7 @@ def mymovies(user_id):
 @login_required
 def search2(string, page):
     list_series, list_movies, nb_pages = Api.search(string,page)
+    app.logger.info(msg=f'Search page {page} rendered for : {string}')
     return render_template('search.html', title='Search', list_series=list_series, tv_genres=tv_genres, movie_genres=movie_genres,
                            list_movies=list_movies, nb_pages=nb_pages, current_page=int(page), search=string)
 
@@ -231,19 +260,24 @@ def genre(media, genre, page):
             index_genre = i
     id_genre = list_genres[index_genre]['id']
     list_media, nb_pages = Api.discover(media, id_genre, page)
+    app.logger.info(msg=f'Genre request on : Genre = {genre}, Media = {media}, Page = {page}')
     return render_template('genre.html', genre=genre, list_medias=list_media, media=media,
-                           tv_genres=tv_genres, movie_genres=movie_genres, current_page=int(page), nb_pages = nb_pages)
+                           tv_genres=tv_genres, movie_genres=movie_genres, current_page=int(page), nb_pages=nb_pages)
 
 
 @app.route('/serie/<id>/season/<season>/episode/<episode>')
+@login_required
 def select_episode(id, season, episode):
     serie = Api.get_serie(id)
     serie.selected_episode = 'S' + str(season) + 'E' + str(episode)
     episode = serie.get_episode
+    app.logger.info(msg=f'Selected Episode : Serie = {id}, Season = {season}, episode = {episode.num_episode}')
     return render_template('serie.html', serie=serie, user=current_user, episode=episode)
 
 @app.route('/serie/<id>/season/<season>/episode/<episode>/view')
+@login_required
 def next_episode(id, season, episode):
     string_episode = 'S' + str(season) + 'E' + str(episode)
     current_user.view_episode(string_episode, id)
     return(serie(id))
+
