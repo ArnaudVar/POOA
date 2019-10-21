@@ -9,27 +9,33 @@ class Api:
 
     @staticmethod
     def get_movie(id):
-
         r = requests.get(f"{Api.base_url_start}movie/{id}{Api.base_url_end}").json()
-        genre_list = []
-        for x in r['genres']:
-            genre_list.append(x['name'])
-        return Movie(id=r['id'], name=r['title'], description=r['overview'], grade=r['vote_average'],
-                     image=r['poster_path'], genre=genre_list, date=r['release_date'])
+        try :
+            genre_list = []
+            for x in r['genres']:
+                genre_list.append(x['name'])
+            return Movie(id=r['id'], name=r['title'], description=r['overview'], grade=r['vote_average'],
+                         image=r['poster_path'], genre=genre_list, date=r['release_date'])
+        except :
+            movie = None
+            return movie
 
     @staticmethod
     def get_serie(id):
         seriejson = requests.get(f"{Api.base_url_start}tv/{id}{Api.base_url_end}").json()
-        if seriejson['next_episode_to_air']:
-            serie = Serie(seriejson['id'], seriejson['name'], seriejson['overview'], seriejson['vote_average'],
-                          seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']),
-                          seriejson['last_episode_to_air'], seriejson['next_episode_to_air']['air_date'])
-        else:
-            serie = Serie(seriejson['id'], seriejson['name'], seriejson['overview'], seriejson['vote_average'],
-                          seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']),
-                          seriejson['last_episode_to_air'], '')
-        for season in seriejson['seasons']:
-            serie.seasons[season['season_number']] = season['episode_count']
+        try :
+            if seriejson['next_episode_to_air']:
+                serie = Serie(seriejson['id'], seriejson['name'], seriejson['overview'], seriejson['vote_average'],
+                              seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']),
+                              seriejson['last_episode_to_air'], seriejson['next_episode_to_air']['air_date'])
+            else:
+                serie = Serie(seriejson['id'], seriejson['name'], seriejson['overview'], seriejson['vote_average'],
+                              seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']),
+                              seriejson['last_episode_to_air'], '')
+            for season in seriejson['seasons']:
+                serie.seasons[season['season_number']] = season['episode_count']
+        except :
+            serie = None
         return serie
 
     @staticmethod

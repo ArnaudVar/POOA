@@ -1,5 +1,4 @@
 from flask import render_template, redirect, url_for, flash, request, g
-import requests
 from app.api import Api
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm, SearchForm
@@ -9,21 +8,13 @@ from app.models import User
 from flask_login import logout_user
 from flask_login import login_required
 from werkzeug.urls import url_parse
-from classes.Serie import Serie
-from classes.movie import Movie
 from datetime import datetime
 import tkinter
 from tkinter import messagebox
 
 
-api_key = "11893590e2d73c103c840153c0daa770"
-base_url_serie = "https://api.themoviedb.org/3/tv/"
-base_url_movie = "https://api.themoviedb.org/3/movie/"
-base_url_end = f"?api_key={api_key}&language=en-US"
-tv_g = requests.get(f"http://api.themoviedb.org/3/genre/tv/list?api_key={api_key}&language=en-US")
-tv_genres = tv_g.json()['genres']
-movie_g = requests.get(f"http://api.themoviedb.org/3/genre/movie/list?api_key={api_key}&language=en-US")
-movie_genres = movie_g.json()['genres']
+tv_genres = Api.get_genre('tv')
+movie_genres = Api.get_genre('movie')
 logo_nom_source = "../static/assets/LogoNom.png"
 logo_source = "../static/assets/Logo.png"
 
@@ -44,16 +35,21 @@ def home():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    app.logger.info(msg='The user is logging in')
     if current_user.is_authenticated:
         return redirect(url_for('home'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
-        if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
+        if user is None :
+            app.logger.info(msg='Invalid Username !')
+            return redirect(url_for('login'))
+        elif not user.check_password(form.password.data):
+            app.logger.info(msg='Invalid Password !')
             return redirect(url_for('login'))
         login_user(user, remember = form.remember_me.data)
         next_page = request.args.get('next')
+        app.logger.info(msg='Successful Login !')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('home')
         return redirect(next_page)
@@ -63,6 +59,7 @@ def login():
 @app.route('/logout')
 def logout():
     logout_user()
+    app.logger.info(msg='Successful Logout !')
     return redirect(url_for('login'))
 
 
@@ -70,20 +67,31 @@ def logout():
 @login_required
 def serie(id):
     serie = Api.get_serie(id)
-    if current_user.is_in_series(id) :
-        user_series = current_user.series.split('-')
-        for user_serie in user_series :
-            if user_serie.split('x')[0] == str(id) :
-                serie.selected_episode = user_serie.split('x')[1]
-    print(current_user.series_grades)
-    return render_template('serie.html', serie=serie, user=current_user,tv_genres=tv_genres, movie_genres=movie_genres)
+    if serie is None :
+        app.logger.info(msg=f'Incorrect Serie id')
+        return render_template('404.html')
+    else :
+        if current_user.is_in_series(id) :
+            user_series = current_user.series.split('-')
+            for user_serie in user_series :
+                if user_serie.split('x')[0] == str(id) :
+                    serie.selected_episode = user_serie.split('x')[1]
+        episode = serie.get_episode
+        app.logger.info(msg=f'Successful query for the Serie id={serie.id} page')
+        return render_template('serie.html', serie=serie, user=current_user, episode=episode)
 
 
 @app.route('/movie/<id>')
 @login_required
 def movie(id):
     movie = Api.get_movie(id)
-    return render_template('movie.html', movie=movie, user=current_user, tv_genres=tv_genres, movie_genres=movie_genres)
+    if movie is None :
+        app.logger.info(msg=f'Incorrect Movie id')
+        return render_template('404.html')
+    else :
+        app.logger.info(msg=f'Successful query for the Movie id={id} page')
+        return render_template('movie.html', movie=movie, user=current_user)
+
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -96,7 +104,7 @@ def register():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash('Congratulations, you are now a registered user!')
+        app.logger.info(msg='Successful registry')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form, src = logo_source)
 
@@ -140,79 +148,87 @@ def reset_password(token):
 
 
 @app.route('/add_serie/<id>')
+@login_required
 def add_serie(id):
     current_user.add_serie(id)
-    return(serie(id))
+    app.logger.info(msg=f'Serie {id} successfully added')
+    return serie(id)
+
 
 @app.route('/remove_serie/<id>')
+@login_required
 def remove_serie(id):
     current_user.remove_serie(id)
-    return(serie(id))
+    app.logger.info(msg=f'Serie {id} successfully removed')
+    return serie(id)
 
 
 
 @app.route('/add_movie/<id>')
+@login_required
 def add_movie(id):
     current_user.add_movie(id)
+    app.logger.info(msg=f'Movie {id} successfully added')
     return (movie(id))
 
 
 @app.route('/remove_movie/<id>')
+@login_required
 def remove_movie(id):
     current_user.remove_movie(id)
+    app.logger.info(msg=f'Movie {id} successfully removed')
     return (movie(id))
 
 
-@app.route('/myseries/<user_id>')
+@app.route('/myseries')
 @login_required
-def myserie(user_id):
+def myserie():
+    user_id = current_user.id
     u = User.query.get(user_id)
     list_series = u.list_serie()
     list_serie_rendered = []
     nb_series = 0
     if list_series == "The user doesn't have any series":
         list_serie_rendered = list_series
+        app.logger.info(msg=f'MySeries page rendered without series')
     else:
         for tvshow in list_series:
             nb_series+=1
-            r = requests.get(f"{base_url_serie}{tvshow}{base_url_end}").json()
-            list_serie_rendered.append(Serie(r['id'],r['name'], r['overview'], r['vote_average'], r['genres'], r['poster_path'], {}, len(r['seasons']), r['last_episode_to_air'], ''))
+            serie = Api.get_serie(tvshow)
+            list_serie_rendered.append(serie)
+        app.logger.info(msg=f'MySeries page rendered')
+        app.logger.info(msg=f'The series list has {nb_series} series')
     return render_template('mySeries.html', title='MySeries', list_series=list_serie_rendered, nb_series=nb_series,
                            tv_genres=tv_genres, movie_genres=movie_genres, user=current_user)
 
 
-@app.route('/mymovies/<user_id>')
+@app.route('/mymovies')
 @login_required
-def mymovies(user_id):
+def mymovies():
+    user_id = current_user.id
     u = User.query.get(user_id)
     list_movies = u.list_movie()
     list_movies_rendered = []
     nb_movies = 0
     if list_movies == "The user doesn't have any movie":
         list_movies_rendered = list_movies
+        app.logger.info(msg=f'MyMovies page rendered without movies')
     else:
         for movie in list_movies:
             nb_movies+=1
-            r = requests.get(f"{base_url_movie}{movie}{base_url_end}").json()
-            list_movies_rendered.append(Movie(id=r['id'], name=r['title'], description=r['overview'],
-                                              grade=r['vote_average'], image=r['poster_path'],
-                                              genre=r['genres'][0]['name'], date=r['release_date']))
+            m = Api.get_movie(movie)
+            list_movies_rendered.append(m)
+        app.logger.info(msg=f'MyMovies page rendered')
+        app.logger.info(msg=f'The movies list has {nb_movies} movies')
     return  render_template('myMovies.html', title='MyMovies', list_movies=list_movies_rendered, nb_movies=nb_movies,
-                            tv_genres=tv_genres, movie_genres=movie_genres)
+                            tv_genre=tv_genres, movie_genres=movie_genres)
 
 
 @app.route('/search2/<string>/<page>')
 @login_required
 def search2(string, page):
-    base_url_tv = f"https://api.themoviedb.org/3/search/tv?query={string}&api_key={api_key}&" \
-                  f"language=en-US&page={page}&sort_by=popularity.desc"
-    base_url_movies = f"https://api.themoviedb.org/3/search/movie?query={string}&api_key={api_key}&" \
-                      f"language=en-US&page={page}&sort_by=popularity.desc"
-    r1 = requests.get(base_url_tv).json()
-    r2 = requests.get(base_url_movies).json()
-    list_series = r1['results']
-    list_movies = r2['results']
-    nb_pages = max(int(r1['total_pages']), int(r2['total_pages']))
+    list_series, list_movies, nb_pages = Api.search(string,page)
+    app.logger.info(msg=f'Search page {page} rendered for : {string}')
     return render_template('search.html', title='Search', list_series=list_series, tv_genres=tv_genres, movie_genres=movie_genres,
                            list_movies=list_movies, nb_pages=nb_pages, current_page=int(page), search=string)
 
@@ -235,67 +251,33 @@ def search():
 @app.route('/genre/<media>/<genre>/<page>')
 @login_required
 def genre(media, genre, page):
-    genres_url = f"https://api.themoviedb.org/3/genre/{media}/list?api_key={api_key}&language=en-US"
-    genres_request = requests.get(genres_url).json()
-    list_genres = genres_request['genres']
-    id_genre = -1
+    if media == 'movie' :
+        list_genres = movie_genres
+    elif media == 'tv' :
+        list_genres = tv_genres
     for i in range(len(list_genres)):
         if list_genres[i]['name'] == genre:
-            id_genre = i
-    id_genre = list_genres[id_genre]['id']
-    url = f"http://api.themoviedb.org/3/discover/{media}?api_key={api_key}" \
-          f"&with_genres={id_genre}&sort_by=popularity.desc&language=en-US&page={page}"
-    request = requests.get(url).json()
-    r = request['results']
-    nb_pages = int(request['total_pages'])
-    r = requests.get(url).json()['results']
-    return render_template('genre.html', genre=genre, list_medias=r, media=media,
-                           tv_genres=tv_genres, movie_genres=movie_genres, current_page=int(page), nb_pages = nb_pages)
+            index_genre = i
+    id_genre = list_genres[index_genre]['id']
+    list_media, nb_pages = Api.discover(media, id_genre, page)
+    app.logger.info(msg=f'Genre request on : Genre = {genre}, Media = {media}, Page = {page}')
+    return render_template('genre.html', genre=genre, list_medias=list_media, media=media,
+                           tv_genres=tv_genres, movie_genres=movie_genres, current_page=int(page), nb_pages=nb_pages)
 
 
 @app.route('/serie/<id>/season/<season>/episode/<episode>')
+@login_required
 def select_episode(id, season, episode):
-    s = requests.get(
-        "https://api.themoviedb.org/3/tv/" + str(id) + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US")
-    seriejson = s.json()
-    if seriejson['next_episode_to_air']:
-        serie = Serie(seriejson['id'], seriejson['name'], seriejson['overview'], seriejson['vote_average'],
-                      seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']),
-                      seriejson['last_episode_to_air'], seriejson['next_episode_to_air']['air_date'])
-    else:
-        serie = Serie(seriejson['id'], seriejson['name'], seriejson['overview'], seriejson['vote_average'],
-                      seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']),
-                      seriejson['last_episode_to_air'], '')
-    for seasonz in seriejson['seasons']:
-        serie.seasons[seasonz['season_number']] = seasonz['episode_count']
-
-    serie.set_selected_episode(season, episode)
-    return render_template('serie.html', serie=serie, user=current_user)
+    serie = Api.get_serie(id)
+    serie.selected_episode = 'S' + str(season) + 'E' + str(episode)
+    episode = serie.get_episode
+    app.logger.info(msg=f'Selected Episode : Serie = {id}, Season = {season}, episode = {episode.num_episode}')
+    return render_template('serie.html', serie=serie, user=current_user, episode=episode)
 
 @app.route('/serie/<id>/season/<season>/episode/<episode>/view')
+@login_required
 def next_episode(id, season, episode):
     string_episode = 'S' + str(season) + 'E' + str(episode)
     current_user.view_episode(string_episode, id)
     return(serie(id))
-
-@app.route('/rate/<i>')
-def rate(i):
-    current_user.update_grade(float(2*int(i)))
-    return('',204)
-
-
-@app.route('/serie/<id>/post/grade')
-def post_series_grade(id):
-    grade = current_user.current_grade
-    current_user.grade(id, 'serie', grade)
-    # requests.post("https://api.themoviedb.org/3/tv/" + str(id)+'/rating' + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US", data = { "value" : grade})
-    return(serie(id))
-
-
-@app.route('/serie/<id>/unrate')
-
-def unrate_serie(id):
-    current_user.unrate('serie', id)
-    return(serie(id))
-
 

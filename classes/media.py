@@ -6,7 +6,6 @@ class Media:
         self._name = name
         self._description = description
         self.grade = grade
-        self.current_grade = 0;
         self._image = image
 
     def _get_name(self):
