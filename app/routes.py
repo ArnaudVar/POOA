@@ -9,8 +9,6 @@ from flask_login import logout_user
 from flask_login import login_required
 from werkzeug.urls import url_parse
 from datetime import datetime
-import tkinter
-from tkinter import messagebox
 
 
 tv_genres = Api.get_genre('tv')
@@ -67,6 +65,7 @@ def logout():
 @login_required
 def serie(id):
     serie = Api.get_serie(id)
+    similar = Api.get_similar(id, 'tv')
     if serie is None :
         app.logger.info(msg=f'Incorrect Serie id')
         return render_template('404.html')
@@ -79,21 +78,21 @@ def serie(id):
         episode = serie.get_episode
         app.logger.info(msg=f'Successful query for the Serie id={serie.id} page')
         return render_template('serie.html', serie=serie, user=current_user,
-                               tv_genres=tv_genres, movie_genres=movie_genres)
+                               tv_genres=tv_genres, movie_genres=movie_genres, similar=similar)
 
 
 @app.route('/movie/<id>')
 @login_required
 def movie(id):
     movie = Api.get_movie(id)
+    similar = Api.get_similar(id, 'movie')
     if movie is None :
         app.logger.info(msg=f'Incorrect Movie id')
         return render_template('404.html')
-    else :
+    else:
         app.logger.info(msg=f'Successful query for the Movie id={id} page')
         return render_template('movie.html', movie=movie, user=current_user, tv_genres=tv_genres,
-                               movie_genres=movie_genres)
-
+                               movie_genres=movie_genres, similar=similar)
 
 
 @app.route('/register', methods=['GET', 'POST'])
