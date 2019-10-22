@@ -1,6 +1,4 @@
-
-
-
+# noinspection DuplicatedCode
 class Api:
 
     api_key = "11893590e2d73c103c840153c0daa770"
@@ -83,6 +81,35 @@ class Api:
                           num_episode=episode_number, release=episode_json["air_date"])
         return episode
 
+    @staticmethod
+    def get_similar(id,media_type):
+        request = requests.get(f"{Api.base_url_start}{media_type}/{id}/similar{Api.base_url_end}")
+        similar_json = request.json()
+        results = similar_json["total_results"]
+        media_list = []
+        if results >= 12:
+            for i in range(12):
+                media = similar_json["results"][i]
+                if media_type == "movie":
+                    media_list.append(Movie(id=media['id'], name=media['title'], description=None,
+                                            grade=None, image=media['poster_path'], genre=None,
+                                            date=None))
+                if media_type == "tv":
+                    media_list.append(Serie(id=media['id'], name=media['name'], description=None, grade=None,
+                                      image=media['poster_path'], genre=None, seasons=None, seasons_count=None,
+                                      latest=None, date=None))
+        else:
+            for i in range(results):
+                media = similar_json["results"][i]
+                if media_type == "movie":
+                    media_list.append(Movie(id=media['id'], name=media['title'], description=None,
+                                            grade=None, image=media['poster_path'], genre=None,
+                                            date=None))
+                if media_type == "tv":
+                    media_list.append(Serie(id=media['id'], name=media['name'], description=None, grade=None,
+                                      image=media['poster_path'], genre=None, seasons=None, seasons_count=None,
+                                      latest=None, date=None))
+        return media_list
 
 import requests
 from classes.movie import Movie
