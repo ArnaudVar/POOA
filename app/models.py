@@ -182,35 +182,51 @@ class User(UserMixin, db.Model):
 
     def get_grade(self, type, id):
         if type == 'serie':
-            grades = self.series_grades.split('-')
-            for grade in grades:
-                if grade.split('x')[0] == str(id):
-                    return (float(grade.split('x')[1]))
+            if self.series_grades is None:
+                return False
+            else:
+                grades = self.series_grades.split('-')
+                for grade in grades:
+                    if grade.split('x')[0] == str(id):
+                        return (float(grade.split('x')[1]))
+                if str(id) not in grades :
+                    return False
         elif type == 'movie':
-            grades = self.movies_grades.split('-')
-            for grade in grades:
-                if grade.split('x')[0] == str(id):
-                    return (float(grade.split('x')[1]))
+            if self.movies_grades is None:
+                return False
+            else:
+                grades = self.movies_grades.split('-')
+                for grade in grades:
+                    if grade.split('x')[0] == str(id):
+                        return (float(grade.split('x')[1]))
+                if str(id) not in grades:
+                    return False
         else:
             raise ValueError("The type of this media is unknown")
 
     def unrate(self, type, id):
-        if type == 'serie':
+        if type == 'serie' and self.series_grades is not None:
             grades = self.series_grades.split('-')
             for i, grade in enumerate(grades):
                 if grade.split('x')[0] == str(id):
                     if i == 0:
-                        self.series_grades = self.series_grades.replace(grade, '')
+                        if len(grades) == 1:
+                            self.series_grades = self.series_grades.replace(grade, '')
+                        else:
+                            self.series_grades = self.series_grades.replace(grade + '-', '')
                     else:
                         self.series_grades = self.series_grades.replace('-' + grade, '')
-        elif type == 'movie':
+        elif type == 'movie' and self.movies_grades is not None:
             grades = self.movies_grades.split('-')
             for i, grade in enumerate(grades):
                 if grade.split('x')[0] == str(id):
                     if i == 0:
-                        self.series_grades = self.series_grades.replace(grade, '')
+                        if len(grades)==1:
+                            self.movies_grades = self.movies_grades.replace(grade, '')
+                        else:
+                            self.movies_grades = self.movies_grades.replace(grade + '-', '')
                     else:
-                        self.series_grades = self.series_grades.replace('-' + grade, '')
+                        self.movies_grades = self.movies_grades.replace('-' + grade, '')
         db.session.commit()
 
     def get_reset_password_token(self, expires_in=600):
