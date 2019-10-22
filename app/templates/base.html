@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
           integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
     <link href='https://fonts.googleapis.com/css?family=Amatic SC' rel='stylesheet'>
+    <link href="https://fonts.googleapis.com/css?family=Bree+Serif|Playfair+Display&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/side.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/head.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/serie.css') }}">
@@ -16,7 +17,7 @@
 <body>
 
 {% block header %}
-<nav class="w-100 navbar navbar-expand-lg">
+<nav class="w-100 navbar nav-home navbar-expand-lg">
     <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
         <div class="d-flex flex-row">
             {% if g.search_form %}
@@ -46,21 +47,21 @@
     <nav id="sidebar">
         <ul class="list-unstyled components">
             <li class="active">
-                <a href="{{ url_for('home') }}"> <i class="fa fa-home"></i> &nbsp; HOME</a>
+                <a href="{{ url_for('home') }}"> <i class="fa fa-home"></i> &nbsp; Home</a>
             </li>
             <li class="active">
-                <a href="/myseries"><i class="fas fa-video" ></i>&nbsp; MY SERIES</a>
+                <a href="/myseries"><i class="fas fa-video" ></i>&nbsp; My Series</a>
             </li>
             <li class="active">
-                <a href="/mymovies"><i class="fas fa-film"></i>&nbsp; MY MOVIES</a>
+                <a href="/mymovies"><i class="fas fa-film"></i>&nbsp; My Movies</a>
             </li>
             <li class="active">
-                <a><i class="fa fa-star"></i>&nbsp; BEST SERIES</a>
+                <a><i class="fa fa-star"></i>&nbsp; Best Series</a>
             </li>
             <li class="active">
                 <a class="dropdown-toggle" data-toggle="collapse" data-target="#genreSubmenu" role="button"
                    aria-expanded="false" aria-controls="genreSubmenu">
-                    <i class="fa fa-list"></i> &nbsp; TV GENRES
+                    <i class="fa fa-list"></i> &nbsp; TV Genres
                 </a>
                 <ul class="collapse list-unstyled" id="genreSubmenu">
                     {% for genre in tv_genres %}
@@ -73,7 +74,7 @@
             <li class="active">
                 <a class="dropdown-toggle" data-toggle="collapse" data-target="#genreSubmenu2" role="button"
                    aria-expanded="true" aria-controls="genreSubmenu">
-                    <i class="fa fa-list"></i> &nbsp; MOVIE GENRES
+                    <i class="fa fa-list"></i> &nbsp; Movie Genres
                 </a>
                 <ul class="collapse list-unstyled" id="genreSubmenu2">
                     {% for genre in movie_genres %}

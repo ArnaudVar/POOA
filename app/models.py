@@ -14,6 +14,9 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     _series = db.Column(db.Text())
     _movies = db.Column(db.Text())
+    series_grades = db.Column(db.Text())
+    movies_grades = db.Column(db.Text())
+    current_grade = db.Column(db.Float)
 
     def __repr__(self):
         return f"Username : {self.username}, Name : {self.name}, Surname : {self.surname}, Email : {self.email}," \
@@ -145,6 +148,70 @@ class User(UserMixin, db.Model):
             else:
                 self._movies = self._movies.replace('-'+str(id_movie),'')
             db.session.commit()
+
+    def update_grade(self, new_grade):
+        self.current_grade = new_grade
+        db.session.commit()
+
+    def grade(self, id, type, grade):
+        if type == 'serie':
+            if self.series_grades is None or self.series_grades == '':
+                self.series_grades = str(id) + 'x' + str(grade)
+            else:
+                self.series_grades += '-' + str(id) + 'x' + str(grade)
+        else:
+            if type == 'movie':
+                if self.movies_grades is None or self.movies_grades == '':
+                    self.movies_grades = str(id) + 'x' + str(grade)
+                else:
+                    self.movies_grades += '-' + str(id) + 'x' + str(grade)
+        db.session.commit()
+
+    def is_graded(self, type, id):
+        if type == 'serie':
+            if self.series_grades is None:
+                return(False)
+            else :
+                return str(id) in self.series_grades
+        elif type == 'movie':
+            if self.movies_grades is None:
+                return(False)
+            return str(id) in self.movies_grades
+        else:
+            raise ValueError("The type of this media is unknown")
+
+    def get_grade(self, type, id):
+        if type == 'serie':
+            grades = self.series_grades.split('-')
+            for grade in grades:
+                if grade.split('x')[0] == str(id):
+                    return (float(grade.split('x')[1]))
+        elif type == 'movie':
+            grades = self.movies_grades.split('-')
+            for grade in grades:
+                if grade.split('x')[0] == str(id):
+                    return (float(grade.split('x')[1]))
+        else:
+            raise ValueError("The type of this media is unknown")
+
+    def unrate(self, type, id):
+        if type == 'serie':
+            grades = self.series_grades.split('-')
+            for i, grade in enumerate(grades):
+                if grade.split('x')[0] == str(id):
+                    if i == 0:
+                        self.series_grades = self.series_grades.replace(grade, '')
+                    else:
+                        self.series_grades = self.series_grades.replace('-' + grade, '')
+        elif type == 'movie':
+            grades = self.movies_grades.split('-')
+            for i, grade in enumerate(grades):
+                if grade.split('x')[0] == str(id):
+                    if i == 0:
+                        self.series_grades = self.series_grades.replace(grade, '')
+                    else:
+                        self.series_grades = self.series_grades.replace('-' + grade, '')
+        db.session.commit()
 
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(

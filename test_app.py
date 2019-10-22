@@ -450,59 +450,59 @@ class TestApplication(TestCase):
     #     with self.assertLogs() as cm:
     #         self.app.get('/search2/test/1', follow_redirects=True)
     #     self.assertEqual(cm.records[0].msg, 'The user is logging in')
-
-    def test_route_genre(self):
-        """
-            We check that the route for genre returns the correct genre searched by the user
-            We also check that the user can't check a genre when not logged in
-            :return: void
-        """
-        # We create a user that logs in that will be used throughout this test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-                                 'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
-
-        with self.assertLogs() as cm:
-            self.app.get('/genre/tv/Comedy/1', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'Genre request on : Genre = Comedy, Media = tv, Page = 1')
-
-        # We now check that this route is not available if no user is logged in
-        self.logout()
-        with self.assertLogs() as cm:
-            self.app.get('/genre/tv/Comedy/1', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'The user is logging in')
-
-    def test_route_select_episode(self):
-        """
-            We check that the route to select an episode returns the correct episode searched by the user
-            We also check that the user can't check an episode when not logged in
-            :return: void
-        """
-        # We create a user that logs in that will be used throughout this test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-                                 'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
-
-        with self.assertLogs() as cm:
-            self.app.get('/serie/1412/season/3/episode/4', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'Selected Episode : Serie = 1412, Season = 3, episode = 4')
-
-        # We now check that this route is not available if no user is logged in
-        self.logout()
-        with self.assertLogs() as cm:
-            self.app.get('/serie/1412/season/3/episode/4', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'The user is logging in')
-
-    def test_route_next_episode(self):
-        """
-            We check that the route to select the next episode updates the correct episode for the user
-            We also check that the user can't select a next an episode when not logged in
-            :return: void
-        """
-        # We create a user that logs in that will be used throughout this test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-                                 'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
+    #
+    # def test_route_genre(self):
+    #     """
+    #         We check that the route for genre returns the correct genre searched by the user
+    #         We also check that the user can't check a genre when not logged in
+    #         :return: void
+    #     """
+    #     # We create a user that logs in that will be used throughout this test
+    #     TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+    #                              'password', 'password')
+    #     TestApplication.login(self, 'Username', 'password')
+    #
+    #     with self.assertLogs() as cm:
+    #         self.app.get('/genre/tv/Comedy/1', follow_redirects=True)
+    #     self.assertEqual(cm.records[0].msg, 'Genre request on : Genre = Comedy, Media = tv, Page = 1')
+    #
+    #     # We now check that this route is not available if no user is logged in
+    #     self.logout()
+    #     with self.assertLogs() as cm:
+    #         self.app.get('/genre/tv/Comedy/1', follow_redirects=True)
+    #     self.assertEqual(cm.records[0].msg, 'The user is logging in')
+    #
+    # def test_route_select_episode(self):
+    #     """
+    #         We check that the route to select an episode returns the correct episode searched by the user
+    #         We also check that the user can't check an episode when not logged in
+    #         :return: void
+    #     """
+    #     # We create a user that logs in that will be used throughout this test
+    #     TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+    #                              'password', 'password')
+    #     TestApplication.login(self, 'Username', 'password')
+    #
+    #     with self.assertLogs() as cm:
+    #         self.app.get('/serie/1412/season/3/episode/4', follow_redirects=True)
+    #     self.assertEqual(cm.records[0].msg, 'Selected Episode : Serie = 1412, Season = 3, episode = 4')
+    #
+    #     # We now check that this route is not available if no user is logged in
+    #     self.logout()
+    #     with self.assertLogs() as cm:
+    #         self.app.get('/serie/1412/season/3/episode/4', follow_redirects=True)
+    #     self.assertEqual(cm.records[0].msg, 'The user is logging in')
+    #
+    # def test_route_next_episode(self):
+    #     """
+    #         We check that the route to select the next episode updates the correct episode for the user
+    #         We also check that the user can't select a next an episode when not logged in
+    #         :return: void
+    #     """
+    #     # We create a user that logs in that will be used throughout this test
+    #     TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+    #                              'password', 'password')
+    #     TestApplication.login(self, 'Username', 'password')
 
     def tearDown(self):
         db.session.remove()
@@ -668,19 +668,172 @@ class TestUser(TestCase):
         """
         # We check that the method updates the last episode the user saw
         self.user.series = '1412xS3E4-69050xS1E1'
-        self.assertTrue(self.user.view_episode())
+        self.user.view_episode('S4E5', 1412)
+        self.assertEqual(self.user.get_last_episode_viewed(1412), 'S4E5')
+
+        # We check that no error is raised when we update a serie that isn't in the user list
+        self.user.view_episode('S5E6', 1413)
+        self.assertEqual(self.user.series, '1412xS4E5-69050xS1E1')
+
+    def test_add_serie(self):
+        """
+        We check that the add_serie method correctly adds the serie to the serie list of the user
+        If the user already has this serie in his list then it musn't add it again
+        We also need to check when the user has no serie in his list yet as the expected return is different
+            (no - in front in the list)
+        :return: void
+        """
+        # We set the serie list of our user to None and try to add a serie.
+        # We check that the output is the expecterd one
+        self.user.series = None
+        self.user.add_serie('1412')
+        self.assertEqual(self.user.series, '1412xS1E1')
+
+        # We now add another serie to the user serie list to check that we get the expected result (with a - in front)
+        self.user.add_serie('69050')
+        self.assertEqual(self.user.series, '1412xS1E1-69050xS1E1')
+
+        #Finally we check that when adding a serie already in the list, the method does nothing
+        self.user.add_serie('1412')
+        self.assertEqual(self.user.series, '1412xS1E1-69050xS1E1')
+
+    def test_remove_serie(self):
+        """
+        We check that the remove_serie method correctly removes the serie from the serie list of the user
+        If the user doesn't have this serie in its serie list then it musn't create an error
+        We also need to check when the user only has one serie in its list because the returned value is different
+            (no - in front in the list)
+        :return:
+        """
+        # We check that the method doesn't fail when we delete a serie that's not yet in the user's list
+        self.user.series = '1412xS3E4-69050xS1E1'
+        self.user.remove_serie('1413')
+        self.assertEqual(self.user.series, '1412xS3E4-69050xS1E1')
+
+        # We check that the method gives us the expected result when we delete a serie in the front of the list
+        self.user.remove_serie('1412')
+        self.assertEqual(self.user.series, '69050xS1E1')
+
+        # We check that the method gives us the expected result when we delete a serie in the back of the list
+        self.user.add_serie('1412')
+        self.user.remove_serie('1412')
+        self.assertEqual(self.user.series, '69050xS1E1')
+
+        # Finally we check that when deleting all the series from the list, no error is raised
+        self.user.remove_serie('69050')
+        self.assertEqual(self.user.series, '')
+
+    def test_add_movie(self):
+        """
+        We check that the add_movie method correctly adds the movie to the movie list of the user
+        If the user already has this movie in his list then it musn't add it again
+        We also need to check when the user has no movie in his list yet as the expected return is different
+            (no - in front in the list)
+        :return: void
+        """
+
+        # We set the movie list of our user to None and try to add a movie.
+        # We check that the output is the expecterd one
+        self.user.movies = None
+        self.user.add_movie('453405')
+        self.assertEqual(self.user.movies, '453405')
+
+        # We now add another movie to the user movie list to check that we get the expected result (with a - in front)
+        self.user.add_movie('420818')
+        self.assertEqual(self.user.movies, '453405-420818')
+
+        # Finally we check that when adding a serie already in the list, the method does nothing
+        self.user.add_movie('420818')
+        self.assertEqual(self.user.movies, '453405-420818')
+
+    def test_remove_movie(self):
+        """
+        We check that the remove_movie method correctly removes the movie from the movie list of the user
+        If the user doesn't have this movie in its movie list then it musn't create an error
+        We also need to check when the user only has one movie in its list because the returned value is different
+            (no - in front in the list)
+        :return:
+        """
+        # We check that the method doesn't fail when we delete a movie that's not yet in the user's list
+        self.user.movies = '453405-420818'
+        self.user.remove_movie('4534053')
+        self.assertEqual(self.user.movies, '453405-420818')
+
+        # We check that the method gives us the expected result when we delete a movie in the front of the list
+        self.user.remove_movie('453405')
+        self.assertEqual(self.user.movies, '420818')
+
+        # We check that the method gives us the expected result when we delete a movie in the back of the list
+        self.user.add_movie('453405')
+        self.user.remove_movie('453405')
+        self.assertEqual(self.user.movies, '420818')
+
+        # Finally we check that when deleting all the movies from the list, no error is raised
+        self.user.remove_movie('420818')
+        self.assertEqual(self.user.movies, '')
+
+    def test_update_grade(self):
+        """
+        We try here to check that the update_grade method works well, we check it in two context
+        (none current_grade and current_grade already filled)
+        :return: void
+        """
+        self.user.series = '1412xS3E4-69050xS1E1'
+        self.user.current_grade = None
+
+        # We test the method when the current_grade is None
+        self.user.update_grade(4)
+        self.assertTrue(self.user.current_grade, '4')
+
+        # We test the method when the current_grade is already filled
+        self.user.update_grade(2)
+        self.assertTrue(self.user.current_grade, '2')
+
+    def test_grade(self):
+        """
+        We need to test here that the grading of the medias is correct
+        We need to check both cases (TV show and media)
+        In both cases, we need to check the grading when there already is a grading before and when there isn't :
+            the grading list isn't under the same form in both cases
+        :return:
+        """
+        self.user.series_grades = None
+        self.user.movies_grades = None
+
+        # We check that when adding a grade to a serie with an empty grade list there is no problem
+        self.user.grade('1412', 'serie', 2)
+        self.assertEqual(self.user.series_grades, '1412x2')
+
+        # We check that when adding a grade to a movie with an empty grade list there is no problem
+        self.user.grade('453405', 'movie', 4)
+        self.assertEqual(self.user.movies_grades, '453405x4')
+
+        # We check that the method works well when there already is a grade in the serie grade list
+        self.user.grade('69050', 'serie', 5)
+        self.assertEqual(self.user.series_grades, '1412x2-69050x5')
+
+        # We check that the method works well when there already is a grade in the movie grade list
+        self.user.grade('420818', 'movie', 6)
+        self.assertEqual(self.user.movies_grades, '453405x4-420818x6')
+
+    def test_is_graded(self):
+        """
+        We try here to check that the is_graded method works well,
+        We need to check that when the serie is graded, the method returns True
+        The method needs to return False when the serie is not graded or the graded list is null
+        We need to check that it works for both series and movies
+        :return: void
+        """
+        self.user.series_grades = None
+        self.user.movies_grades = None
+
+        # We check that it returns false for both series and movies when the lists are None
+        self.user.is_graded('1412')
+        self.user
     #
-    # def test_add_serie(self):
-    #     self.fail()
+    # def test_get_grade(self):
     #
-    # def test_remove_serie(self):
-    #     self.fail()
-    #
-    # def test_add_movie(self):
-    #     self.fail()
-    #
-    # def test_remove_movie(self):
-    #     self.fail()
+    # def test_unrate(self):
     #
     # def test_get_reset_password_token(self):
     #     self.fail()
