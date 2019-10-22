@@ -9,8 +9,6 @@ from flask_login import logout_user
 from flask_login import login_required
 from werkzeug.urls import url_parse
 from datetime import datetime
-import tkinter
-from tkinter import messagebox
 
 
 tv_genres = Api.get_genre('tv')
@@ -296,7 +294,19 @@ def post_series_grade(id):
     # requests.post("https://api.themoviedb.org/3/tv/" + str(id)+'/rating' + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US", data = { "value" : grade})
     return serie(id)
 
+@app.route('/movie/<id>/post/grade')
+def post_movie_grade(id):
+    grade = current_user.current_grade
+    current_user.grade(id, 'movie', grade)
+    # requests.post("https://api.themoviedb.org/3/tv/" + str(id)+'/rating' + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US", data = { "value" : grade})
+    return movie(id)
+
 @app.route('/serie/<id>/unrate')
 def unrate_serie(id):
     current_user.unrate('serie', id)
     return serie(id)
+
+@app.route('/movie/<id>/unrate')
+def unrate_movie(id):
+    current_user.unrate('movie', id)
+    return movie(id)

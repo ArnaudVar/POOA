@@ -40,9 +40,19 @@
     overflow-y: auto;
 }
 
+.rating {
+    float: left;
+    display: flex;
+    flex-direction : row-reverse;
+}
+
+.rating .undergrade {
+   color: orange;
+   cursor: pointer;
+}
+
 .rating a {
    float: left;
-   color: #aaa;
    text-decoration: none;
    font-size: 3em;
    transition: color .4s;
