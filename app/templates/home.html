@@ -37,9 +37,14 @@
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
                                                 </a>
+                                                {% if suggestions_serie[i*4]['poster_path'] == None %}
+                                                <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                     class="rounded">
+                                                {% else %}
                                                 <img src="https://image.tmdb.org/t/p/w500{{suggestions_serie[i*4]['poster_path']}}"
                                                      alt="{{suggestions_serie[i*4]['name']}}"
                                                      class="rounded">
+                                                {% endif %}
                                             </div>
 
                                         </div>
@@ -53,9 +58,14 @@
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
                                                 </a>
+                                                {% if suggestions_serie[i*4+1]['poster_path'] == None %}
+                                                <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                     class="rounded">
+                                                {% else %}
                                                 <img src="https://image.tmdb.org/t/p/w500{{suggestions_serie[i*4+1]['poster_path']}}"
                                                      alt="{{suggestions_serie[i*4+1]['name']}}"
                                                      class="rounded">
+                                                {% endif %}
                                             </div>
 
                                         </div>
@@ -69,9 +79,14 @@
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
                                                 </a>
-                                                <img src="https://image.tmdb.org/t/p/w500{{suggestions_serie[4*i+2]['poster_path']}}"
-                                                     alt="{{suggestions_serie[4*i+2]['name']}}"
+                                                {% if suggestions_serie[i*4+2]['poster_path'] == None %}
+                                                <img src="{{url_for('static', filename='assets/notFound.png')}}"
                                                      class="rounded">
+                                                {% else %}
+                                                <img src="https://image.tmdb.org/t/p/w500{{suggestions_serie[i*4+2]['poster_path']}}"
+                                                     alt="{{suggestions_serie[i*4+2]['name']}}"
+                                                     class="rounded">
+                                                {% endif %}
                                             </div>
                                         </div>
                                         <div class="col-md-3">
@@ -84,9 +99,14 @@
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
                                                 </a>
+                                                {% if suggestions_serie[i*4+3]['poster_path'] == None %}
+                                                <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                     class="rounded">
+                                                {% else %}
                                                 <img src="https://image.tmdb.org/t/p/w500{{suggestions_serie[i*4+3]['poster_path']}}"
                                                      alt="{{suggestions_serie[i*4+3]['name']}}"
                                                      class="rounded">
+                                                {% endif %}
                                             </div>
                                         </div>
                                     </div>
@@ -104,9 +124,14 @@
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
                                                 </a>
+                                                {% if suggestions_serie[i*4]['poster_path'] == None %}
+                                                <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                     class="rounded">
+                                                {% else %}
                                                 <img src="https://image.tmdb.org/t/p/w500{{suggestions_serie[i*4]['poster_path']}}"
                                                      alt="{{suggestions_serie[i*4]['name']}}"
                                                      class="rounded">
+                                                {% endif %}
                                             </div>
                                         </div>
                                         <div class="col-md-3">
@@ -119,9 +144,14 @@
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
                                                 </a>
+                                                {% if suggestions_serie[i*4+1]['poster_path'] == None %}
+                                                <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                     class="rounded">
+                                                {% else %}
                                                 <img src="https://image.tmdb.org/t/p/w500{{suggestions_serie[i*4+1]['poster_path']}}"
                                                      alt="{{suggestions_serie[i*4+1]['name']}}"
                                                      class="rounded">
+                                                {% endif %}
                                             </div>
                                         </div>
                                         <div class="col-md-3">
@@ -134,9 +164,14 @@
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
                                                 </a>
-                                                <img src="https://image.tmdb.org/t/p/w500{{suggestions_serie[4*i+2]['poster_path']}}"
-                                                     alt="{{suggestions_serie[4*i+2]['name']}}"
+                                                {% if suggestions_serie[i*4+2]['poster_path'] == None %}
+                                                <img src="{{url_for('static', filename='assets/notFound.png')}}"
                                                      class="rounded">
+                                                {% else %}
+                                                <img src="https://image.tmdb.org/t/p/w500{{suggestions_serie[i*4+2]['poster_path']}}"
+                                                     alt="{{suggestions_serie[i*4+2]['name']}}"
+                                                     class="rounded">
+                                                {% endif %}
                                             </div>
                                         </div>
                                         <div class="col-md-3">
@@ -149,9 +184,14 @@
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
                                                 </a>
+                                                {% if suggestions_serie[i*4+3]['poster_path'] == None %}
+                                                <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                     class="rounded">
+                                                {% else %}
                                                 <img src="https://image.tmdb.org/t/p/w500{{suggestions_serie[i*4+3]['poster_path']}}"
                                                      alt="{{suggestions_serie[i*4+3]['name']}}"
                                                      class="rounded">
+                                                {% endif %}
                                             </div>
                                         </div>
                                     </div>
@@ -166,157 +206,196 @@
         </div>
     </div>
     <div class="w-100 h-50 card suggestion">
-            <div class="card-header">
-                New movies
-            </div>
-            <div class="card-body list">
-                <div class="container">
-                    <div class="row blog">
-                        <div class="col-md-12">
-                            <div id="blogCarousel2" class="carousel slide" data-ride="carousel">
+        <div class="card-header">
+            New movies
+        </div>
+        <div class="card-body list">
+            <div class="container">
+                <div class="row blog">
+                    <div class="col-md-12">
+                        <div id="blogCarousel2" class="carousel slide" data-ride="carousel">
 
-                                <ol class="carousel-indicators">
-                                    <li data-target="#blogCarousel2" data-slide-to="0" class="active"></li>
-                                    <li data-target="#blogCarousel2" data-slide-to="1"></li>
-                                    <li data-target="#blogCarousel2" data-slide-to="2"></li>
-                                </ol>
-                                <div class="carousel-inner">
-                                    {% for i in range(suggestions_movie| length //4) %}
-                                    {% if i == 0 %}
-                                    <div class="carousel-item active">
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <div class="card-header name">
-                                                    {{suggestions_movie[i*4]['title']}}
-                                                </div>
-                                                <div class="p-0 card-body serie">
-                                                    <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4]['id']}}">
-                                                        <button class="btn btn-default btn-circle">
-                                                            <i class="fa fa-fw fa-plus"></i>
-                                                        </button>
-                                                    </a>
-                                                    <img src="https://image.tmdb.org/t/p/w500{{suggestions_movie[i*4]['poster_path']}}"
-                                                         alt="{{suggestions_movie[i*4]['title']}}"
-                                                         class="rounded">
-                                                </div>
+                            <ol class="carousel-indicators">
+                                <li data-target="#blogCarousel2" data-slide-to="0" class="active"></li>
+                                <li data-target="#blogCarousel2" data-slide-to="1"></li>
+                                <li data-target="#blogCarousel2" data-slide-to="2"></li>
+                            </ol>
+                            <div class="carousel-inner">
+                                {% for i in range(suggestions_movie| length //4) %}
+                                {% if i == 0 %}
+                                <div class="carousel-item active">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="card-header name">
+                                                {{suggestions_movie[i*4]['title']}}
+                                            </div>
+                                            <div class="p-0 card-body serie">
+                                                <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4]['id']}}">
+                                                    <button class="btn btn-default btn-circle">
+                                                        <i class="fa fa-fw fa-plus"></i>
+                                                    </button>
+                                                </a>
+                                                {% if suggestions_movie[4*i]['poster_path'] == None %}
+                                                <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                     class="rounded">
+                                                {% else %}
+                                                <img src="https://image.tmdb.org/t/p/w500{{suggestions_movie[i*4]['poster_path']}}"
+                                                     alt="{{suggestions_movie[i*4]['title']}}"
+                                                     class="rounded">
+                                                {% endif %}
+                                            </div>
 
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card-header name">
+                                                {{suggestions_movie[i*4+1]['title']}}
                                             </div>
-                                            <div class="col-md-3">
-                                                <div class="card-header name">
-                                                    {{suggestions_movie[i*4+1]['title']}}
-                                                </div>
-                                                <div class="p-0 card-body serie">
-                                                    <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4+1]['id']}}">
-                                                        <button class="btn btn-default btn-circle">
-                                                            <i class="fa fa-fw fa-plus"></i>
-                                                        </button>
-                                                    </a>
-                                                    <img src="https://image.tmdb.org/t/p/w500{{suggestions_movie[i*4+1]['poster_path']}}"
-                                                         alt="{{suggestions_movie[i*4+1]['title']}}"
-                                                         class="rounded">
-                                                </div>
+                                            <div class="p-0 card-body serie">
+                                                <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4+1]['id']}}">
+                                                    <button class="btn btn-default btn-circle">
+                                                        <i class="fa fa-fw fa-plus"></i>
+                                                    </button>
+                                                </a>
+                                                {% if suggestions_movie[4*i+1]['poster_path'] == None %}
+                                                <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                     class="rounded">
+                                                {% else %}
+                                                <img src="https://image.tmdb.org/t/p/w500{{suggestions_movie[i*4+1]['poster_path']}}"
+                                                     alt="{{suggestions_movie[i*4+1]['title']}}"
+                                                     class="rounded">
+                                                {% endif %}
+                                            </div>
 
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card-header name">
+                                                {{suggestions_movie[i*4+2]['title']}}
                                             </div>
-                                            <div class="col-md-3">
-                                                <div class="card-header name">
-                                                    {{suggestions_movie[i*4+2]['title']}}
-                                                </div>
-                                                <div class="p-0 card-body serie">
-                                                    <a class="w-100 h-100" href="/title/{{suggestions_movie[i*4+2]['id']}}">
-                                                        <button class="btn btn-default btn-circle">
-                                                            <i class="fa fa-fw fa-plus"></i>
-                                                        </button>
-                                                    </a>
-                                                    <img src="https://image.tmdb.org/t/p/w500{{suggestions_movie[4*i+2]['poster_path']}}"
-                                                         alt="{{suggestions_movie[4*i+2]['title']}}"
-                                                         class="rounded">
-                                                </div>
+                                            <div class="p-0 card-body serie">
+                                                <a class="w-100 h-100" href="/title/{{suggestions_movie[i*4+2]['id']}}">
+                                                    <button class="btn btn-default btn-circle">
+                                                        <i class="fa fa-fw fa-plus"></i>
+                                                    </button>
+                                                </a>
+                                                {% if suggestions_movie[4*i+2]['poster_path'] == None %}
+                                                <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                     class="rounded">
+                                                {% else %}
+                                                <img src="https://image.tmdb.org/t/p/w500{{suggestions_movie[i*4+2]['poster_path']}}"
+                                                     alt="{{suggestions_movie[i*4+2]['title']}}"
+                                                     class="rounded">
+                                                {% endif %}
                                             </div>
-                                            <div class="col-md-3">
-                                                <div class="card-header name">
-                                                    {{suggestions_movie[i*4+3]['title']}}
-                                                </div>
-                                                <div class="p-0 card-body serie">
-                                                    <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4+3]['id']}}">
-                                                        <button class="btn btn-default btn-circle">
-                                                            <i class="fa fa-fw fa-plus"></i>
-                                                        </button>
-                                                    </a>
-                                                    <img src="https://image.tmdb.org/t/p/w500{{suggestions_movie[i*4+3]['poster_path']}}"
-                                                         alt="{{suggestions_movie[i*4+3]['title']}}"
-                                                         class="rounded">
-                                                </div>
+                                         </div>
+                                        <div class="col-md-3">
+                                            <div class="card-header name">
+                                                {{suggestions_movie[i*4+3]['title']}}
+                                            </div>
+                                            <div class="p-0 card-body serie">
+                                                <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4+3]['id']}}">
+                                                    <button class="btn btn-default btn-circle">
+                                                        <i class="fa fa-fw fa-plus"></i>
+                                                    </button>
+                                                </a>
+                                                {% if suggestions_movie[4*i+3]['poster_path'] == None %}
+                                                <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                     class="rounded">
+                                                {% else %}
+                                                <img src="https://image.tmdb.org/t/p/w500{{suggestions_movie[i*4+3]['poster_path']}}"
+                                                     alt="{{suggestions_movie[i*4+3]['title']}}"
+                                                     class="rounded">
+                                                {% endif %}
                                             </div>
                                         </div>
                                     </div>
-                                    {% else %}
-                                    <div class="carousel-item">
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <div class="card-header name">
-                                                    {{suggestions_movie[i*4]['title']}}
-                                                </div>
-                                                <div class="p-0 card-body serie">
-                                                    <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4]['id']}}">
-                                                        <button class="btn btn-default btn-circle">
-                                                            <i class="fa fa-fw fa-plus"></i>
-                                                        </button>
-                                                    </a>
-                                                    <img src="https://image.tmdb.org/t/p/w500{{suggestions_movie[i*4]['poster_path']}}"
-                                                         alt="{{suggestions_movie[i*4]['title']}}"
-                                                         class="rounded">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <div class="card-header name">
-                                                    {{suggestions_movie[i*4+1]['title']}}
-                                                </div>
-                                                <div class="p-0 card-body serie">
-                                                    <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4+1]['id']}}">
-                                                        <button class="btn btn-default btn-circle">
-                                                            <i class="fa fa-fw fa-plus"></i>
-                                                        </button>
-                                                    </a>
-                                                    <img src="https://image.tmdb.org/t/p/w500{{suggestions_movie[i*4+1]['poster_path']}}"
-                                                         alt="{{suggestions_movie[i*4+1]['title']}}"
-                                                         class="rounded">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <div class="card-header name">
-                                                    {{suggestions_movie[i*4+2]['title']}}
-                                                </div>
-                                                <div class="p-0 card-body serie">
-                                                    <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4+2]['id']}}">
-                                                        <button class="btn btn-default btn-circle">
-                                                            <i class="fa fa-fw fa-plus"></i>
-                                                        </button>
-                                                    </a>
-                                                    <img src="https://image.tmdb.org/t/p/w500{{suggestions_movie[4*i+2]['poster_path']}}"
-                                                         alt="{{suggestions_movie[4*i+2]['title']}}"
-                                                         class="rounded">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <div class="card-header name">
-                                                    {{suggestions_movie[i*4+3]['title']}}
-                                                </div>
-                                                <div class="p-0 card-body serie">
-                                                    <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4+3]['id']}}">
-                                                        <button class="btn btn-default btn-circle">
-                                                            <i class="fa fa-fw fa-plus"></i>
-                                                        </button>
-                                                    </a>
-                                                    <img src="https://image.tmdb.org/t/p/w500{{suggestions_movie[i*4+3]['poster_path']}}"
-                                                         alt="{{suggestions_movie[i*4+3]['title']}}"
-                                                         class="rounded">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endif %}
-                                    {% endfor %}
                                 </div>
+                                {% else %}
+                                <div class="carousel-item">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="card-header name">
+                                                {{suggestions_movie[i*4]['title']}}
+                                            </div>
+                                            <div class="p-0 card-body serie">
+                                                <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4]['id']}}">
+                                                    <button class="btn btn-default btn-circle">
+                                                        <i class="fa fa-fw fa-plus"></i>
+                                                    </button>
+                                                </a>
+                                                {% if suggestions_movie[4*i]['poster_path'] == None %}
+                                                <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                     class="rounded">
+                                                {% else %}
+                                                <img src="https://image.tmdb.org/t/p/w500{{suggestions_movie[i*4]['poster_path']}}"
+                                                     alt="{{suggestions_movie[i*4]['title']}}"
+                                                     class="rounded">
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card-header name">
+                                                {{suggestions_movie[i*4+1]['title']}}
+                                            </div>
+                                            <div class="p-0 card-body serie">
+                                                <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4+1]['id']}}">
+                                                    <button class="btn btn-default btn-circle">
+                                                        <i class="fa fa-fw fa-plus"></i>
+                                                    </button>
+                                                </a>
+                                                {% if suggestions_movie[4*i+1]['poster_path'] == None %}
+                                                <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                     class="rounded">
+                                                {% else %}
+                                                <img src="https://image.tmdb.org/t/p/w500{{suggestions_movie[i*4+1]['poster_path']}}"
+                                                     alt="{{suggestions_movie[i*4+1]['title']}}"
+                                                     class="rounded">
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card-header name">
+                                                {{suggestions_movie[i*4+2]['title']}}
+                                            </div>
+                                            <div class="p-0 card-body serie">
+                                                <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4+2]['id']}}">
+                                                    <button class="btn btn-default btn-circle">
+                                                        <i class="fa fa-fw fa-plus"></i>
+                                                    </button>
+                                                </a>
+                                                {% if suggestions_movie[4*i+2]['poster_path'] == None %}
+                                                <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                     class="rounded">
+                                                {% else %}
+                                                <img src="https://image.tmdb.org/t/p/w500{{suggestions_movie[i*4+2]['poster_path']}}"
+                                                     alt="{{suggestions_movie[i*4+2]['title']}}"
+                                                     class="rounded">
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card-header name">
+                                                {{suggestions_movie[i*4+3]['title']}}
+                                            </div>
+                                            <div class="p-0 card-body serie">
+                                                <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4+3]['id']}}">
+                                                    <button class="btn btn-default btn-circle">
+                                                        <i class="fa fa-fw fa-plus"></i>
+                                                    </button>
+                                                </a>
+                                                {% if suggestions_movie[4*i+3]['poster_path'] == None %}
+                                                <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                     class="rounded">
+                                                {% else %}
+                                                <img src="https://image.tmdb.org/t/p/w500{{suggestions_movie[i*4+3]['poster_path']}}"
+                                                     alt="{{suggestions_movie[i*4+3]['title']}}"
+                                                     class="rounded">
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
                             </div>
                         </div>
                     </div>
@@ -324,6 +403,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 
 {% endblock %}

@@ -78,7 +78,8 @@ def serie(id):
                     serie.selected_episode = user_serie.split('x')[1]
         episode = serie.get_episode
         app.logger.info(msg=f'Successful query for the Serie id={serie.id} page')
-        return render_template('serie.html', serie=serie, user=current_user, episode=episode)
+        return render_template('serie.html', serie=serie, user=current_user,
+                               tv_genres=tv_genres, movie_genres=movie_genres)
 
 
 @app.route('/movie/<id>')
@@ -90,7 +91,8 @@ def movie(id):
         return render_template('404.html')
     else :
         app.logger.info(msg=f'Successful query for the Movie id={id} page')
-        return render_template('movie.html', movie=movie, user=current_user)
+        return render_template('movie.html', movie=movie, user=current_user, tv_genres=tv_genres,
+                               movie_genres=movie_genres)
 
 
 
@@ -221,7 +223,7 @@ def mymovies():
         app.logger.info(msg=f'MyMovies page rendered')
         app.logger.info(msg=f'The movies list has {nb_movies} movies')
     return  render_template('myMovies.html', title='MyMovies', list_movies=list_movies_rendered, nb_movies=nb_movies,
-                            tv_genre=tv_genres, movie_genres=movie_genres)
+                            tv_genres=tv_genres, movie_genres=movie_genres)
 
 
 @app.route('/search2/<string>/<page>')
@@ -281,3 +283,20 @@ def next_episode(id, season, episode):
     current_user.view_episode(string_episode, id)
     return(serie(id))
 
+@app.route('/rate/<i>')
+def rate(i):
+    current_user.update_grade(float(2*int(i)))
+    return('',204)
+
+
+@app.route('/serie/<id>/post/grade')
+def post_series_grade(id):
+    grade = current_user.current_grade
+    current_user.grade(id, 'serie', grade)
+    # requests.post("https://api.themoviedb.org/3/tv/" + str(id)+'/rating' + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US", data = { "value" : grade})
+    return serie(id)
+
+@app.route('/serie/<id>/unrate')
+def unrate_serie(id):
+    current_user.unrate('serie', id)
+    return serie(id)

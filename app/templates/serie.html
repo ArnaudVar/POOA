@@ -2,32 +2,36 @@
 {% block header %}
 <nav class="w-100 navbar navbar-expand-lg">
     <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
-        <div class="d-flex flex-row">
-            <div class="ml-3">
-                <div class="rating">
-                    <input type="radio" id="star10" name="rating" value="10"/><label for="star10" title="Rocks!">5
-                    stars</label>
-                    <input type="radio" id="star9" name="rating" value="9"/><label for="star9" title="Rocks!">4
-                    stars</label>
-                    <input type="radio" id="star8" name="rating" value="8"/><label for="star8" title="Pretty good">3
-                    stars</label>
-                    <input type="radio" id="star7" name="rating" value="7"/><label for="star7" title="Pretty good">2
-                    stars</label>
-                    <input type="radio" id="star6" name="rating" value="6"/><label for="star6" title="Meh">1
-                    star</label>
-                </div>
-            </div>
+        <div class="rating">
+            <a href="/rate/5/" title="Donner 5 étoiles">☆</a>
+            <a href="/rate/4" title="Donner 4 étoiles">☆</a>
+            <a href="/rate/3" title="Donner 3 étoiles">☆</a>
+            <a href="/rate/2" title="Donner 2 étoiles">☆</a>
+            <a href="/rate/1" title="Donner 1 étoile">☆</a>
         </div>
         <div class="name">
             <h1>{{serie.name}}</h1>
         </div>
         <div>
-            <button class="btn btn-warning mr-3">
-                <div>
+            {% if user.is_graded('serie', serie.id) %}
+            Rated : {{user.get_grade('serie', serie.id)}}
+            <a href="/serie/{{serie.id}}/unrate">
+                <button class="btn btn-info mr-3">
+                    Unrate
+                    <i class="fa fa-times"></i>
+                </button>
+            </a>
+
+            {% else %}
+            <a href="/serie/{{serie.id}}/post/grade">
+                <button class="btn btn-warning mr-3">
                     Rate
-                    <i class="fa fa-check"></i>
-                </div>
-            </button>
+                    <i class="fa fa-clipboard"></i>
+                </button>
+            </a>
+            {% endif %}
+
+
             {% if user.series == None or not(user.is_in_series(serie.id)) %}
             <a href="/add_serie/{{serie.id}}">
                 <button class="btn btn-success add">
@@ -55,10 +59,11 @@
 <div class="d-flex flex-row justify-content-between">
      <div class="card episode m-3">
         <div class="titre-episode card-header d-flex flex-row justify-content-between">
-            {{ episode.name }}
+            {{ serie.get_episode.name }}
             {% if user.is_in_series(serie.id) %}
-            {% if user.is_after(episode.num_season, episode.num_episode, serie.id) %}
-            <a href="/serie/{{serie.id}}/season/{{episode.num_season}}/episode/{{episode.num_episode}}/view" class="btn bton-dark">
+            {% if user.is_after(serie.get_episode.num_season, serie.get_episode.num_episode, serie.id) %}
+            <a href="/serie/{{serie.id}}/season/{{serie.get_episode.num_season}}/episode/{{serie.get_episode.num_episode}}/view"
+               class="btn bton-dark">
                 <i class="fa fa-eye-slash">&nbsp; Not viewed</i>
             </a>
             {% else %}
@@ -69,14 +74,14 @@
             {% endif %}
         </div>
         <div class="card-body d-flex flex-row justify-content-between">
-            {% if episode.image == None %}
+            {% if serie.get_episode.image == None %}
             <img class="rounded im-episode" src="{{url_for('static', filename='assets/LogoNom.png') }}">
             {% else %}
-            <img class="rounded im-episode" src="https://image.tmdb.org/t/p/w500{{episode.image}}">
+            <img class="rounded im-episode" src="https://image.tmdb.org/t/p/w500{{serie.get_episode.image}}">
             {% endif %}
 
             <div class="m-2">
-                {{episode.description}}
+                {{serie.get_episode.description}}
             </div>
         </div>
     </div>
