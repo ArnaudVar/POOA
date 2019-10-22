@@ -52,16 +52,218 @@
 </nav>
 {% endblock %}
 {% block content %}
-<div class="d-flex flex-row">
-     <div class="card episode m-3">
-        <div class="titre-episode card-header d-flex flex-row justify-content-between">
-            {{movie.name}}
-        </div>
-        <div class="card-body d-flex flex-row justify-content-between">
-            <img class="rounded im-episode" src="https://image.tmdb.org/t/p/w500{{movie.image}}">
-            <div class="m-2">
-                {{movie.description}}
+<div class="m-3 home w-100 d-flex flex-column">
+    <div class="d-flex flex-row">
+         <div class="card episode m-3">
+            <div class="titre-episode card-header d-flex flex-row justify-content-between">
+                {{movie.name}}
             </div>
+            <div class="card-body d-flex flex-row justify-content-between">
+                <img class="rounded im-episode" src="https://image.tmdb.org/t/p/w500{{movie.image}}">
+                <div class="m-2">
+                    {{movie.description}}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex flex-row">
+        <div class="w-100 h-50 card suggestion">
+        <div class="card-header">
+            Similar movies
+        </div>
+            <div class="card-body list">
+                        <div class="container">
+                            <div class="row blog">
+                                <div class="col-md-12">
+                                    <div id="blogCarousel" class="carousel slide" data-ride="carousel">
+
+                                        <ol class="carousel-indicators">
+                                            <li data-target="#blogCarousel" data-slide-to="0" class="active"></li>
+                                            <li data-target="#blogCarousel" data-slide-to="1"></li>
+                                            <li data-target="#blogCarousel" data-slide-to="2"></li>
+                                        </ol>
+                                        <div class="carousel-inner">
+                                            {% for i in range(3) %}
+                                            {% if i == 0 %}
+                                            <div class="carousel-item active">
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <div class="card-header name">
+                                                            {{similar[i*4].name}}
+                                                        </div>
+                                                        <div class="p-0 card-body serie">
+                                                            <a class="w-100 h-100" href="/movie/{{similar[i*4].id}}">
+                                                                <button class="btn btn-default btn-circle">
+                                                                    <i class="fa fa-fw fa-plus"></i>
+                                                                </button>
+                                                            </a>
+                                                            {% if similar[i*4].image == None %}
+                                                            <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                                 class="rounded">
+                                                            {% else %}
+                                                            <img src="https://image.tmdb.org/t/p/w500{{similar[i*4].image}}"
+                                                                 alt="{{similar[i*4].name}}"
+                                                                 class="rounded">
+                                                            {% endif %}
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="card-header name">
+                                                            {{similar[i*4+1].name}}
+                                                        </div>
+                                                        <div class="p-0 card-body serie">
+                                                            <a class="w-100 h-100" href="/movie/{{similar[i*4+1].id}}">
+                                                                <button class="btn btn-default btn-circle">
+                                                                    <i class="fa fa-fw fa-plus"></i>
+                                                                </button>
+                                                            </a>
+                                                            {% if similar[i*4+1].image == None %}
+                                                            <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                                 class="rounded">
+                                                            {% else %}
+                                                            <img src="https://image.tmdb.org/t/p/w500{{similar[i*4+1].image}}"
+                                                                 alt="{{similar[i*4+1].name}}"
+                                                                 class="rounded">
+                                                            {% endif %}
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="card-header name">
+                                                            {{similar[i*4+2].name}}
+                                                        </div>
+                                                        <div class="p-0 card-body serie">
+                                                            <a class="w-100 h-100" href="/movie/{{similar[i*4+2].id}}">
+                                                                <button class="btn btn-default btn-circle">
+                                                                    <i class="fa fa-fw fa-plus"></i>
+                                                                </button>
+                                                            </a>
+                                                            {% if similar[i*4+2].image == None %}
+                                                            <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                                 class="rounded">
+                                                            {% else %}
+                                                            <img src="https://image.tmdb.org/t/p/w500{{similar[i*4+2].image}}"
+                                                                 alt="{{similar[i*4+2].name}}"
+                                                                 class="rounded">
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="card-header name">
+                                                            {{similar[i*4+3].name}}
+                                                        </div>
+                                                        <div class="p-0 card-body serie">
+                                                            <a class="w-100 h-100" href="/movie/{{similar[i*4+3].id}}">
+                                                                <button class="btn btn-default btn-circle">
+                                                                    <i class="fa fa-fw fa-plus"></i>
+                                                                </button>
+                                                            </a>
+                                                            {% if similar[i*4+3].image == None %}
+                                                            <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                                 class="rounded">
+                                                            {% else %}
+                                                            <img src="https://image.tmdb.org/t/p/w500{{similar[i*4+3].image}}"
+                                                                 alt="{{similar[i*4+3].name}}"
+                                                                 class="rounded">
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% else %}
+                                            <div class="carousel-item">
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <div class="card-header name">
+                                                            {{similar[i*4].name}}
+                                                        </div>
+                                                        <div class="p-0 card-body serie">
+                                                            <a class="w-100 h-100" href="/movie/{{similar[i*4].id}}">
+                                                                <button class="btn btn-default btn-circle">
+                                                                    <i class="fa fa-fw fa-plus"></i>
+                                                                </button>
+                                                            </a>
+                                                            {% if similar[i*4].image == None %}
+                                                            <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                                 class="rounded">
+                                                            {% else %}
+                                                            <img src="https://image.tmdb.org/t/p/w500{{similar[i*4].image}}"
+                                                                 alt="{{similar[i*4].name}}"
+                                                                 class="rounded">
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="card-header name">
+                                                            {{similar[i*4+1].name}}
+                                                        </div>
+                                                        <div class="p-0 card-body serie">
+                                                            <a class="w-100 h-100" href="/movie/{{similar[i*4+1].id}}">
+                                                                <button class="btn btn-default btn-circle">
+                                                                    <i class="fa fa-fw fa-plus"></i>
+                                                                </button>
+                                                            </a>
+                                                            {% if similar[i*4+1].image == None %}
+                                                            <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                                 class="rounded">
+                                                            {% else %}
+                                                            <img src="https://image.tmdb.org/t/p/w500{{similar[i*4+1].image}}"
+                                                                 alt="{{similar[i*4+1].name}}"
+                                                                 class="rounded">
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="card-header name">
+                                                            {{similar[i*4+2].name}}
+                                                        </div>
+                                                        <div class="p-0 card-body serie">
+                                                            <a class="w-100 h-100" href="/movie/{{similar[i*4+2].id}}">
+                                                                <button class="btn btn-default btn-circle">
+                                                                    <i class="fa fa-fw fa-plus"></i>
+                                                                </button>
+                                                            </a>
+                                                            {% if similar[i*4+2].image == None %}
+                                                            <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                                 class="rounded">
+                                                            {% else %}
+                                                            <img src="https://image.tmdb.org/t/p/w500{{similar[i*4+2].image}}"
+                                                                 alt="{{similar[i*4+2].name}}"
+                                                                 class="rounded">
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="card-header name">
+                                                            {{similar[i*4+3].name}}
+                                                        </div>
+                                                        <div class="p-0 card-body serie">
+                                                            <a class="w-100 h-100" href="/movie/{{similar[i*4+3].id}}">
+                                                                <button class="btn btn-default btn-circle">
+                                                                    <i class="fa fa-fw fa-plus"></i>
+                                                                </button>
+                                                            </a>
+                                                            {% if similar[i*4+3].image == None %}
+                                                            <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                                 class="rounded">
+                                                            {% else %}
+                                                            <img src="https://image.tmdb.org/t/p/w500{{similar[i*4+3].image}}"
+                                                                 alt="{{similar[i*4+3].name}}"
+                                                                 class="rounded">
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
         </div>
     </div>
 </div>
