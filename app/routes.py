@@ -263,6 +263,8 @@ def genre(media, genre, page):
             index_genre = i
     id_genre = list_genres[index_genre]['id']
     list_media, nb_pages = Api.discover(media, id_genre, page)
+    if media == 'tv':
+        media = 'serie'
     app.logger.info(msg=f'Genre request on : Genre = {genre}, Media = {media}, Page = {page}')
     return render_template('genre.html', genre=genre, list_medias=list_media, media=media,
                            tv_genres=tv_genres, movie_genres=movie_genres, current_page=int(page), nb_pages=nb_pages)
