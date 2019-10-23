@@ -132,15 +132,12 @@ class Api:
                                 f"&guest_session_id={session}", params={"value": int(grade)}, headers={"Content-Type": "application/json;charset=utf-8"})
         return request.json()
 
+    @staticmethod
     def get_top_rated(media, page):
-        if media=='serie':
-            result = requests.get(f"{Api.base_url_start}tv/top_rated{Api.base_url_end}&"
+        result = requests.get(f"{Api.base_url_start}{media}/top_rated{Api.base_url_end}&"
                                   f"sort_by=vote_average.desc&page={page}").json()
-        elif media=='movie':
-            result = requests.get(f"{Api.base_url_start}movie/top_rated{Api.base_url_end}&"
-                                  f"sort_by=vote_average.desc&page={page}").json()
-        else:
-            raise ValueError("The type of this media is unknown")
+        print(f"{Api.base_url_start}{media}/top_rated{Api.base_url_end}&"
+                                  f"sort_by=vote_average.desc&page={page}")
         return result['results'], result['total_pages']
         
 import requests

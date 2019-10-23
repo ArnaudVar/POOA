@@ -322,7 +322,7 @@ def topRated(media, page):
     """
     This function is called when the user tries to access the popular pannel from one of the pages
     We start by getting the API result with the API class
-    :param media:String (movie or serie)
+    :param media:String (movie or tv)
     :param page:int (>0)
     :return:void
     """
