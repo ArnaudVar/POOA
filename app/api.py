@@ -111,6 +111,18 @@ class Api:
                                       latest=None, date=None))
         return media_list
 
+    @staticmethod
+    def new_session():
+        request = requests.get(f"{Api.base_url_start}authentication/guest_session/new?api_key={Api.api_key}")
+        session = request.json()['guest_session_id']
+        return session
+
+    @staticmethod
+    def rate(id, grade, media, session):
+        request = requests.post(f"{Api.base_url_start}{media}/{id}/rating?api_key={Api.api_key}" \
+                                f"&guest_session_id={session}", params={"value": int(grade)}, headers={"Content-Type": "application/json;charset=utf-8"})
+        return request.json()
+
 import requests
 from classes.movie import Movie
 from classes.Serie import Serie

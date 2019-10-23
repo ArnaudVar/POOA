@@ -17,6 +17,7 @@ class User(UserMixin, db.Model):
     series_grades = db.Column(db.Text())
     movies_grades = db.Column(db.Text())
     current_grade = db.Column(db.Float)
+    session_id = db.Column(db.String(64))
 
     def __repr__(self):
         return f"Username : {self.username}, Name : {self.name}, Surname : {self.surname}, Email : {self.email}," \

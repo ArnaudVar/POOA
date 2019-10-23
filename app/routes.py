@@ -50,6 +50,8 @@ def login():
         app.logger.info(msg='Successful Login !')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('home')
+        current_user.session_id = Api.new_session()
+        db.session.commit()
         return redirect(next_page)
     return render_template('login.html', title='Sign In', form=form, src = logo_source)
 
@@ -291,8 +293,9 @@ def rate(i):
 @app.route('/serie/<id>/post/grade')
 def post_series_grade(id):
     grade = current_user.current_grade
+    session = current_user.session_id
     current_user.grade(id, 'serie', grade)
-    # requests.post("https://api.themoviedb.org/3/tv/" + str(id)+'/rating' + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US", data = { "value" : grade})
+    msg = Api.rate(id, grade, 'tv', session)
     return serie(id)
 
 @app.route('/serie/<id>/unrate')
