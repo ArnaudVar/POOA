@@ -37,10 +37,19 @@ class Api:
         return serie
 
     @staticmethod
-    def get_popular():
-        seriesjson = requests.get(f"{Api.base_url_start}tv/popular{Api.base_url_end}").json()
-        moviesjson = requests.get(f"{Api.base_url_start}movie/popular{Api.base_url_end}").json()
-        return seriesjson['results'], moviesjson['results']
+    def get_popular(media, page, nb_page=False):
+        if media=='serie':
+            result = requests.get(f"{Api.base_url_start}tv/popular{Api.base_url_end}&"
+                                  f"sort_by=popularity.desc&page={page}").json()
+        elif media=='movie':
+            result = requests.get(f"{Api.base_url_start}movie/popular{Api.base_url_end}&"
+                                  f"sort_by=popularity.desc&page={page}").json()
+        else:
+            raise ValueError("The type of this media is unknown")
+        if nb_page:
+            return result['results'], result['total_pages']
+        else:
+            return result['results']
 
     @staticmethod
     def search(string, page):
@@ -123,6 +132,17 @@ class Api:
                                 f"&guest_session_id={session}", params={"value": int(grade)}, headers={"Content-Type": "application/json;charset=utf-8"})
         return request.json()
 
+    def get_top_rated(media, page):
+        if media=='serie':
+            result = requests.get(f"{Api.base_url_start}tv/top_rated{Api.base_url_end}&"
+                                  f"sort_by=vote_average.desc&page={page}").json()
+        elif media=='movie':
+            result = requests.get(f"{Api.base_url_start}movie/top_rated{Api.base_url_end}&"
+                                  f"sort_by=vote_average.desc&page={page}").json()
+        else:
+            raise ValueError("The type of this media is unknown")
+        return result['results'], result['total_pages']
+        
 import requests
 from classes.movie import Movie
 from classes.Serie import Serie

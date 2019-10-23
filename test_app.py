@@ -2,14 +2,17 @@ import os
 import unittest
 from flask import url_for, g
 
+from app.api import Api
 from app.forms import SearchForm
 from classes.Exception import SetterException
 from config import basedir
 from app import app, db
 from app.models import User
+from app.forms import RegistrationForm
 from unittest import TestCase
 from classes.media import Media
 from classes.episode import Episode
+from classes.season import Season
 import logging
 
 
@@ -75,53 +78,53 @@ class TestApplication(TestCase):
             password=password1,
             password2=password2
         ), follow_redirects=True)
-    #
-    # def test_user_registration(self):
-    #     """
-    #     This method allows us to check that the registration of the users takes place without problems
-    #     We check that when a user registers, a successful message is flashed
-    #
-    #     We also check that in the following cases the user is not created (errors message are flashed
-    #     in the register page):
-    #     - Username already taken
-    #     - Email already taken
-    #     - Email not in the good format (not in xxx@xxx.xx)
-    #     - The two fields email aren't matching
-    #     - The two password fields aren't matching
-    #     :return: void
-    #     """
-    #     # We check that a user can register if all the correct info is typed in
-    #     # To check if the registration took place correctly, we check the logs
-    #     with self.assertLogs() as cm :
-    #         TestApplication.register(self, 'Username2',  'Name2', 'Surname2', 'test2@test.co', 'test2@test.co',
-    #                                       'password2', 'password2')
-    #     self.assertEqual(cm.records[0].msg, 'Successful registry')
-    #
-    #     #We check that a user can't register with the same username than an already existing user
-    #     rv2 = TestApplication.register(self, 'Username2',  'Name3', 'Surname3', 'test3@test.co', 'test3@test.co',
-    #                                    'password3', 'password3')
-    #     assert b'This username is already used, please use a different username.' in rv2.data
-    #
-    #     # We check that a user can't register with the same email than an already existing user
-    #     rv3 = TestApplication.register(self, 'Username3', 'Name3', 'Surname3', 'test2@test.co', 'test2@test.co',
-    #                                    'password3', 'password3')
-    #     assert b'This e-mail is already used, please use a different email address.' in rv3.data
-    #
-    #     # We check that the user must type in an email that matches the email format
-    #     rv4 = TestApplication.register(self, 'Username3', 'Name3', 'Surname3', 'test3test.co', 'test3test.co',
-    #                                    'password3', 'password3')
-    #     assert b'Invalid email address.' in rv4.data
-    #
-    #     # We check that a user can't register if the validation email isn't equal to the email first typed in
-    #     rv5 = TestApplication.register(self, 'Username3', 'Name3', 'Surname3', 'test3@test.co', 'test3@test.com',
-    #                                    'password3', 'password3')
-    #     assert b'Field must be equal to email.' in rv5.data
-    #
-    #     # We check that a user can't register if the validation password isn't equal to the password first typed in
-    #     rv6 = TestApplication.register(self, 'Username3', 'Name3', 'Surname3', 'test3@test.co', 'test3@test.co',
-    #                                    'password3', 'password3x')
-    #     assert b'Field must be equal to password.' in rv6.data
-    #
+
+    def test_user_registration(self):
+        """
+        This method allows us to check that the registration of the users takes place without problems
+        We check that when a user registers, a successful message is flashed
+
+        We also check that in the following cases the user is not created (errors message are flashed
+        in the register page):
+        - Username already taken
+        - Email already taken
+        - Email not in the good format (not in xxx@xxx.xx)
+        - The two fields email aren't matching
+        - The two password fields aren't matching
+        :return: void
+        """
+        # We check that a user can register if all the correct info is typed in
+        # To check if the registration took place correctly, we check the logs
+        with self.assertLogs() as cm :
+            TestApplication.register(self, 'Username2',  'Name2', 'Surname2', 'test2@test.co', 'test2@test.co',
+                                          'password2', 'password2')
+        self.assertEqual(cm.records[0].msg, 'Successful registry')
+
+        #We check that a user can't register with the same username than an already existing user
+        rv2 = TestApplication.register(self, 'Username2',  'Name3', 'Surname3', 'test3@test.co', 'test3@test.co',
+                                       'password3', 'password3')
+        assert b'This username is already used, please use a different username.' in rv2.data
+
+        # We check that a user can't register with the same email than an already existing user
+        rv3 = TestApplication.register(self, 'Username3', 'Name3', 'Surname3', 'test2@test.co', 'test2@test.co',
+                                       'password3', 'password3')
+        assert b'This e-mail is already used, please use a different email address.' in rv3.data
+
+        # We check that the user must type in an email that matches the email format
+        rv4 = TestApplication.register(self, 'Username3', 'Name3', 'Surname3', 'test3test.co', 'test3test.co',
+                                       'password3', 'password3')
+        assert b'Invalid email address.' in rv4.data
+
+        # We check that a user can't register if the validation email isn't equal to the email first typed in
+        rv5 = TestApplication.register(self, 'Username3', 'Name3', 'Surname3', 'test3@test.co', 'test3@test.com',
+                                       'password3', 'password3')
+        assert b'Field must be equal to email.' in rv5.data
+
+        # We check that a user can't register if the validation password isn't equal to the password first typed in
+        rv6 = TestApplication.register(self, 'Username3', 'Name3', 'Surname3', 'test3@test.co', 'test3@test.co',
+                                       'password3', 'password3x')
+        assert b'Field must be equal to password.' in rv6.data
+
     def login(self, username, password):
         """
         This function is used to simulate a login event for a user on our login page.
@@ -141,368 +144,357 @@ class TestApplication(TestCase):
         :return: void
         """
         return self.app.get('/logout', follow_redirects=True)
-    #
-    # def test_user_login_logout(self):
-    #     """
-    #     This method allows us to check that the login of the users takes place without problems
-    #     We check that when a user logs in, a successful message is flashed
-    #
-    #     We also check that a user can't login if he types in the wrong info (wrong username or wrong password)
-    #     :return: void
-    #     """
-    #     # We check that a user can log in if all the correct info is typed in
-    #     TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-    #                                  'password', 'password')
-    #     with self.assertLogs() as cm:
-    #         TestApplication.login(self, 'Username',  'password')
-    #     self.assertEqual(cm.records[1].msg, 'Successful Login !')
-    #
-    #     # We check that the logout is succesful
-    #     with self.assertLogs() as cm:
-    #         self.logout()
-    #     self.assertEqual(cm.records[0].msg, 'Successful Logout !')
-    #
-    #     # We check that a user can't log in if there is a mistake in its username
-    #     with self.assertLogs() as cm:
-    #         TestApplication.login(self, 'Username2', 'password')
-    #     self.assertEqual(cm.records[1].msg, 'Invalid Username !')
-    #
-    #     # We check that a user can't log in if there is a mistake in its password
-    #     with self.assertLogs() as cm:
-    #         TestApplication.login(self, 'Username', 'password2')
-    #     self.assertEqual(cm.records[1].msg, 'Invalid Password !')
-    #
-    # def test_routes_serie(self):
-    #     """
-    #     This method allows us to check the route for the serie template
-    #     We check that a logged in user can access a serie if the id of the serie matches a serie in the api
-    #     We also check that if the id is not correct, the user is correctly sent to an error template
-    #     Finally, we check that a user can't go to a serie page if he isn't logged in
-    #     :return: void
-    #     """
-    #     # We create a user that logs in that will be used throughout this test
-    #     TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-    #                              'password', 'password')
-    #     TestApplication.login(self, 'Username', 'password')
-    #
-    #     # We check that the serie route works well with a correct id of a serie (1412 serie : Arrow)
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/serie/1412', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'Successful query for the Serie id=1412 page')
-    #
-    #     # We check that an error is returned when an incorrect serie number is given
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/serie/141213243', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'Incorrect Serie id')
-    #
-    #     #We now check that this route is not available if no user is logged in
-    #     self.logout()
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/serie/1412', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'The user is logging in')
-    #
-    # def test_routes_movie(self):
-    #     """
-    #         This method allows us to check the route for the movie template
-    #         We check that a logged in user can access a movie if the id of the movie matches a movie in the api
-    #         We also check that if the id is not correct, the user is correctly sent to an error template
-    #         Finally, we check that a user can't go to a movie page if he isn't logged in
-    #         :return: void
-    #     """
-    #     # We create a user that logs in that will be used throughout this test
-    #     TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-    #                              'password', 'password')
-    #     TestApplication.login(self, 'Username', 'password')
-    #
-    #     # We check that the movie route works well with the 475557 movie (Joker)
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/movie/475557', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'Successful query for the Movie id=475557 page')
-    #
-    #     # We check that an error is returned when an incorrect movie number is given
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/movie/141213243', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'Incorrect Movie id')
-    #
-    #     #We now check that this route is not available if no user is logged in
-    #     self.logout()
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/movie/1412', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'The user is logging in')
-    #
-    # def test_route_addSerie(self):
-    #     """
-    #         This method allows us to check the route for adding a serie to a user in the database
-    #         We check that when the users adds a serie, the correct serie is added to the database
-    #         We also check that there is no problem when the user already has a serie in his database
-    #         Finally, we check that the login is needed
-    #         :return: void
-    #     """
-    #     # We create a user that logs in that will be used throughout this test
-    #     TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-    #                              'password', 'password')
-    #     TestApplication.login(self, 'Username', 'password')
-    #
-    #     # We check that the add serie route works well
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/add_serie/1412', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'Serie 1412 successfully added')
-    #     # We check that the serie is correctly added to the user in the db
-    #     u = User.query.filter_by(name='Name')
-    #     self.assertEqual(u[0]._series, '1412xS1E1')
-    #
-    #     # We check that if the user adds another serie, the process works good in the database
-    #     self.app.get('/add_serie/2190', follow_redirects=True)
-    #     u = User.query.filter_by(name='Name')
-    #     self.assertEqual(u[0]._series, '1412xS1E1-2190xS1E1')
-    #
-    #     # We now check that this route is not available if no user is logged in
-    #     self.logout()
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/add_serie/2190', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'The user is logging in')
-    #
-    # def test_route_removeSerie(self):
-    #     """
-    #         This method allows us to check the route for removing a serie of an user in the database
-    #         We check that when the users removes a serie, the correct serie is removed from the database
-    #         We also check that there is no problem when the user already has only one serie in his database
-    #         Finally, we check that the login is needed
-    #         :return: void
-    #     """
-    #     # We create a user that logs in that will be used throughout this test
-    #     TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-    #                              'password', 'password')
-    #     TestApplication.login(self, 'Username', 'password')
-    #
-    #     # We add 2 series to the user :
-    #     u = User.query.filter_by(name='Name')
-    #     u[0]._series = '1412xS1E1-2190xS1E1'
-    #
-    #     # We check that the remove serie route works well
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/remove_serie/1412', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'Serie 1412 successfully removed')
-    #     # We check that the serie is correctly removed from the user in the db
-    #     u = User.query.filter_by(name='Name')
-    #     self.assertEqual(u[0]._series, '2190xS1E1')
-    #
-    #     # We check that if the user removes another serie, the process works good in the database
-    #     self.app.get('/remove_serie/2190', follow_redirects=True)
-    #     u = User.query.filter_by(name='Name')
-    #     self.assertEqual(u[0]._series, '')
-    #
-    #     # We now check that this route is not available if no user is logged in
-    #     self.logout()
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/remove_serie/2190', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'The user is logging in')
 
-    # def test_route_addMovie(self):
-    #     """
-    #         This method allows us to check the route for adding a movie to a user in the database
-    #         We check that when the users adds a movie, the correct movie is added to the database
-    #         Finally, we check that the login is needed
-    #         :return: void
-    #     """
-    #     # We create a user that logs in that will be used throughout this test
-    #     TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-    #                              'password', 'password')
-    #     TestApplication.login(self, 'Username', 'password')
-    #
-    #     # We check that the add movie route works well
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/add_movie/475557', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'Movie 475557 successfully added')
-    #     # We check that the serie is correctly added to the user in the db
-    #     u = User.query.filter_by(name='Name')
-    #     self.assertEqual(u[0]._movies, '475557')
-    #
-    #     # We now check that this route is not available if no user is logged in
-    #     self.logout()
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/add_movie/420818', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'The user is logging in')
-    #
-    # def test_route_removeMovie(self):
-    #     """
-    #         This method allows us to check the route for removing a movie of an user in the database
-    #         We check that when the users removes a movie, the correct movie is removed from the database
-    #         We also check that there is no problem when the user already has only one movie in his database
-    #         Finally, we check that the login is needed
-    #         :return: void
-    #     """
-    #     # We create a user that logs in that will be used throughout this test
-    #     TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-    #                              'password', 'password')
-    #     TestApplication.login(self, 'Username', 'password')
-    #
-    #     # We add a movie to the user :
-    #     u = User.query.filter_by(name='Name')
-    #     u[0]._movies = '475557'
-    #
-    #     # We check that the remove movie route works well
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/remove_movie/475557', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'Movie 475557 successfully removed')
-    #     # We check that the movie is correctly removed from the user in the db
-    #     u = User.query.filter_by(name='Name')
-    #     self.assertEqual(u[0]._movies, '')
-    #
-    #     # We now check that this route is not available if no user is logged in
-    #     self.logout()
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/remove_movie/420818', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'The user is logging in')
-    #
-    # def test_route_mySerie(self):
-    #     """
-    #         With this function, we check that the mySeries page works well for a connected user
-    #         We check that the series are displayed when there are and that none are displayed when the user doesn't
-    #         have any
-    #         Finally, we check that a when no user is logged in, the page can't be displayed
-    #         :return: void
-    #     """
-    #     # We create a user that logs in that will be used throughout this test
-    #     TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-    #                              'password', 'password')
-    #     TestApplication.login(self, 'Username', 'password')
-    #
-    #     # We add 2 series to the user :
-    #     u = User.query.filter_by(name='Name')
-    #     u[0]._series = '1412xS1E1-2190xS1E1'
-    #
-    #     # We check that the mySerie route works well for this user
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/myseries', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'MySeries page rendered')
-    #     self.assertEqual(cm.records[1].msg, 'The series list has 2 series')
-    #
-    #     # We check that the when the user has no Series added the template renders no serie
-    #     u = User.query.filter_by(name='Name')
-    #     u[0]._series = ''
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/myseries', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'MySeries page rendered without series')
-    #
-    #     # We now check that this route is not available if no user is logged in
-    #     self.logout()
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/myseries', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'The user is logging in')
-    #
-    #
-    #
-    # def test_route_myMovie(self):
-    #     """
-    #         With this function, we check that the myMovies page works well for a connected user
-    #         We check that the movies are displayed when there are and that none are displayed when the user doesn't
-    #         have any
-    #         Finally, we check that a when no user is logged in, the page can't be displayed
-    #         :return: void
-    #     """
-    #     # We create a user that logs in that will be used throughout this test
-    #     TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-    #                              'password', 'password')
-    #     TestApplication.login(self, 'Username', 'password')
-    #
-    #     # We add 2 movies to the user :
-    #     u = User.query.filter_by(name='Name')
-    #     u[0]._movies = '453405-420818'
-    #
-    #     # We check that the myMovie route works well for this user
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/mymovies', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'MyMovies page rendered')
-    #     self.assertEqual(cm.records[1].msg, 'The movies list has 2 movies')
-    #
-    #     # We check that the when the user has no Movies added the template renders no serie
-    #     u = User.query.filter_by(name='Name')
-    #     u[0]._movies = ''
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/mymovies', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'MyMovies page rendered without movies')
-    #
-    #     # We now check that this route is not available if no user is logged in
-    #     self.logout()
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/mymovies', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'The user is logging in')
-    #
-    #
-    #
-    # def test_route_search(self):
-    #     """
-    #         We check that the route for search2 returns the correct search for the user
-    #         We also check that the user can't do a search when not logged in
-    #         :return: void
-    #     """
-    #     # We create a user that logs in that will be used throughout this test
-    #     TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-    #                              'password', 'password')
-    #     TestApplication.login(self, 'Username', 'password')
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/search2/test/1', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'Search page 1 rendered for : test')
-    #
-    #     # We now check that this route is not available if no user is logged in
-    #     self.logout()
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/search2/test/1', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'The user is logging in')
-    #
-    # def test_route_genre(self):
-    #     """
-    #         We check that the route for genre returns the correct genre searched by the user
-    #         We also check that the user can't check a genre when not logged in
-    #         :return: void
-    #     """
-    #     # We create a user that logs in that will be used throughout this test
-    #     TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-    #                              'password', 'password')
-    #     TestApplication.login(self, 'Username', 'password')
-    #
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/genre/tv/Comedy/1', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'Genre request on : Genre = Comedy, Media = tv, Page = 1')
-    #
-    #     # We now check that this route is not available if no user is logged in
-    #     self.logout()
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/genre/tv/Comedy/1', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'The user is logging in')
-    #
-    # def test_route_select_episode(self):
-    #     """
-    #         We check that the route to select an episode returns the correct episode searched by the user
-    #         We also check that the user can't check an episode when not logged in
-    #         :return: void
-    #     """
-    #     # We create a user that logs in that will be used throughout this test
-    #     TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-    #                              'password', 'password')
-    #     TestApplication.login(self, 'Username', 'password')
-    #
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/serie/1412/season/3/episode/4', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'Selected Episode : Serie = 1412, Season = 3, episode = 4')
-    #
-    #     # We now check that this route is not available if no user is logged in
-    #     self.logout()
-    #     with self.assertLogs() as cm:
-    #         self.app.get('/serie/1412/season/3/episode/4', follow_redirects=True)
-    #     self.assertEqual(cm.records[0].msg, 'The user is logging in')
-    #
-    # def test_route_next_episode(self):
-    #     """
-    #         We check that the route to select the next episode updates the correct episode for the user
-    #         We also check that the user can't select a next an episode when not logged in
-    #         :return: void
-    #     """
-    #     # We create a user that logs in that will be used throughout this test
-    #     TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-    #                              'password', 'password')
-    #     TestApplication.login(self, 'Username', 'password')
+    def test_user_login_logout(self):
+        """
+        This method allows us to check that the login of the users takes place without problems
+        We check that when a user logs in, a successful message is flashed
+
+        We also check that a user can't login if he types in the wrong info (wrong username or wrong password)
+        :return: void
+        """
+        # We check that a user can log in if all the correct info is typed in
+        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                                     'password', 'password')
+        with self.assertLogs() as cm:
+            TestApplication.login(self, 'Username',  'password')
+        self.assertEqual(cm.records[1].msg, 'Successful Login !')
+
+        # We check that the logout is succesful
+        with self.assertLogs() as cm:
+            self.logout()
+        self.assertEqual(cm.records[0].msg, 'Successful Logout !')
+
+        # We check that a user can't log in if there is a mistake in its username
+        with self.assertLogs() as cm:
+            TestApplication.login(self, 'Username2', 'password')
+        self.assertEqual(cm.records[1].msg, 'Invalid Username !')
+
+        # We check that a user can't log in if there is a mistake in its password
+        with self.assertLogs() as cm:
+            TestApplication.login(self, 'Username', 'password2')
+        self.assertEqual(cm.records[1].msg, 'Invalid Password !')
+
+    def test_routes_serie(self):
+        """
+        This method allows us to check the route for the serie template
+        We check that a logged in user can access a serie if the id of the serie matches a serie in the api
+        We also check that if the id is not correct, the user is correctly sent to an error template
+        Finally, we check that a user can't go to a serie page if he isn't logged in
+        :return: void
+        """
+        # We create a user that logs in that will be used throughout this test
+        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                                 'password', 'password')
+        TestApplication.login(self, 'Username', 'password')
+
+        # We check that the serie route works well with a correct id of a serie (1412 serie : Arrow)
+        with self.assertLogs() as cm:
+            self.app.get('/serie/1412', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Successful query for the Serie id=1412 page')
+
+        # We check that an error is returned when an incorrect serie number is given
+        with self.assertLogs() as cm:
+            self.app.get('/serie/141213243', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Incorrect Serie id')
+
+        #We now check that this route is not available if no user is logged in
+        self.logout()
+        with self.assertLogs() as cm:
+            self.app.get('/serie/1412', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'The user is logging in')
+
+    def test_routes_movie(self):
+        """
+            This method allows us to check the route for the movie template
+            We check that a logged in user can access a movie if the id of the movie matches a movie in the api
+            We also check that if the id is not correct, the user is correctly sent to an error template
+            Finally, we check that a user can't go to a movie page if he isn't logged in
+            :return: void
+        """
+        # We create a user that logs in that will be used throughout this test
+        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                                 'password', 'password')
+        TestApplication.login(self, 'Username', 'password')
+
+        # We check that the movie route works well with the 475557 movie (Joker)
+        with self.assertLogs() as cm:
+            self.app.get('/movie/475557', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Successful query for the Movie id=475557 page')
+
+        # We check that an error is returned when an incorrect movie number is given
+        with self.assertLogs() as cm:
+            self.app.get('/movie/141213243', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Incorrect Movie id')
+
+        #We now check that this route is not available if no user is logged in
+        self.logout()
+        with self.assertLogs() as cm:
+            self.app.get('/movie/1412', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'The user is logging in')
+
+    def test_route_addSerie(self):
+        """
+            This method allows us to check the route for adding a serie to a user in the database
+            We check that when the users adds a serie, the correct serie is added to the database
+            We also check that there is no problem when the user already has a serie in his database
+            Finally, we check that the login is needed
+            :return: void
+        """
+        # We create a user that logs in that will be used throughout this test
+        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                                 'password', 'password')
+        TestApplication.login(self, 'Username', 'password')
+
+        # We check that the add serie route works well
+        with self.assertLogs() as cm:
+            self.app.get('/add_serie/1412', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Serie 1412 successfully added')
+        # We check that the serie is correctly added to the user in the db
+        u = User.query.filter_by(name='Name')
+        self.assertEqual(u[0]._series, '1412xS1E1')
+
+        # We check that if the user adds another serie, the process works good in the database
+        self.app.get('/add_serie/2190', follow_redirects=True)
+        u = User.query.filter_by(name='Name')
+        self.assertEqual(u[0]._series, '1412xS1E1-2190xS1E1')
+
+        # We now check that this route is not available if no user is logged in
+        self.logout()
+        with self.assertLogs() as cm:
+            self.app.get('/add_serie/2190', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'The user is logging in')
+
+    def test_route_removeSerie(self):
+        """
+            This method allows us to check the route for removing a serie of an user in the database
+            We check that when the users removes a serie, the correct serie is removed from the database
+            We also check that there is no problem when the user already has only one serie in his database
+            Finally, we check that the login is needed
+            :return: void
+        """
+        # We create a user that logs in that will be used throughout this test
+        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                                 'password', 'password')
+        TestApplication.login(self, 'Username', 'password')
+
+        # We add 2 series to the user :
+        u = User.query.filter_by(name='Name')
+        u[0]._series = '1412xS1E1-2190xS1E1'
+
+        # We check that the remove serie route works well
+        with self.assertLogs() as cm:
+            self.app.get('/remove_serie/1412', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Serie 1412 successfully removed')
+        # We check that the serie is correctly removed from the user in the db
+        u = User.query.filter_by(name='Name')
+        self.assertEqual(u[0]._series, '2190xS1E1')
+
+        # We check that if the user removes another serie, the process works good in the database
+        self.app.get('/remove_serie/2190', follow_redirects=True)
+        u = User.query.filter_by(name='Name')
+        self.assertEqual(u[0]._series, '')
+
+        # We now check that this route is not available if no user is logged in
+        self.logout()
+        with self.assertLogs() as cm:
+            self.app.get('/remove_serie/2190', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'The user is logging in')
+
+    def test_route_addMovie(self):
+        """
+            This method allows us to check the route for adding a movie to a user in the database
+            We check that when the users adds a movie, the correct movie is added to the database
+            Finally, we check that the login is needed
+            :return: void
+        """
+        # We create a user that logs in that will be used throughout this test
+        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                                 'password', 'password')
+        TestApplication.login(self, 'Username', 'password')
+
+        # We check that the add movie route works well
+        with self.assertLogs() as cm:
+            self.app.get('/add_movie/475557', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Movie 475557 successfully added')
+        # We check that the serie is correctly added to the user in the db
+        u = User.query.filter_by(name='Name')
+        self.assertEqual(u[0]._movies, '475557')
+
+        # We now check that this route is not available if no user is logged in
+        self.logout()
+        with self.assertLogs() as cm:
+            self.app.get('/add_movie/420818', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'The user is logging in')
+
+    def test_route_removeMovie(self):
+        """
+            This method allows us to check the route for removing a movie of an user in the database
+            We check that when the users removes a movie, the correct movie is removed from the database
+            We also check that there is no problem when the user already has only one movie in his database
+            Finally, we check that the login is needed
+            :return: void
+        """
+        # We create a user that logs in that will be used throughout this test
+        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                                 'password', 'password')
+        TestApplication.login(self, 'Username', 'password')
+
+        # We add a movie to the user :
+        u = User.query.filter_by(name='Name')
+        u[0]._movies = '475557'
+
+        # We check that the remove movie route works well
+        with self.assertLogs() as cm:
+            self.app.get('/remove_movie/475557', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Movie 475557 successfully removed')
+        # We check that the movie is correctly removed from the user in the db
+        u = User.query.filter_by(name='Name')
+        self.assertEqual(u[0]._movies, '')
+
+        # We now check that this route is not available if no user is logged in
+        self.logout()
+        with self.assertLogs() as cm:
+            self.app.get('/remove_movie/420818', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'The user is logging in')
+
+    def test_route_mySerie(self):
+        """
+            With this function, we check that the mySeries page works well for a connected user
+            We check that the series are displayed when there are and that none are displayed when the user doesn't
+            have any
+            Finally, we check that a when no user is logged in, the page can't be displayed
+            :return: void
+        """
+        # We create a user that logs in that will be used throughout this test
+        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                                 'password', 'password')
+        TestApplication.login(self, 'Username', 'password')
+
+        # We add 2 series to the user :
+        u = User.query.filter_by(name='Name')
+        u[0]._series = '1412xS1E1-2190xS1E1'
+
+        # We check that the mySerie route works well for this user
+        with self.assertLogs() as cm:
+            self.app.get('/myseries', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'MySeries page rendered')
+        self.assertEqual(cm.records[1].msg, 'The series list has 2 series')
+
+        # We check that the when the user has no Series added the template renders no serie
+        u = User.query.filter_by(name='Name')
+        u[0]._series = ''
+        with self.assertLogs() as cm:
+            self.app.get('/myseries', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'MySeries page rendered without series')
+
+        # We now check that this route is not available if no user is logged in
+        self.logout()
+        with self.assertLogs() as cm:
+            self.app.get('/myseries', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'The user is logging in')
+
+
+
+    def test_route_myMovie(self):
+        """
+            With this function, we check that the myMovies page works well for a connected user
+            We check that the movies are displayed when there are and that none are displayed when the user doesn't
+            have any
+            Finally, we check that a when no user is logged in, the page can't be displayed
+            :return: void
+        """
+        # We create a user that logs in that will be used throughout this test
+        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                                 'password', 'password')
+        TestApplication.login(self, 'Username', 'password')
+
+        # We add 2 movies to the user :
+        u = User.query.filter_by(name='Name')
+        u[0]._movies = '453405-420818'
+
+        # We check that the myMovie route works well for this user
+        with self.assertLogs() as cm:
+            self.app.get('/mymovies', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'MyMovies page rendered')
+        self.assertEqual(cm.records[1].msg, 'The movies list has 2 movies')
+
+        # We check that the when the user has no Movies added the template renders no serie
+        u = User.query.filter_by(name='Name')
+        u[0]._movies = ''
+        with self.assertLogs() as cm:
+            self.app.get('/mymovies', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'MyMovies page rendered without movies')
+
+        # We now check that this route is not available if no user is logged in
+        self.logout()
+        with self.assertLogs() as cm:
+            self.app.get('/mymovies', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'The user is logging in')
+
+
+
+    def test_route_search(self):
+        """
+            We check that the route for search2 returns the correct search for the user
+            We also check that the user can't do a search when not logged in
+            :return: void
+        """
+        # We create a user that logs in that will be used throughout this test
+        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                                 'password', 'password')
+        TestApplication.login(self, 'Username', 'password')
+        with self.assertLogs() as cm:
+            self.app.get('/search2/test/1', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Search page 1 rendered for : test')
+
+        # We now check that this route is not available if no user is logged in
+        self.logout()
+        with self.assertLogs() as cm:
+            self.app.get('/search2/test/1', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'The user is logging in')
+
+    def test_route_genre(self):
+        """
+            We check that the route for genre returns the correct genre searched by the user
+            We also check that the user can't check a genre when not logged in
+            :return: void
+        """
+        # We create a user that logs in that will be used throughout this test
+        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                                 'password', 'password')
+        TestApplication.login(self, 'Username', 'password')
+
+        with self.assertLogs() as cm:
+            self.app.get('/genre/tv/Comedy/1', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Genre request on : Genre = Comedy, Media = tv, Page = 1')
+
+        # We now check that this route is not available if no user is logged in
+        self.logout()
+        with self.assertLogs() as cm:
+            self.app.get('/genre/tv/Comedy/1', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'The user is logging in')
+
+    def test_route_select_episode(self):
+        """
+            We check that the route to select an episode returns the correct episode searched by the user
+            We also check that the user can't check an episode when not logged in
+            :return: void
+        """
+        # We create a user that logs in that will be used throughout this test
+        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                                 'password', 'password')
+        TestApplication.login(self, 'Username', 'password')
+
+        with self.assertLogs() as cm:
+            self.app.get('/serie/1412/season/3/episode/4', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Selected Episode : Serie = 1412, Season = 3, episode = 4')
+
+        # We now check that this route is not available if no user is logged in
+        self.logout()
+        with self.assertLogs() as cm:
+            self.app.get('/serie/1412/season/3/episode/4', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'The user is logging in')
 
     def tearDown(self):
         db.session.remove()
@@ -809,8 +801,8 @@ class TestUser(TestCase):
         self.assertEqual(self.user.movies_grades, '453405x4')
 
         # We check that the method works well when there already is a grade in the serie grade list
-        self.user.grade('69050', 'serie', 5)
-        self.assertEqual(self.user.series_grades, '1412x2-69050x5')
+        self.user.grade('69050', 'serie', 8)
+        self.assertEqual(self.user.series_grades, '1412x2-69050x8')
 
         # We check that the method works well when there already is a grade in the movie grade list
         self.user.grade('420818', 'movie', 6)
@@ -818,9 +810,9 @@ class TestUser(TestCase):
 
     def test_is_graded(self):
         """
-        We try here to check that the is_graded method works well,
-        We need to check that when the serie is graded, the method returns True
-        The method needs to return False when the serie is not graded or the graded list is null
+        We try here to check that the is_graded method works well, for both series and movies
+        We need to check that when the media is graded, the method returns True
+        The method needs to return False when the media is not graded or the graded list is null
         We need to check that it works for both series and movies
         :return: void
         """
@@ -828,19 +820,88 @@ class TestUser(TestCase):
         self.user.movies_grades = None
 
         # We check that it returns false for both series and movies when the lists are None
-        self.user.is_graded('1412')
-        self.user
-    #
-    # def test_get_grade(self):
-    #
-    # def test_unrate(self):
-    #
-    # def test_get_reset_password_token(self):
-    #     self.fail()
-    #
-    # def test_verify_reset_password_token(self):
-    #     self.fail()
+        self.assertFalse(self.user.is_graded('serie', '1412'))
+        self.assertFalse(self.user.is_graded('movie', '453405'))
 
+        # We now add a serie and a movie to the user grades lists
+        self.user.grade('1412', 'serie', 2)
+        self.user.grade('453405', 'movie', 8)
+
+        # We now check that the method returns true for both of them when we check that they are graded
+        self.assertTrue(self.user.is_graded('serie', '1412'))
+        self.assertTrue(self.user.is_graded('movie', '453405'))
+
+        # Finally we check that the method returns false when we look for others medias or other series/films
+        self.assertFalse(self.user.is_graded('serie', '1413'))
+        self.assertFalse(self.user.is_graded('movie', '453406'))
+        with self.assertRaises(ValueError):
+            self.user.is_graded('other_media', '1412')
+
+    def test_get_grade(self):
+        """
+        We try here to check that the get_grade method works well, for both series and movies
+        We need to check that when the media is graded, the method returns the grade
+        The method needs to return False when the media is not graded or the graded list is null
+        We need to check that it works for both series and movies
+        :return: void
+        """
+        self.user.series_grades = None
+        self.user.movies_grades = None
+
+        # We check that it returns false for both series and movies when the lists are None
+        self.assertFalse(self.user.get_grade('serie', '1412'))
+        self.assertFalse(self.user.get_grade('movie', '453405'))
+
+        # we add grades to the series and movies grades lists
+        self.user.grade('1412', 'serie', 2)
+        self.user.grade('453405', 'movie', 8)
+
+        # We check that we get the grades of the medias
+        self.assertEqual(self.user.get_grade('serie', '1412'), 2)
+        self.assertEqual(self.user.get_grade('movie', '453405'), 8)
+
+        # Finally we check that the method returns false when we grade for others medias or other series/films
+        self.assertFalse(self.user.is_graded('serie', '1413'))
+        self.assertFalse(self.user.is_graded('movie', '453406'))
+        with self.assertRaises(ValueError):
+            self.user.is_graded('other_media', '1412')
+
+    def test_unrate(self):
+        """
+           We try here to check that the unrate method works well, for both series and movies
+           We need to check that when the media is graded, the method deletes the grade and the media from the list
+           We also need to check that there are no errors if the lists are None
+           Finally we need to check that the delete works well when we delete the first media,
+           or when there only is one media
+           :return: void
+        """
+        self.user.series_grades = '1412x2-69050x6-62286x8'
+        self.user.movies_grades = '453405x4-420818x8-420809x6'
+
+        # We check that it returns the correct list when we delete the first elements
+        self.user.unrate('serie', '1412')
+        self.user.unrate('movie', '453405')
+        self.assertEqual(self.user.series_grades, '69050x6-62286x8')
+        self.assertEqual(self.user.movies_grades, '420818x8-420809x6')
+
+        # We check that it returns the correct list when we delete the last elements
+        self.user.unrate('serie', '62286')
+        self.user.unrate('movie', '420809')
+        self.assertEqual(self.user.series_grades, '69050x6')
+        self.assertEqual(self.user.movies_grades, '420818x8')
+
+        # We check that nothing happens when we delete a media not in the lists
+        self.user.unrate('serie', '62286')
+        self.user.unrate('movie', '420809')
+        self.assertEqual(self.user.series_grades, '69050x6')
+        self.assertEqual(self.user.movies_grades, '420818x8')
+
+        # Finally, we check that nothing happens when the list is None or empty
+        self.user.series_grades = None
+        self.user.movies_grades = None
+        self.user.unrate('serie', '62286')
+        self.user.unrate('movie', '420809')
+        self.assertEqual(self.user.series_grades, None)
 
 
 if __name__ == '__main__':
