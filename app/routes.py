@@ -79,7 +79,8 @@ def serie(id):
                     serie.selected_episode = user_serie.split('x')[1]
         episode = serie.get_episode
         app.logger.info(msg=f'Successful query for the Serie id={serie.id} page')
-        return render_template('serie.html', serie=serie, user=current_user,
+        return render_template('serie.html', serie=serie, user=current_user, episode=episode,
+                               season =serie.get_episode.num_season,
                                tv_genres=tv_genres, movie_genres=movie_genres, similar=similar)
 
 
@@ -278,8 +279,8 @@ def select_episode(id, season, episode):
     serie.selected_episode = 'S' + str(season) + 'E' + str(episode)
     episode = serie.get_episode
     app.logger.info(msg=f'Selected Episode : Serie = {id}, Season = {season}, episode = {episode.num_episode}')
-    return render_template('serie.html', serie=serie, user=current_user, episode=episode, similar=similar,
-                           tv_genres=tv_genres, movie_genres=movie_genres)
+    return render_template('serie.html', serie=serie, user=current_user, episode=episode, season=episode.num_season,
+                           similar=similar, tv_genres=tv_genres, movie_genres=movie_genres)
 
 
 @app.route('/serie/<id>/season/<season>/episode/<episode>/view')

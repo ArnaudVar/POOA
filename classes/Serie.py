@@ -84,3 +84,18 @@ class Serie(Media):
     def get_episode(self):
         return Api.get_episode(self.id, self.get_current_season(), self.get_current_episode())
 
+    def get_previous_episode(self):
+        if self.get_current_episode() > 1:
+            return self.get_current_season(), self.get_current_episode()-1
+        elif self.get_current_season() > min(self.seasons):
+            return self.get_current_season()-1, self.seasons[self.get_current_season()-1]
+        else:
+            return False
+
+    def get_next_episode(self):
+        if self.get_current_episode() < self.seasons[self.get_current_season()]:
+            return self.get_current_season(), self.get_current_episode()+1
+        elif self.get_current_season() < max(self.seasons):
+            return self.get_current_season()+1, 1
+        else:
+            return False
