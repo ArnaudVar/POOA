@@ -339,3 +339,32 @@ def topRated(media, page):
 def unrate_movie(id):
     current_user.unrate('movie', id)
     return movie(id)
+
+
+@app.route('/upcoming')
+@login_required
+def upcomingEpisodes():
+    user_id = current_user.id
+    u = User.query.get(user_id)
+    list_series = u.list_serie()
+    list_series_up_to_date = []
+    list_series_last_episode =[]
+    list_series_finished = []
+    if list_series == "The user doesn't have any series":
+        list_series_up_to_date = list_series
+        list_series_last_episode = list_series
+        # app.logger.info(msg=f'MySeries page rendered without series')
+    else:
+        for tvshow in list_series:
+            serie = Api.get_serie(tvshow)
+            latest_ep = f"S{serie.latest['season_number']}E{serie.latest['episode_number']}"
+            if latest_ep == u.get_last_episode_viewed(serie.id):
+                if serie.date == '':
+                    list_series_finished.append(serie)
+                else:
+                    list_series_up_to_date.append(serie)
+            else:
+                list_series_last_episode.append(serie)
+    return render_template('upcoming_episodes.html', title='Upcoming Episodes', list_next_episode=list_series_up_to_date,
+                           list_last_episode=list_series_last_episode, list_finished=list_series_finished,
+                           tv_genres=tv_genres, movie_genres=movie_genres, user=current_user)
