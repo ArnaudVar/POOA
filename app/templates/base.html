@@ -50,13 +50,19 @@
                 <a href="{{ url_for('home') }}"> <i class="fa fa-home"></i> &nbsp; Home</a>
             </li>
             <li class="active">
-                <a href="/myseries"><i class="fas fa-video" ></i>&nbsp; My Series</a>
+                <a href="{{ url_for('myserie') }}"><i class="fas fa-video" ></i>&nbsp; My Series</a>
             </li>
             <li class="active">
-                <a href="/mymovies"><i class="fas fa-film"></i>&nbsp; My Movies</a>
+                <a href="{{ url_for('mymovies') }}"><i class="fas fa-film"></i>&nbsp; My Movies</a>
             </li>
             <li class="active">
-                <a><i class="fa fa-star"></i>&nbsp; Best Series</a>
+                <a href="{{ url_for('upcomingEpisodes') }}"><i class="fas fa-calendar-check"></i>&nbsp; Upcoming Episodes</a>
+            </li>
+            <li class="active">
+                <a href="{{url_for('topRated', media='tv', page=1 )}}"><i class="fa fa-star"></i>&nbsp; Best Series</a>
+            </li>
+            <li class="active">
+                <a href="{{url_for('topRated', media='movie', page=1 )}}"><i class="fa fa-star"></i>&nbsp; Best Movies</a>
             </li>
             <li class="active">
                 <a class="dropdown-toggle" data-toggle="collapse" data-target="#genreSubmenu" role="button"
@@ -66,7 +72,7 @@
                 <ul class="collapse list-unstyled" id="genreSubmenu">
                     {% for genre in tv_genres %}
                     <li>
-                        <a href="/genre/tv/{{genre.name}}/1">{{genre.name}}</a>
+                        <a href="{{url_for('genre', media='tv', genre=genre.name, page=1 )}}">{{genre.name}}</a>
                     </li>
                     {% endfor %}
                 </ul>
@@ -79,7 +85,7 @@
                 <ul class="collapse list-unstyled" id="genreSubmenu2">
                     {% for genre in movie_genres %}
                     <li>
-                        <a href="/genre/movie/{{genre.name}}/1">{{genre.name}}</a>
+                        <a href="{{url_for('genre', media='movie', genre=genre.name, page=1 )}}">{{genre.name}}</a>
                     </li>
                     {% endfor %}
                 </ul>

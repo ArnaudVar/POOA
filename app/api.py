@@ -37,10 +37,19 @@ class Api:
         return serie
 
     @staticmethod
-    def get_popular():
-        seriesjson = requests.get(f"{Api.base_url_start}tv/popular{Api.base_url_end}").json()
-        moviesjson = requests.get(f"{Api.base_url_start}movie/popular{Api.base_url_end}").json()
-        return seriesjson['results'], moviesjson['results']
+    def get_popular(media, page, nb_page=False):
+        if media=='serie':
+            result = requests.get(f"{Api.base_url_start}tv/popular{Api.base_url_end}&"
+                                  f"sort_by=popularity.desc&page={page}").json()
+        elif media=='movie':
+            result = requests.get(f"{Api.base_url_start}movie/popular{Api.base_url_end}&"
+                                  f"sort_by=popularity.desc&page={page}").json()
+        else:
+            raise ValueError("The type of this media is unknown")
+        if nb_page:
+            return result['results'], result['total_pages']
+        else:
+            return result['results']
 
     @staticmethod
     def search(string, page):
@@ -111,6 +120,26 @@ class Api:
                                       latest=None, date=None))
         return media_list
 
+    @staticmethod
+    def new_session():
+        request = requests.get(f"{Api.base_url_start}authentication/guest_session/new?api_key={Api.api_key}")
+        session = request.json()['guest_session_id']
+        return session
+
+    @staticmethod
+    def rate(id, grade, media, session):
+        request = requests.post(f"{Api.base_url_start}{media}/{id}/rating?api_key={Api.api_key}" \
+                                f"&guest_session_id={session}", params={"value": int(grade)}, headers={"Content-Type": "application/json;charset=utf-8"})
+        return request.json()
+
+    @staticmethod
+    def get_top_rated(media, page):
+        result = requests.get(f"{Api.base_url_start}{media}/top_rated{Api.base_url_end}&"
+                                  f"sort_by=vote_average.desc&page={page}").json()
+        print(f"{Api.base_url_start}{media}/top_rated{Api.base_url_end}&"
+                                  f"sort_by=vote_average.desc&page={page}")
+        return result['results'], result['total_pages']
+        
 import requests
 from classes.movie import Movie
 from classes.Serie import Serie

@@ -20,7 +20,8 @@ logo_source = "../static/assets/Logo.png"
 @app.route('/home')
 @login_required
 def home():
-    suggestions_serie, suggestions_movie = Api.get_popular()
+    suggestions_serie = Api.get_popular('serie', 1)
+    suggestions_movie = Api.get_popular('movie', 1)
     selection_serie, selection_movie = [], []
     for i in range(12):
         selection_serie.append(suggestions_serie[i])
@@ -49,6 +50,8 @@ def login():
         app.logger.info(msg='Successful Login !')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('home')
+        current_user.session_id = Api.new_session()
+        db.session.commit()
         return redirect(next_page)
     return render_template('login.html', title='Sign In', form=form, src=logo_source)
 
@@ -77,7 +80,6 @@ def serie(id):
         episode = serie.get_episode
         app.logger.info(msg=f'Successful query for the Serie id={serie.id} page')
         return render_template('serie.html', serie=serie, user=current_user, tv_genres=tv_genres, movie_genres=movie_genres, similar=similar)
-
 
 @app.route('/movie/<id>')
 @login_required
@@ -258,6 +260,8 @@ def genre(media, genre, page):
             index_genre = i
     id_genre = list_genres[index_genre]['id']
     list_media, nb_pages = Api.discover(media, id_genre, page)
+    if media == 'tv':
+        media = 'serie'
     app.logger.info(msg=f'Genre request on : Genre = {genre}, Media = {media}, Page = {page}')
     return render_template('genre.html', genre=genre, list_medias=list_media, media=media,
                            tv_genres=tv_genres, movie_genres=movie_genres, current_page=int(page), nb_pages=nb_pages)
@@ -271,8 +275,8 @@ def select_episode(id, season, episode):
     serie.selected_episode = 'S' + str(season) + 'E' + str(episode)
     episode = serie.get_episode
     app.logger.info(msg=f'Selected Episode : Serie = {id}, Season = {season}, episode = {episode.num_episode}')
-    return render_template('serie.html', serie=serie, user=current_user, episode=episode, similar=similar,
-                           tv_genres=tv_genres, movie_genres=movie_genres)
+    return render_template('serie.html', serie=serie, user=current_user, episode=episode, season=episode.num_season,
+                           similar=similar, tv_genres=tv_genres, movie_genres=movie_genres)
 
 
 @app.route('/serie/<id>/season/<season>/episode/<episode>/view')
@@ -292,8 +296,9 @@ def rate(i):
 @app.route('/serie/<id>/post/grade')
 def post_series_grade(id):
     grade = current_user.current_grade
+    session = current_user.session_id
     current_user.grade(id, 'serie', grade)
-    # requests.post("https://api.themoviedb.org/3/tv/" + str(id)+'/rating' + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US", data = { "value" : grade})
+    msg = Api.rate(id, grade, 'tv', session)
     return serie(id)
 
 
@@ -311,7 +316,52 @@ def unrate_serie(id):
     return serie(id)
 
 
+@app.route('/topRated/<media>/<page>')
+def topRated(media, page):
+    """
+    This function is called when the user tries to access the popular pannel from one of the pages
+    We start by getting the API result with the API class
+    :param media:String (movie or tv)
+    :param page:int (>0)
+    :return:void
+    """
+    # we get the result from the API
+    top_rated_medias, nb_pages = Api.get_top_rated(media, page)
+    app.logger.info(msg=f'Top Rated request on Media = {media}, Page = {page}')
+    return render_template('topRatedMedias.html', list_medias=top_rated_medias, current_page=int(page),
+                           media=media, page=page, nb_pages=nb_pages, tv_genres=tv_genres, movie_genres=movie_genres)
+
+
 @app.route('/movie/<id>/unrate')
 def unrate_movie(id):
     current_user.unrate('movie', id)
     return movie(id)
+
+
+@app.route('/upcoming')
+@login_required
+def upcomingEpisodes():
+    user_id = current_user.id
+    u = User.query.get(user_id)
+    list_series = u.list_serie()
+    list_series_up_to_date = []
+    list_series_last_episode =[]
+    list_series_finished = []
+    if list_series == "The user doesn't have any series":
+        list_series_up_to_date = list_series
+        list_series_last_episode = list_series
+        # app.logger.info(msg=f'MySeries page rendered without series')
+    else:
+        for tvshow in list_series:
+            serie = Api.get_serie(tvshow)
+            latest_ep = f"S{serie.latest['season_number']}E{serie.latest['episode_number']}"
+            if latest_ep == u.get_last_episode_viewed(serie.id):
+                if serie.date == '':
+                    list_series_finished.append(serie)
+                else:
+                    list_series_up_to_date.append(serie)
+            else:
+                list_series_last_episode.append(serie)
+    return render_template('upcoming_episodes.html', title='Upcoming Episodes', list_next_episode=list_series_up_to_date,
+                           list_last_episode=list_series_last_episode, list_finished=list_series_finished,
+                           tv_genres=tv_genres, movie_genres=movie_genres, user=current_user)
