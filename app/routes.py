@@ -76,8 +76,7 @@ def serie(id):
                     serie.selected_episode = user_serie.split('x')[1]
         episode = serie.get_episode
         app.logger.info(msg=f'Successful query for the Serie id={serie.id} page')
-        return render_template('serie.html', serie=serie, user=current_user,
-                               tv_genres=tv_genres, movie_genres=movie_genres, similar=similar)
+        return render_template('serie.html', serie=serie, user=current_user, tv_genres=tv_genres, movie_genres=movie_genres, similar=similar)
 
 
 @app.route('/movie/<id>')
@@ -90,8 +89,7 @@ def movie(id):
         return render_template('404.html')
     else:
         app.logger.info(msg=f'Successful query for the Movie id={id} page')
-        return render_template('movie.html', movie=movie, user=current_user, tv_genres=tv_genres,
-                               movie_genres=movie_genres, similar=similar)
+        return render_template('movie.html', movie=movie, user=current_user, tv_genres=tv_genres, movie_genres=movie_genres, similar=similar)
 
 
 @app.route('/register', methods=['GET', 'POST'])

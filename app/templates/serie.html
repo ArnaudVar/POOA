@@ -40,7 +40,7 @@
         <div class="name">
             <h1>{{serie.name}}</h1>
         </div>
-        <div>
+        <div class="d-flex flex-row">
             {% if user.is_graded('serie', serie.id) %}
             Rated : {{user.get_grade('serie', serie.id)}}
             <a href="/serie/{{serie.id}}/unrate">
@@ -111,6 +111,11 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="d-flex flex-row justify-content-center">
+        {% for genre in serie.genre %}
+        <span class="m-2 badge badge-info">{{genre.name}}</span>
+        {% endfor %}
     </div>
     <div class="d-flex flex-row">
         <div class="w-100 h-50 card suggestion">
