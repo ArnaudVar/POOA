@@ -79,12 +79,13 @@ def serie(id):
                     serie.selected_episode = user_serie.split('x')[1]
         episode = serie.get_episode
         app.logger.info(msg=f'Successful query for the Serie id={serie.id} page')
-        return render_template('serie.html', serie=serie, user=current_user, tv_genres=tv_genres, movie_genres=movie_genres, similar=similar)
+        return render_template('serie.html', serie=serie, episode=episode, user=current_user, tv_genres=tv_genres, movie_genres=movie_genres, similar=similar)
 
 @app.route('/movie/<id>')
 @login_required
 def movie(id):
     movie = Api.get_movie(id)
+    print(movie.genre)
     similar = Api.get_similar(id, 'movie')
     if movie is None:
         app.logger.info(msg=f'Incorrect Movie id')
