@@ -52,6 +52,7 @@ def login():
             next_page = url_for('home')
         current_user.session_id = Api.new_session()
         db.session.commit()
+        current_user.update_all_upcoming_episodes()
         return redirect(next_page)
     return render_template('login.html', title='Sign In', form=form, src=logo_source)
 
@@ -353,33 +354,19 @@ def upcomingEpisodes():
     """
     user_id = current_user.id
     u = User.query.get(user_id)
-    # We get the series of the user using the list_serie method
-    list_series = u.list_serie()
-    list_series_up_to_date = []
-    list_series_last_episode =[]
-    list_series_finished = []
-    for tvshow in list_series:
+    l_utd, l_nutd, l_fin = u.check_upcoming_episodes()
 
-        # We get the information of the tv show from the API
-        serie = Api.get_serie(tvshow)
+    # We fill the list with all the series info using the Api get_serie method
+    list_up_to_date, list_not_up_to_date, list_finished = [], [], []
+    for s_id in l_utd:
+        list_up_to_date.append(Api.get_serie(s_id))
 
-        # We get the number of the last episode aired
-        latest_ep = f"S{serie.latest['season_number']}E{serie.latest['episode_number']}"
+    for s_id in l_nutd:
+        list_not_up_to_date.append(Api.get_serie(s_id))
 
-        # If the last episode was viewed by the user, we check if there is an upcoming episode
-        if latest_ep == u.get_last_episode_viewed(serie.id):
-            if serie.date == '':
-                # We add the show to the finished series
-                list_series_finished.append(serie)
-                app.logger.info(msg=f'Serie {tvshow} added to finished shows')
-            else:
-                # We add the show to the series the user is waiting for the next episode
-                list_series_up_to_date.append(serie)
-                app.logger.info(msg=f'Serie {tvshow} added to up to date shows')
-        else:
-            # We add the show to the not up-to-date shows of the user
-            list_series_last_episode.append(serie)
-            app.logger.info(msg=f'Serie {tvshow} added to not up to date shows')
-    return render_template('upcoming_episodes.html', title='Upcoming Episodes', list_next_episode=list_series_up_to_date,
-                           list_last_episode=list_series_last_episode, list_finished=list_series_finished,
+    for s_id in l_fin:
+        list_finished.append(Api.get_serie(s_id))
+
+    return render_template('upcoming_episodes.html', title='Upcoming Episodes', list_next_episode=list_up_to_date,
+                           list_last_episode=list_not_up_to_date, list_finished=list_finished,
                            tv_genres=tv_genres, movie_genres=movie_genres, user=current_user)

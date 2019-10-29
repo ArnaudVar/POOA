@@ -56,7 +56,15 @@
                 <a href="{{ url_for('mymovies') }}"><i class="fas fa-film"></i>&nbsp; My Movies</a>
             </li>
             <li class="active">
-                <a href="{{ url_for('upcomingEpisodes') }}"><i class="fas fa-calendar-check"></i>&nbsp; Upcoming Episodes</a>
+                <a href="{{ url_for('upcomingEpisodes') }}"><i class="fas fa-calendar-check"></i>&nbsp;
+                    Unseen Episodes
+                    {% set unseen_episodes = current_user.nb_not_up_to_date() %}
+                        {% if unseen_episodes > 0 %}
+                            <span id="message_count" class="badge badge-danger" >
+                                {{ unseen_episodes }}
+                            </span>
+                        {% endif %}
+                </a>
             </li>
             <li class="active">
                 <a href="{{url_for('topRated', media='tv', page=1 )}}"><i class="fa fa-star"></i>&nbsp; Best Series</a>
