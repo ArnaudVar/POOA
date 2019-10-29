@@ -6,6 +6,21 @@ from time import time
 
 
 class User(UserMixin, db.Model):
+    """
+    Classe User
+    :param id: identifiant de l'utilisateur
+    :param username: nom d'utilisateur
+    :param email: email utilisateur
+    :param name: prenom de l'utilisateur
+    :param surname: nom de famille de l'utilisateur
+    :param password_hash : mot de passe hash apres inscription de l'utilisateur
+    :param series: texte avec des id series associes au code du dernier episode vu par l'utilisateur
+    :param movies: texte avec la liste des id des films vus
+    :param series_grades: texte avec des id series associes a la note donnee par l'utilisateur
+    :param movies_grades: texte avec des id movies associes a la note donnee par l'utilisateur
+    :param current_grade: nombre correspondant a la note actuelle de l'utilisateur
+    :param session_id: l'id_session donne par l'API MovieDB pour avoir une guest session pour l'utilisateur
+    """
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
@@ -23,6 +38,10 @@ class User(UserMixin, db.Model):
         return f"Username : {self.username}, Name : {self.name}, Surname : {self.surname}, Email : {self.email}," \
                f" Series : {self.series}"
 
+
+    """
+    Getters et setters pour series, movies et password
+    """
     def _set_series(self, series):
         self._series = series
 
@@ -44,6 +63,10 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+
+    """
+    Cette methode permet de retourner la liste des id des series ajoutees par l'utilisateur
+    """
     def list_serie(self):
         # Le format du texte est sous la forme {idserie}x{Snum_saisonEnum_episode}-{idserie}x{Snum_saisonEnum_episode} .
         # Renvoie une liste de id_serie
@@ -56,6 +79,9 @@ class User(UserMixin, db.Model):
         else :
             return "The user doesn't have any series"
 
+    """
+    Cette methode permet de retourner la liste des id des films ajoutees par l'utilisateur
+    """
     def list_movie(self):
         #Le format du texte est sous la forme {idmovie}-{idmovie}
         #Renvoie une liste de idmovie
@@ -68,16 +94,26 @@ class User(UserMixin, db.Model):
         else:
             return "The user doesn't have any movie"
 
+
+    """
+    Cette methode permet de savoir si une serie est dans la liste des series de l'utilisateur
+    """
     def is_in_series(self,id):
         db.session.commit()
         list_serie = self.list_serie()
         return self.series is not None and str(id) in list_serie
 
+    """
+    Cette methode permet de savoir si un film est dans la liste des films de l'utilisateur
+    """
     def has_movie(self,id):
         db.session.commit()
         list_movie = self.list_movie()
         return self.movies is not None and str(id) in list_movie
 
+    """
+    Cette methode permet de retourner le derniere episode vu pour la serie avec l'ID "id"
+    """
     def get_last_episode_viewed(self,id):
         if self.series == None :
             return('S1E1')
@@ -88,6 +124,10 @@ class User(UserMixin, db.Model):
                 if serieid == str(id):
                     return(serie_string.split('x')[1])
 
+    """
+    Cette methode sert a determiner si un episode de la saison "season" et de numero d'episode "episode"
+    est posterieur au dernier episode vu pour la serie qui a l'ID "serie"
+    """
     def is_after(self, season, episode, serie):
         if str(serie) not in self.series:
             return True
@@ -99,6 +139,10 @@ class User(UserMixin, db.Model):
                     code_last = code.split('E')
             return(int(code_last[0].split('S')[1]) < season or (int(code_last[0].split('S')[1]) == season and int(code_last[1]) < episode) )
 
+    """
+    Cette methode permet de remplacer le dernier episode vu par l'utilisateur pour la serie d'ID "serie" par l'episode "episode"
+    on va donc remplacer le code de l'episode dans series par le code "episode"
+    """
     def view_episode(self, episode, serie):
         user_series = self.series.split('-')
         for userserie in user_series :
@@ -108,6 +152,9 @@ class User(UserMixin, db.Model):
                 self._set_series(new_series)
                 db.session.commit()
 
+    """
+    Cette methode permet d'ajouter une serie a la liste des series de l'utilisateur dans le texte series
+    """
     def add_serie(self, id_serie):
         list_serie = self.list_serie()
         if id_serie not in list_serie:
@@ -117,6 +164,9 @@ class User(UserMixin, db.Model):
                 self._series += f"-{id_serie}xS1E1"
             db.session.commit()
 
+    """
+    Cette methode permet d'enlever une serie de la liste des series de l'utilisateur dans le texte series
+    """
     def remove_serie(self,id_serie):
         string_series = self._series.split('-')
         for i, string_serie in enumerate(string_series):
@@ -131,6 +181,9 @@ class User(UserMixin, db.Model):
                     self._series = self._series.replace('-'+string_serie,'')
         db.session.commit()
 
+    """
+    Cette methode permet d'ajouter un film a la liste des films de l'utilisateur dans le texte movies
+    """
     def add_movie(self, id_movie):
         list_movie = self.list_movie()
         if id_movie not in list_movie:
@@ -140,6 +193,9 @@ class User(UserMixin, db.Model):
                 self._movies += f"-{id_movie}"
             db.session.commit()
 
+    """
+    Cette methode permet d'enlever un film de la liste des films de l'utilisateur dans le texte movies
+    """
     def remove_movie(self, id_movie):
         list_movie = self.list_movie()
         if id_movie in list_movie:
@@ -153,10 +209,17 @@ class User(UserMixin, db.Model):
                 self._movies = self._movies.replace('-'+str(id_movie),'')
             db.session.commit()
 
+    """
+    Cette methode permet de changer la note actuelle de l'utilisateur quand il clique sur une etoile
+    """
     def update_grade(self, new_grade):
         self.current_grade = new_grade
         db.session.commit()
 
+
+    """
+    Cette methode permet d'associer une note a un film ou une serie dans movies_grades ou series_grades
+    """
     def grade(self, id, type, grade):
         if type == 'serie':
             if self.series_grades is None or self.series_grades == '':
@@ -171,6 +234,10 @@ class User(UserMixin, db.Model):
                     self.movies_grades += '-' + str(id) + 'x' + str(grade)
         db.session.commit()
 
+
+    """
+    Cette methode permet de savoir si l'on a deja note une serie ou un film
+    """
     def is_graded(self, type, id):
         if type == 'serie':
             if self.series_grades is None:
@@ -184,6 +251,9 @@ class User(UserMixin, db.Model):
         else:
             raise ValueError("The type of this media is unknown")
 
+    """
+    Cette methode permet d'obtenir la note donnee par l'utilisateur a un film ou une serie
+    """
     def get_grade(self, type, id):
         if type == 'serie':
             if self.series_grades is None:
@@ -207,7 +277,9 @@ class User(UserMixin, db.Model):
                     return False
         else:
             raise ValueError("The type of this media is unknown")
-
+    """
+    Cette methode permet de retirer la note associee a un film ou une serie pour l'utilisateur
+    """
     def unrate(self, type, id):
         if type == 'serie' and self.series_grades is not None:
             grades = self.series_grades.split('-')
@@ -233,6 +305,10 @@ class User(UserMixin, db.Model):
                         self.movies_grades = self.movies_grades.replace('-' + grade, '')
         db.session.commit()
 
+
+    """
+    Ces methodes sont utilisees lorsque l'utilisateur souhaite reinitialiser sont mot de passe
+    """
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
             {'reset_password': self.id, 'exp': time() + expires_in},
