@@ -2,18 +2,15 @@ import os
 import unittest
 from flask import url_for, g
 
-from app.api import Api
+
 from app.forms import SearchForm
 from classes.Exception import SetterException
 from config import basedir
 from app import app, db
 from app.models import User
-from app.forms import RegistrationForm
 from unittest import TestCase
 from classes.media import Media
 from classes.episode import Episode
-from classes.season import Season
-import logging
 
 
 class TestApplication(TestCase):
@@ -495,6 +492,36 @@ class TestApplication(TestCase):
         with self.assertLogs() as cm:
             self.app.get('/serie/1412/season/3/episode/4', follow_redirects=True)
         self.assertEqual(cm.records[0].msg, 'The user is logging in')
+
+    def test_route_upcomingEpisodes(self):
+        """
+        We check that the shows are added to the correct lists for the user
+        We need to check that
+         - an ongoing tv show is added to the up to date show
+         - a ended show is added to the finished shows
+         - a show not up to date is added to the not up to date shows
+        :return:
+        """
+
+        # We create a user that logs in that will be used throughout this test
+        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                                 'password', 'password')
+        TestApplication.login(self, 'Username', 'password')
+
+        # We add 3 series to the user Arrow (1412) that will be a not up to date show,
+        # Friends (1668) that will be a finished show : we are going to enter the last episode as viewed by the user:
+        # We're going to add the last episode of the tv show Flash (60735 under production as we speek)
+        u = User.query.filter_by(name='Name')
+        serie = "https://api.themoviedb.org/3/tv/60735?api_key=11893590e2d73c103c840153c0daa770&language=en-US"
+        latest_ep = f"S{serie.latest['season_number']}E{serie.latest['episode_number']}"
+        u[0]._series = f'1412xS3E1-1668xS10E18-60735x{latest_ep}'
+
+        with self.assertLogs() as cm:
+            self.app.get('/upcoming', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Serie 1412 added to not up to date shows')
+        self.assertEqual(cm.records[1].msg, 'Serie 1668 added to finished shows')
+        self.assertEqual(cm.records[2].msg, 'Serie 60735 added to up to date shows')
+
 
     def tearDown(self):
         db.session.remove()

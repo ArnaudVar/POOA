@@ -342,27 +342,44 @@ def unrate_movie(id):
 @app.route('/upcoming')
 @login_required
 def upcomingEpisodes():
+    """
+    This function is called when the user is trying to go on his upcoming episode page
+    We provide the different series lists divided in 3 :
+        * The series the user is watching but is not up to date (ex : the user last saw the episode 3 of the first season
+            while the series last episode is S4E3 > list_series_last_episode
+        * The user is up to date with this serie and we're expecting an episode for this show > list_series_up_to_date
+        * The user is up-to-date with the serie but we're not expecting any next episode > list_series_finished
+    :return:render_template('upcoming_episode.html')
+    """
     user_id = current_user.id
     u = User.query.get(user_id)
+    # We get the series of the user using the list_serie method
     list_series = u.list_serie()
     list_series_up_to_date = []
     list_series_last_episode =[]
     list_series_finished = []
-    if list_series == "The user doesn't have any series":
-        list_series_up_to_date = list_series
-        list_series_last_episode = list_series
-        # app.logger.info(msg=f'MySeries page rendered without series')
-    else:
-        for tvshow in list_series:
-            serie = Api.get_serie(tvshow)
-            latest_ep = f"S{serie.latest['season_number']}E{serie.latest['episode_number']}"
-            if latest_ep == u.get_last_episode_viewed(serie.id):
-                if serie.date == '':
-                    list_series_finished.append(serie)
-                else:
-                    list_series_up_to_date.append(serie)
+    for tvshow in list_series:
+
+        # We get the information of the tv show from the API
+        serie = Api.get_serie(tvshow)
+
+        # We get the number of the last episode aired
+        latest_ep = f"S{serie.latest['season_number']}E{serie.latest['episode_number']}"
+
+        # If the last episode was viewed by the user, we check if there is an upcoming episode
+        if latest_ep == u.get_last_episode_viewed(serie.id):
+            if serie.date == '':
+                # We add the show to the finished series
+                list_series_finished.append(serie)
+                app.logger.info(msg=f'Serie {tvshow} added to finished shows')
             else:
-                list_series_last_episode.append(serie)
+                # We add the show to the series the user is waiting for the next episode
+                list_series_up_to_date.append(serie)
+                app.logger.info(msg=f'Serie {tvshow} added to up to date shows')
+        else:
+            # We add the show to the not up-to-date shows of the user
+            list_series_last_episode.append(serie)
+            app.logger.info(msg=f'Serie {tvshow} added to not up to date shows')
     return render_template('upcoming_episodes.html', title='Upcoming Episodes', list_next_episode=list_series_up_to_date,
                            list_last_episode=list_series_last_episode, list_finished=list_series_finished,
                            tv_genres=tv_genres, movie_genres=movie_genres, user=current_user)
