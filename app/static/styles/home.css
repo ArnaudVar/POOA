@@ -7,6 +7,10 @@
     background: #F5FFFA;
 }
 
+navbar {
+    overflow-x: auto;
+}
+
 
 img {
   max-width:100%;
@@ -17,6 +21,11 @@ img {
 .welcome {
     font-family: 'Amatic SC';;
     text-align: center
+}
+
+.suggestion {
+    min-width: 750px;
+    overflow-x: auto;
 }
 
 .btn-circle {
@@ -42,12 +51,12 @@ img {
     width: 50px;
     height: 50px;
     padding: 6px 0px;
-    border-radius: 15px;
+    border: 1px solid white;
     text-align: center;
     font-size: 12px;
     line-height: 1.42857;
-    top: 150px;
-    right: 130px;
+    background: #343a40;
+    color: white;
 }
 
 .list {
@@ -94,9 +103,8 @@ img {
     display: block;
     position: absolute;
     color: white;
-    background : grey;
-    top: 150px;
-    right: 100px;
+    background: #343a40;
+    color: white;
     width: 30%;
 }
 
@@ -106,12 +114,12 @@ img {
     width: 50px;
     height: 50px;
     padding: 6px 0px;
-    border-radius: 15px;
+    border: 1px solid white;
     text-align: center;
     font-size: 12px;
     line-height: 1.42857;
-    top: 150px;
-    right: 120px;
+    background: #343a40;
+    color: white;
 }
 
 .serie-search:hover .btn-circle{
@@ -120,12 +128,12 @@ img {
     width: 50px;
     height: 50px;
     padding: 6px 0px;
-    border-radius: 15px;
+    border: 1px solid white;
     text-align: center;
     font-size: 12px;
     line-height: 1.42857;
-    top: 150px;
-    right: 120px;
+    background: #343a40;
+    color: white;
 }
 
 .active:hover {
