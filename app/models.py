@@ -302,6 +302,7 @@ class User(UserMixin, db.Model):
                     return False
         else:
             raise ValueError("The type of this media is unknown")
+
     """
     Cette methode permet de retirer la note associee a un film ou une serie pour l'utilisateur
     """
@@ -432,7 +433,6 @@ class User(UserMixin, db.Model):
         This method returns the number of series where the user isn't up to date
         :return: int
         """
-        print(self.check_upcoming_episodes())
         return len(self.check_upcoming_episodes()[1])
 
 @login.user_loader
