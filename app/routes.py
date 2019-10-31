@@ -26,6 +26,7 @@ def home():
     for i in range(12):
         selection_serie.append(suggestions_serie[i])
         selection_movie.append(suggestions_movie[i])
+    print(current_user.series)
     return render_template('home.html', title='Home', suggestions_serie=selection_serie,
                            suggestions_movie=selection_movie, nombre_series=12,
                            tv_genres=tv_genres, movie_genres=movie_genres)
@@ -86,7 +87,6 @@ def serie(id):
 @login_required
 def movie(id):
     movie = Api.get_movie(id)
-    print(movie.genre)
     similar = Api.get_similar(id, 'movie')
     if movie is None:
         app.logger.info(msg=f'Incorrect Movie id')
