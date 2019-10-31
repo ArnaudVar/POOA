@@ -4,7 +4,7 @@
 {% block content %}
 <div class="m-3 home w-100 d-flex flex-column">
     <div class="w-100 d-flex flex-column justify-content-center welcome">
-        {% if media==movie %}
+        {% if media=='movie' %}
             <h1>Top Rated Movies</h1>
         {% else %}
             <h1>Top Rated TV Shows</h1>
@@ -12,7 +12,7 @@
     </div>
     <div class="w-100 h-100% card suggestion">
         <div class="card-header">
-            {% if media==movie %}
+            {% if media=='movie' %}
                 Best Rated movies:
             {% else %}
                 Best Rated TV shows :
@@ -212,21 +212,20 @@
                                         {% if 4*i + j < (list_medias| length) %}
                                             <div class="col justify-content-center">
                                                 <div class="card-header name genre">
-                                                    {% if media == 'serie' %}
+                                                    {% if media == 'tv' %}
                                                         {{list_medias[4*i+j]['name']}}
                                                     {% else %}
                                                         {{list_medias[4*i+j]['title']}}
                                                     {% endif %}
                                                 </div>
                                                 <div class="p-0 card-body serie justify-content-center">
-                                                    {% if media==serie %}
+                                                    {% if media=='tv' %}
                                                         <a class="w-100 h-100" href="/tv/{{list_medias[4*i+j]['id']}}">
                                                             <button class="btn btn-default btn-circle
                                                                 justify-content-center">
                                                                 <i class="fa fa-fw fa-plus"></i>
                                                             </button>
                                                         </a>
-                                                        {{list_medias[4*i+j]['poster_path']}}
                                                         <img src="https://image.tmdb.org/t/p/w500{{list_medias[4*i+j]['poster_path']}}"
                                                              alt="{{list_medias[4*i+j]['name']}}"
                                                              class="rounded justify-content-center">

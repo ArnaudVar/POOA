@@ -411,7 +411,7 @@ class User(UserMixin, db.Model):
         if self.series is not None and self.series != '':
             serie_episode_list = self.series.split('-')
             for serie in serie_episode_list:
-                serie_list.append((serie.split('x')[0], serie.split('x')[2]))
+                serie_list.append((serie.split('x')[0], serie.split('x')[1]))
 
         for (tvshow, status) in serie_list:
             # Case when the user has finished the serie
