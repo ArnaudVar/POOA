@@ -122,6 +122,14 @@ img {
     color: white;
 }
 
+.hidden {
+    display:none;
+}
+
+.notif {
+    background: grey;
+}
+
 .serie-search:hover .btn-circle{
     display: block;
     position: absolute;

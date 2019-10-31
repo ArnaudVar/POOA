@@ -63,10 +63,10 @@
                         {% endfor %}
                         {% endif %}
                     </div>
-                    <div class="w-50 col-m-1 series-results">
+                    <div class="w-50 col-m-1">
                         <h2 class="card-header name text-center">Series where you are waiting for the next episode</h2>
                         {% if list_next_episode == [] %}
-                            <p>You have no series up to date : binge watch a little more !</p>
+                            <p class="pl-4">You have no series up to date : binge watch a little more !</p>
                         {% else %}
                         {% for serie in list_next_episode %}
                             <h5 class="card-header name text-center">{{ serie["name"] }}</h5>

@@ -21,14 +21,14 @@
     <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
         <div class="d-flex flex-row">
             {% if g.search_form %}
-                <form class="pl-2 form-inline my-2 my-lg-0" method="get"
-                        action="/search" id="function_search_form">
-                    <div class="form-group mr-1">
-                        {{ g.search_form.s(size=20, class='form-control',
-                            placeholder=g.search_form.s.label.text) }}
-                    </div>
-                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-                </form>
+            <form class="pl-2 form-inline my-2 my-lg-0" method="get"
+                  action="/search" id="function_search_form">
+                <div class="form-group mr-1">
+                    {{ g.search_form.s(size=20, class='form-control',
+                    placeholder=g.search_form.s.label.text) }}
+                </div>
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
             {% endif %}
         </div>
         <img src="{{url_for('static', filename='assets/LogoNom.png') }}" height=90 width=auto class="center">
@@ -50,27 +50,53 @@
                 <a href="{{ url_for('home') }}"> <i class="fa fa-home"></i> &nbsp; Home</a>
             </li>
             <li class="active">
-                <a href="{{ url_for('myserie') }}"><i class="fas fa-video" ></i>&nbsp; My Series</a>
+                <a href="{{ url_for('myserie') }}"><i class="fas fa-video"></i>&nbsp; My Series</a>
             </li>
             <li class="active">
                 <a href="{{ url_for('mymovies') }}"><i class="fas fa-film"></i>&nbsp; My Movies</a>
             </li>
-            <li class="active">
-                <a href="{{ url_for('upcomingEpisodes') }}"><i class="fas fa-calendar-check"></i>&nbsp;
+            <li class="active panel-heading" id="headingNotif" data-toggle="collapse"
+                aria-expanded="true"
+                href="#collapseNotif"
+                aria-controls="collapseNotif">
+                <a href="{{ url_for('upcomingEpisodes') }}">
+                    <i class="fas fa-calendar-check"></i>&nbsp;
                     Unseen Episodes
                     {% set unseen_episodes = current_user.nb_not_up_to_date() %}
-                        {% if unseen_episodes > 0 %}
-                            <span id="message_count" class="badge badge-danger" >
-                                {{ unseen_episodes }}
-                            </span>
-                        {% endif %}
+                    {% if unseen_episodes > 0 %}
+                    <span id="message_count" class="badge badge-danger">
+                        {{ unseen_episodes }}
+                    </span>
+                    {% endif %}
                 </a>
+                <div id="collapseNotif" class="panel-collapse collapse" role="tabpanel"
+                     aria-labelledby="headingNotif">
+                    <div class="panel-body">
+                        {% for notif in current_user.get_notifications() %}
+                        <a href="/serie/{{notif[1]}}" class="m-1 notif">
+                            {{notif[0]}}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                <script type="text/javascript">
+                    $(".panel-heading").hover(
+                      function() {
+                        $(this).children('.collapse').collapse('show');
+                      }, function() {
+                        $(this).children('.collapse').collapse('hide');
+                      }
+                    );
+
+
+                </script>
             </li>
             <li class="active">
                 <a href="{{url_for('topRated', media='tv', page=1 )}}"><i class="fa fa-star"></i>&nbsp; Best Series</a>
             </li>
             <li class="active">
-                <a href="{{url_for('topRated', media='movie', page=1 )}}"><i class="fa fa-star"></i>&nbsp; Best Movies</a>
+                <a href="{{url_for('topRated', media='movie', page=1 )}}"><i class="fa fa-star"></i>&nbsp; Best
+                    Movies</a>
             </li>
             <li class="active">
                 <a class="dropdown-toggle" data-toggle="collapse" data-target="#genreSubmenu" role="button"
@@ -102,13 +128,13 @@
     </nav>
     <hr>
     {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul>
+    {% if messages %}
+    <ul>
         {% for message in messages %}
-            <div class="alert alert-info" role="alert">{{ message }}</div>
+        <div class="alert alert-info" role="alert">{{ message }}</div>
         {% endfor %}
-        </ul>
-      {% endif %}
+    </ul>
+    {% endif %}
     {% endwith %}
     {% block content %}
     {% endblock %}

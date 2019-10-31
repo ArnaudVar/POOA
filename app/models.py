@@ -428,6 +428,16 @@ class User(UserMixin, db.Model):
 
         return list_series_up_to_date, list_series_not_up_to_date, list_series_finished
 
+    def get_notifications(self):
+        list_series = self.check_upcoming_episodes()[1]
+        print(list_series)
+        notifs = []
+        for serie in list_series :
+            serieobj = Api.get_serie(int(serie))
+            print(serieobj)
+            notifs.append((serieobj.name, int(serie)))
+        return notifs
+
     def nb_not_up_to_date(self):
         """
         This method returns the number of series where the user isn't up to date
