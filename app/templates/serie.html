@@ -173,11 +173,12 @@
                                     {% if i == 0 %}
                                     <div class="carousel-item active">
                                         <div class="row">
+                                            {% if similar| length > i*4 %}
                                             <div class="col-md-3">
                                                 <div class="card-header name">
                                                     {{similar[i*4].name}}
                                                 </div>
-                                                <div class="p-0 card-body serie-carrousel">
+                                                <div class="p-0 card-body serie">
                                                     <a class="w-100 h-100" href="/serie/{{similar[i*4].id}}">
                                                         <button class="btn btn-default btn-circle">
                                                             <i class="fa fa-fw fa-plus"></i>
@@ -192,13 +193,14 @@
                                                          class="rounded">
                                                     {% endif %}
                                                 </div>
-
                                             </div>
+                                            {% endif %}
+                                            {% if similar| length > i*4+1 %}
                                             <div class="col-md-3">
                                                 <div class="card-header name">
                                                     {{similar[i*4+1].name}}
                                                 </div>
-                                                <div class="p-0 card-body serie-carrousel">
+                                                <div class="p-0 card-body serie">
                                                     <a class="w-100 h-100" href="/serie/{{similar[i*4+1].id}}">
                                                         <button class="btn btn-default btn-circle">
                                                             <i class="fa fa-fw fa-plus"></i>
@@ -213,13 +215,14 @@
                                                          class="rounded">
                                                     {% endif %}
                                                 </div>
-
                                             </div>
+                                            {% endif %}
+                                            {% if similar| length > i*4+2 %}
                                             <div class="col-md-3">
                                                 <div class="card-header name">
                                                     {{similar[i*4+2].name}}
                                                 </div>
-                                                <div class="p-0 card-body serie-carrousel">
+                                                <div class="p-0 card-body serie">
                                                     <a class="w-100 h-100" href="/serie/{{similar[i*4+2].id}}">
                                                         <button class="btn btn-default btn-circle">
                                                             <i class="fa fa-fw fa-plus"></i>
@@ -235,11 +238,13 @@
                                                     {% endif %}
                                                 </div>
                                             </div>
+                                            {% endif %}
+                                            {% if similar| length > i*4+3 %}
                                             <div class="col-md-3">
                                                 <div class="card-header name">
                                                     {{similar[i*4+3].name}}
                                                 </div>
-                                                <div class="p-0 card-body serie-carrousel">
+                                                <div class="p-0 card-body serie">
                                                     <a class="w-100 h-100" href="/serie/{{similar[i*4+3].id}}">
                                                         <button class="btn btn-default btn-circle">
                                                             <i class="fa fa-fw fa-plus"></i>
@@ -255,16 +260,18 @@
                                                     {% endif %}
                                                 </div>
                                             </div>
+                                            {% endif %}
                                         </div>
                                     </div>
                                     {% else %}
                                     <div class="carousel-item">
                                         <div class="row">
+                                            {% if similar| length > i*4 %}
                                             <div class="col-md-3">
                                                 <div class="card-header name">
                                                     {{similar[i*4].name}}
                                                 </div>
-                                                <div class="p-0 card-body serie-carrousel">
+                                                <div class="p-0 card-body serie">
                                                     <a class="w-100 h-100" href="/serie/{{similar[i*4].id}}">
                                                         <button class="btn btn-default btn-circle">
                                                             <i class="fa fa-fw fa-plus"></i>
@@ -280,11 +287,13 @@
                                                     {% endif %}
                                                 </div>
                                             </div>
+                                            {% endif %}
+                                            {% if similar| length > i*4+1 %}
                                             <div class="col-md-3">
                                                 <div class="card-header name">
                                                     {{similar[i*4+1].name}}
                                                 </div>
-                                                <div class="p-0 card-body serie-carrousel">
+                                                <div class="p-0 card-body serie">
                                                     <a class="w-100 h-100" href="/serie/{{similar[i*4+1].id}}">
                                                         <button class="btn btn-default btn-circle">
                                                             <i class="fa fa-fw fa-plus"></i>
@@ -300,11 +309,13 @@
                                                     {% endif %}
                                                 </div>
                                             </div>
+                                            {% endif %}
+                                            {% if similar| length > i*4+2 %}
                                             <div class="col-md-3">
                                                 <div class="card-header name">
                                                     {{similar[i*4+2].name}}
                                                 </div>
-                                                <div class="p-0 card-body serie-carrousel">
+                                                <div class="p-0 card-body serie">
                                                     <a class="w-100 h-100" href="/serie/{{similar[i*4+2].id}}">
                                                         <button class="btn btn-default btn-circle">
                                                             <i class="fa fa-fw fa-plus"></i>
@@ -320,11 +331,13 @@
                                                     {% endif %}
                                                 </div>
                                             </div>
+                                            {% endif %}
+                                            {% if similar| length > i*4+3 %}
                                             <div class="col-md-3">
                                                 <div class="card-header name">
                                                     {{similar[i*4+3].name}}
                                                 </div>
-                                                <div class="p-0 card-body serie-carrousel">
+                                                <div class="p-0 card-body serie">
                                                     <a class="w-100 h-100" href="/serie/{{similar[i*4+3].id}}">
                                                         <button class="btn btn-default btn-circle">
                                                             <i class="fa fa-fw fa-plus"></i>
@@ -340,6 +353,7 @@
                                                     {% endif %}
                                                 </div>
                                             </div>
+                                            {% endif %}
                                         </div>
                                     </div>
                                     {% endif %}

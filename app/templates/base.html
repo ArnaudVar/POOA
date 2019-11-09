@@ -31,7 +31,9 @@
             </form>
             {% endif %}
         </div>
-        <img src="{{url_for('static', filename='assets/LogoNom.png') }}" height=90 width=auto class="center">
+        <a href="/home">
+            <img src="{{url_for('static', filename='assets/LogoNom.png') }}" height=90 width=auto class="center">
+        </a>
         <a href="/logout">
             <button class="btn btn-default">
                 <div>
@@ -87,6 +89,7 @@
                         $(this).children('.collapse').collapse('hide');
                       }
                     );
+
 
 
                 </script>
