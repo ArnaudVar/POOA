@@ -1,14 +1,10 @@
 import os
 import unittest
-
-from flask import url_for, g
-
 from app.api import Api
-from app.forms import SearchForm
 from classes.Exception import SetterException
 from config import basedir
 from app import app, db
-from app.models import User
+from app.models import User, UserMedia
 from unittest import TestCase
 from classes.media import Media
 from classes.episode import Episode
@@ -26,30 +22,30 @@ class TestApplication(TestCase):
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'test.db')
         self.app = app.test_client()
         db.create_all()
-    #
-    # def test_user_creation(self):
-    #     """
-    #     We check with this function that the user_creation works well
-    #     We create an user in our testing database
-    #     The tests we run are :
-    #     - That there is one and only one user in the database
-    #     - That each field of the user are correct in the database
-    #     - That the hashing of the password is correct (returns false when a wrong password is typed in)
-    #     :return: void
-    #     """
-    #     user = User(username='Username', email='test@test.co', name='Name', surname='Surname')
-    #     user.set_password('Password')
-    #     db.session.add(user)
-    #     db.session.commit()
-    #     u_all = User.query.all()
-    #     u = User.query.filter_by(name='Name')
-    #     assert len(u_all) == 1
-    #     assert u.count() == 1
-    #     assert u[0].username == 'Username'
-    #     assert u[0].email == 'test@test.co'
-    #     assert u[0].surname == 'Surname'
-    #     assert u[0].check_password('Password')
-    #     assert not u[0].check_password('Password' + 'x')
+
+    def test_user_creation(self):
+        """
+        We check with this function that the user_creation works well
+        We create an user in our testing database
+        The tests we run are :
+        - That there is one and only one user in the database
+        - That each field of the user are correct in the database
+        - That the hashing of the password is correct (returns false when a wrong password is typed in)
+        :return: void
+        """
+        user = User(username='Username', email='test@test.co', name='Name', surname='Surname')
+        user.set_password('Password')
+        db.session.add(user)
+        db.session.commit()
+        u_all = User.query.all()
+        u = User.query.filter_by(name='Name')
+        assert len(u_all) == 1
+        assert u.count() == 1
+        assert u[0].username == 'Username'
+        assert u[0].email == 'test@test.co'
+        assert u[0].surname == 'Surname'
+        assert u[0].check_password('Password')
+        assert not u[0].check_password('Password' + 'x')
 
     def register(self, username, name, surname, email1, email2, password1, password2):
         """
@@ -813,373 +809,724 @@ class TestEpisode(TestCase):
     def test_id_episode(self):
         self.assertEqual(f'S{TestEpisode.ep.num_season}E{TestEpisode.ep.num_episode}', TestEpisode.ep._id)
 
+
+class TestUser(TestCase):
+
+    """
+    Class allowing us to setting up our testing
+    it is creating a test database
+    """
+    def setUp(self):
+        app.config['TESTING'] = True
+        app.config['WTF_CSRF_ENABLED'] = False
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'test.db')
+        self.app = app.test_client()
+        db.create_all()
+
+    def register(self, username, name, surname, email1, email2, password1, password2):
+        """
+        This function is used to simulate a register event for a new user on our register page.
+        We fill all the fields and check that the new user is allowed to register
+        :param username: string
+        :param name: string
+        :param surname: string
+        :param email: string
+        :param password: string
+        :return: void
+        """
+        return self.app.post('/register', data=dict(
+            username=username,
+            name=name,
+            surname=surname,
+            email=email1,
+            email2=email2,
+            password=password1,
+            password2=password2
+        ), follow_redirects=True)
+
+    def login(self, username, password):
+        """
+        This function is used to simulate a login event for a user on our login page.
+        We fill all the fields and check that the user is allowed to login
+        :param username: string
+        :param password: string
+        :return: void
+        """
+        return self.app.post('/login', data=dict(
+            username=username,
+            password=password
+        ), follow_redirects=True)
+
+    def test_check_password(self):
+        """
+        On verifie que la methode check_password retourne les bons resultats (vrai si le bon mot de passe est donne
+        en entree, faux sinon)
+        :return: void
+        """
+        # On cree un utilisateur utilise pendant tout le test
+        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                                 'password', 'password')
+
+        # On recupere l'utilisateur
+        u = User.query.filter_by(name='Name')
+        user = u[0]
+
+        assert user.check_password('password')
+        assert not user.check_password('password2')
+
+    def test_list_serie(self):
+        """
+        On regarde si la methode list_serie retourne bien la liste des series de l'utilisateur
+        On verifie que si l'utilisateur n'a aucune serie, le bon resultat est renvoye
+        :return: void
+        """
+        # On cree un utilisateur utilise pendant tout le test
+        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                          'password', 'password')
+
+        # On recupere l'utilisateur
+        u = User.query.filter_by(name='Name')
+        user = u[0]
+        user2 = User(name='Name2', username='Username2', email='test2@test.co')
+
+        # Notre utilisateur n'a pas encore de series
+        assert user.list_serie() == []
+
+        # On lui ajoute deux series
+        # Pour tester que la methode fait ce que l'on veut, on ajoute une serie a un autre utilisateur (user2)
+        # On ajoute egalement un film a l'utilisateur user pour verifier que la methode fait ce que l'on veut
+        s1 = UserMedia(media='serie', media_id=1412, season_id=1, episode_id=1, state_serie='nutd', user=user)
+        s2 = UserMedia(media='serie', media_id=69050, season_id=1, episode_id=1, state_serie='nutd', user=user)
+        s3 = UserMedia(media='serie', media_id=1668, season_id=1, episode_id=1, state_serie='nutd', user=user2)
+        m1 = UserMedia(media='movie', media_id=453405, user=user)
+        db.session.add(s1)
+        db.session.add(s2)
+        db.session.commit()
+
+        # On verifie que l'utilisateur a bien les series ajoutees
+        self.assertEqual(user.list_serie(), [1412, 69050])
+
+    def test_list_movie(self):
+        """
+        Avec cette methode, on teste la methode list_movie de la classe User
+        On verifie que cette methode nous renvoie la bonne liste de series
+        On verifie egalement que si l'utilisateur n'a aucune serie, il n'y a aucune serie renvoyee
+        :return: void
+        """
+        # On cree un utilisateur utilise pendant tout ce test
+        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                          'password', 'password')
+
+        # On recupere l'utilisateur
+        u = User.query.filter_by(name='Name')
+        user = u[0]
+        user2 = User(name='Name2', username='Username2', email='test2@test.co')
+        # Cet utilisateur n'a pas encore de series
+        self.assertEqual(user.list_movie(), [])
+
+        # On lui ajoute deux films a l'utilisateur 1
+        # Pour tester que la methode fait ce que l'on veut, on ajoute un film  a un autre utilisateur (user2)
+        # On ajoute egalement une serie a l'utilisateur 1 pour verifier que la methode fait ce que l'on veut
+        m1 = UserMedia(media='movie', media_id=453405, user=user)
+        m2 = UserMedia(media='movie', media_id=420818, user=user)
+        m3 = UserMedia(media='movie', media_id=453405, user=user2)
+        s2 = UserMedia(media='serie', media_id=1412, season_id=1, episode_id=1, state_serie='nutd', user=user)
+        db.session.add(m1)
+        db.session.add(m2)
+        db.session.add(s2)
+        db.session.add(m3)
+        db.session.commit()
+        self.assertEqual(user.list_movie(), [453405, 420818])
+
+    def test_is_in_series(self):
+        """
+        On verifie que la methode is_in_series renvoie la bonne reponse :
+         - True si la serie est dans la liste de l'utilisateur
+         - Faux sinon
+        :return: void
+        """
+        # On cree un utilisateur utilise pendant tout ce test
+        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                          'password', 'password')
+
+        # On recupere l'utilisateur
+        u = User.query.filter_by(name='Name')
+        user = u[0]
+        user2 = User(name='Name2', username='Username2', email='test2@test.co')
+
+        # On ajoute 2 series a user
+        # On lui ajoute egalement un film pour tester que la methode renvoie ce que l'on veut
+        # On ajoute une serie a l'utilisateur user2 pour tester que la methode ne regarde que les series de user
+        m1 = UserMedia(media='movie', media_id=453405, user=user)
+        s1 = UserMedia(media='serie', media_id=1412, season_id=1, episode_id=1, state_serie='nutd', user=user)
+        s2 = UserMedia(media='serie', media_id=69050, season_id=1, episode_id=1, state_serie='nutd', user=user)
+        s3 = UserMedia(media='serie', media_id=1668, season_id=1, episode_id=1, state_serie='nutd', user=user2)
+        db.session.add(m1)
+        db.session.add(s1)
+        db.session.add(s2)
+        db.session.add(s3)
+        db.session.commit()
+
+        # On teste que la methode marche pour les series de l'utilisateur
+        self.assertTrue(user.is_in_series(1412))
+
+        # On teste que la methode ne regarde pas les films
+        self.assertFalse(user.is_in_series(453405))
+
+        # On teste que la methode ne regarde que les series de user
+        self.assertFalse(user.is_in_series(1668))
+
+    def test_has_movie(self):
+        """
+        On verifie que la methode has_movie retourne la bonne reponse :
+        - True si le film est dans les films de l'utilisateur
+        - False sinon
+        :return: void
+        """
+        # On cree un utilisateur utilise pendant tout ce test
+        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                          'password', 'password')
+
+        # On recupere l'utilisateur
+        u = User.query.filter_by(name='Name')
+        user = u[0]
+        user2 = User(name='Name2', username='Username2', email='test2@test.co')
+
+        # On ajoute 2 films a user
+        # On lui ajoute egalement une serie pour tester que la methode renvoie ce que l'on veut
+        # On ajoute un film a l'utilisateur user2 pour tester que la methode ne regarde que les films de user
+        s1 = UserMedia(media='serie', media_id=1412, season_id=1, episode_id=1, state_serie='nutd', user=user)
+        m1 = UserMedia(media='movie', media_id=420818, user=user)
+        m2 = UserMedia(media='movie', media_id=453405, user=user)
+        m3 = UserMedia(media='movie', media_id=501170, user=user2)
+        db.session.add(s1)
+        db.session.add(m1)
+        db.session.add(m2)
+        db.session.add(m3)
+        db.session.commit()
+
+        # On teste que la methode marche pour les films de l'utilisateur
+        self.assertTrue(user.has_movie(420818))
+
+        # On teste que la methode ne regarde pas les series
+        self.assertFalse(user.has_movie(1412))
+
+        # On teste que la methode ne regarde que les films de user
+        self.assertFalse(user.is_in_series(501170))
+
+    def test_get_last_episode_viewed(self):
+        """
+        On regarde que la methode get_last_episode_viewed retourne la bonne reponse :
+            - S1E1 si la serie n'est pas dans la liste de l'utilisateur
+            - Le dernier episode vu si la serie est dans la liste
+        :return: void
+        """
+        # On cree un utilisateur utilise pendant tout ce test
+        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                          'password', 'password')
+
+        # On recupere l'utilisateur
+        u = User.query.filter_by(name='Name')
+        user = u[0]
+
+        # On verifie que si la serie est dans la liste de l'utilisateur, la methode renvoie bien le dernier episode
+        s1 = UserMedia(media='serie', media_id=1412, season_id=3, episode_id=4, state_serie='nutd', user=user)
+        db.session.add(s1)
+        db.session.commit()
+        self.assertEqual(user.get_last_episode_viewed('1412'), 'S3E4')
+
+        # On verifie que si la serie n'est pas dans la liste de l'utilisateur, la methode renvoie S1E1
+        self.assertEqual(user.get_last_episode_viewed('1413'), 'S1E1')
+
+    def test_is_after(self):
+        """
+        Avec cette methode on va tester la methode is_after qui doit retourner :
+            - True si l'episode en parametre est apres le dernier episode vu par l'utilisateur ou si la serie n'est
+                    pas dans les series de l'utilisateur
+            - False sinon
+        :return: void
+        """
+        # On cree un utilisateur utilise pendant tout ce test
+        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                          'password', 'password')
+
+        # On recupere l'utilisateur
+        u = User.query.filter_by(name='Name')
+        user = u[0]
+
+        # On lui ajoute une serie
+        s1 = UserMedia(media='serie', media_id=1412, season_id=3, episode_id=4, state_serie='nutd', user=user)
+        db.session.add(s1)
+        db.session.commit()
+
+        # On verifie que la methode renvoie True si on lui donne en parametre un episode plus tard dans la meme saison
+        self.assertTrue(user.is_after(season=3, episode=5, serie=1412))
+
+        # On verifie que la methode renvoie True si on lui donne en parametre une saison plus tard que la saison du
+        # dernier episode vu par l'utilisateur
+        self.assertTrue(user.is_after(season=4, episode=2, serie=1412))
+
+        # On verifie que la methode renvoie True si la serie n'est pas dans celles de l'utilisateur
+        self.assertTrue(user.is_after(season=4, episode=2, serie=1413))
+
+        # On verifie que la methode renvoie False dans les autres cas
+        self.assertFalse(user.is_after(season=1, episode=10, serie=1412))
+        self.assertFalse(user.is_after(season=3, episode=3, serie=1412))
+
+    def test_view_episode(self):
+        """
+        Avec cette methode on va tester la methode view_episode qui doit effectue :
+            Elle doit changer l'episode et la saison du dernier episode vu
+            Elle doit changer le statut de la serie(utd/nutd/fin)
+        :return: void
+        """
+        # On cree un utilisateur utilise pendant tout ce test
+        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                          'password', 'password')
+
+        # On recupere l'utilisateur
+        u = User.query.filter_by(name='Name')
+        user = u[0]
+
+        # On lui ajoute deux series (Friends serie qui n'est plus en production et Flash qui l'est encore)
+        s1 = UserMedia(media='serie', media_id=1668, season_id=1, episode_id=1, state_serie='utd', user=user)
+        s2 = UserMedia(media='serie', media_id=60735, season_id=1, episode_id=1, state_serie='fin', user=user)
+        db.session.add(s1)
+        db.session.add(s2)
+        db.session.commit()
+
+        # On teste que la methode met a jour le dernier episode vu et le statut de ce dernier en nutd quand la
+        # serie n'est pas a jour
+        user.view_episode(season=3, episode=4, serie=1668)
+        self.assertEqual(user.get_last_episode_viewed(id=1668), 'S3E4')
+        status = user.user_media.filter_by(media='serie', media_id=1668).first().state_serie
+        self.assertEqual(status, 'nutd')
+
+        # On teste que la methode met a jour le dernier episode vu et le statut de ce dernier en fin quand la
+        # serie est terminee (pas d'episode futur)
+        user.view_episode(season=10, episode=18, serie=1668)
+        self.assertEqual(user.get_last_episode_viewed(id=1668), 'S10E18')
+        status = user.user_media.filter_by(media='serie', media_id=1668).first().state_serie
+        self.assertEqual(status, 'fin')
+
+        # On teste que la methode met a jour le dernier episode vu et le statut de ce dernier en fin quand la
+        # serie est a jour (dernier episode vu mai il y a un episode futur) a l'aide de l'Api
+        serie = Api.get_serie(60735)
+        latest_season, latest_ep = serie.latest['season_number'], serie.latest['episode_number']
+        user.view_episode(season=latest_season, episode=latest_ep, serie=60735)
+        status = user.user_media.filter_by(media='serie', media_id=60735).first().state_serie
+        self.assertEqual(status, 'utd')
+
+    def test_add_serie(self):
+        """
+        Avec ce test on va tester la methode add_serie
+        Celle-ci doit ajouter une serie donnee en parametre a l'utilisateur
+        Si l'utilisateur a deja ajoute une serie, cette methode ne doit pas l'ajouter une deuxieme fois
+        :return: void
+        """
+        # On cree un utilisateur utilise pendant tout ce test
+        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                          'password', 'password')
+
+        # On recupere l'utilisateur
+        u = User.query.filter_by(name='Name')
+        user = u[0]
+
+        # On ajoute une serie a notre utilisateur
+        user.add_serie(1412)
+        serie = user.user_media.filter_by(media='serie', media_id=1412).all()[0]
+        self.assertEqual(serie.media_id, 1412)
+        self.assertEqual(serie.season_id, 1)
+        self.assertEqual(serie.episode_id, 1)
+        self.assertEqual(serie.state_serie, 'nutd')
+
+        # On lui rajoute une deuxieme serie et on verifie que la methode n'ajoute pas une deuxieme serie
+        user.add_serie(1412)
+        serie = user.user_media.filter_by(media='serie', media_id=1412).all()
+        self.assertEqual(len(serie), 1)
+
+    def test_remove_serie(self):
+        """
+        On regarde que la methode remove_serie retire correctement la serie des series de l'utilisateur
+        Si l'utilisateur n'a pas cette serie dans ses series, la methode ne doit pas lever une erreur
+        :return:
+        """
+        # On cree un utilisateur utilise pendant tout ce test
+        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                          'password', 'password')
+
+        # On recupere l'utilisateur
+        u = User.query.filter_by(name='Name')
+        user = u[0]
+
+        # On ajoute une serie a notre utilisateur
+        user.add_serie(1412)
+        user.add_movie(1413)
+
+        # On verifie qu'il n'y a pas d'erreur lorsqu'on retire une serie qui n'est pas dans les series de l'utilisateur
+        # On verifie egalement que la methode ne supprime pas un film ayant le meme id
+        user.remove_serie(1413)
+        media = user.user_media.all()
+        self.assertEqual(len(media), 2)
+
+        # On verifie que la methode retire bien une serie dans les series de l'utilisateur
+        user.remove_serie(1412)
+        serie = user.user_media.filter_by(media='serie', media_id=1412).all()
+        self.assertEqual(serie, [])
+
+    def test_add_movie(self):
+        """
+        Avec ce test on va tester la methode add_movie
+        Celle-ci doit ajouter un film donnee en parametre a l'utilisateur
+        Si l'utilisateur a deja ajoute un film, cette methode ne doit pas l'ajouter une deuxieme fois
+        :return: void
+        """
+        # On cree un utilisateur utilise pendant tout ce test
+        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                          'password', 'password')
+
+        # On recupere l'utilisateur
+        u = User.query.filter_by(name='Name')
+        user = u[0]
+
+        # On ajoute un film a notre utilisateur
+        user.add_movie(453405)
+        movie = user.user_media.filter_by(media='movie', media_id=453405).all()[0]
+        self.assertEqual(movie.media_id, 453405)
+
+        # On lui rajoute une deuxieme le meme film et on verifie que la methode n'ajoute pas une deuxieme film
+        user.add_movie(453405)
+        movie = user.user_media.filter_by(media='movie', media_id=453405).all()
+        self.assertEqual(len(movie), 1)
+
+    def test_remove_movie(self):
+        """
+        On regarde que la methode remove_movie retire correctement le film des films de l'utilisateur
+        Si l'utilisateur n'a pas ce film dans ses series, la methode ne doit pas lever une erreur
+        :return:
+        """
+        # On cree un utilisateur utilise pendant tout ce test
+        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                          'password', 'password')
+
+        # On recupere l'utilisateur
+        u = User.query.filter_by(name='Name')
+        user = u[0]
+
+        # On ajoute un film a notre utilisateur
+        user.add_movie(453405)
+        user.add_serie(453406)
+
+        # On verifie qu'il n'y a pas d'erreur lorsqu'on retire un film qui n'est pas dans les films de l'utilisateur
+        # On verifie egalement que la methode ne supprime pas un film ayant le meme id
+        user.remove_movie(453406)
+        media = user.user_media.all()
+        self.assertEqual(len(media), 2)
+
+        # On verifie que la methode retire bien un film dans les films de l'utilisateur
+        user.remove_movie(453405)
+        movie = user.user_media.filter_by(media='movie', media_id=453405).all()
+        self.assertEqual(movie, [])
+
+    def test_update_grade(self):
+        """
+        On verifie ici que la methode update_grade fonctionne bien :
+            Elle doit modifier la current_grade si cette dernière est vide ou pleine
+        :return: void
+        """
+        # On cree un utilisateur utilise pendant tout ce test
+        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                          'password', 'password')
+
+        # On recupere l'utilisateur
+        u = User.query.filter_by(name='Name')
+        user = u[0]
+
+        # On lui ajoute une note
+        user.update_grade(new_grade=4)
+        self.assertEqual(user.current_grade, 4)
+
+        # On modifie cette note
+        user.update_grade(new_grade=6)
+        self.assertEqual(user.current_grade, 6)
+
+    def test_grade(self):
+        """
+        Ce test nous permet de tester la methode grade
+        On va tester si cette methode marche pour les deux types de medias (tv et movie)
+        Pour chaque cas, on va regarder le cas ou le media a deja une note, le cas ou il n'en a pas et le cas ou le
+            media n'est pas dans les medias de l'utilisateur
+        :return: void
+        """
+        # On cree un utilisateur utilise pendant tout ce test
+        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                          'password', 'password')
+
+        # On recupere l'utilisateur
+        u = User.query.filter_by(name='Name')
+        user = u[0]
+
+        # On lui ajoute une serie et un film
+        user.add_movie(453405)
+        user.add_serie(1412)
+
+        # On note le film et la serie et on verifie que la notation marche bien
+        user.grade(1412, 'serie', 4)
+        user.grade(453405, 'movie', 6)
+        serie = user.user_media.filter_by(media='serie', media_id=1412).first()
+        movie = user.user_media.filter_by(media='movie', media_id=453405).first()
+        self.assertEqual(serie.media_grade, 4)
+        self.assertEqual(movie.media_grade, 6)
+
+        # On change leurs notes et on verifie que la notation marche toujours bien
+        user.grade(1412, 'serie', 5)
+        user.grade(453405, 'movie', 7)
+        serie = user.user_media.filter_by(media='serie', media_id=1412).first()
+        movie = user.user_media.filter_by(media='movie', media_id=453405).first()
+        self.assertEqual(serie.media_grade, 5)
+        self.assertEqual(movie.media_grade, 7)
+
+        # On va tenter de noter des medias qui ne sont pas dans les medias de l'utilisateur et
+        # on va verifier que rien ne se passe
+        # On change leurs notes et on verifie que la notation marche toujours bien
+        user.grade(1413, 'serie', 6)
+        user.grade(453406, 'movie', 8)
+        serie = user.user_media.filter_by(media='serie').all()
+        movie = user.user_media.filter_by(media='movie').all()
+        self.assertEqual(len(serie), 1)
+        self.assertEqual(len(movie), 1)
+        self.assertEqual(serie[0].media_grade, 5)
+        self.assertEqual(movie[0].media_grade, 7)
+
+    def test_is_graded(self):
+        """
+        Ce test verifie que la methodeis_graded renvoie bien les valeurs attendues pour les series et les films
+        On verifie que lorsqu'un media est note, la methode renvoie True
+        La methode renvoie False sinon ou lorsque le media n'est pas dans les medias de l'utilisateur
+        :return: void
+        """
+        # On cree un utilisateur utilise pendant tout ce test
+        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                          'password', 'password')
+
+        # On recupere l'utilisateur
+        u = User.query.filter_by(name='Name')
+        user = u[0]
+
+        # On lui ajoute une serie et un film
+        user.add_movie(453405)
+        user.add_serie(1412)
+
+        # On verifie que la methode renvoie False si les deux medias ne sont pas notes
+        self.assertFalse(user.is_graded('serie', 1412))
+        self.assertFalse(user.is_graded('movie', 453405))
+
+        # On verifie que la methode renvoie True si les deux medias sont notes
+        user.grade(1412, 'serie', 4)
+        user.grade(453405, 'movie', 6)
+        self.assertTrue(user.is_graded('serie', 1412))
+        self.assertTrue(user.is_graded('movie', 453405))
+
+        # On verifie enfin que la methode renvoie false si les deux medias ne sont pas dans les medias de user
+        self.assertFalse(user.is_graded('serie', 1413))
+        self.assertFalse(user.is_graded('movie', 453406))
+
+    def test_get_grade(self):
+        """
+        Ce test a pour objectif de tester la methode get_grade
+        On va verifier qu'elle marche bien pour les series et les films
+            - retourne la note si les medias sont notes
+            - retourne False si les medias ne sont pas notes ou si les medias ne sont pas dans les medias de user
+        :return: void
+        """
+        # On cree un utilisateur utilise pendant tout ce test
+        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                          'password', 'password')
+
+        # On recupere l'utilisateur
+        u = User.query.filter_by(name='Name')
+        user = u[0]
+
+        # On lui ajoute deux medias
+        user.add_serie(1412)
+        user.add_movie(420818)
+
+        # On verifie que la methode renvoie False si les deux medias ne sont pas notes
+        self.assertFalse(user.get_grade('serie', 1412))
+        self.assertFalse(user.get_grade('movie', 420818))
+
+        # On verifie que la methode renvoie True si les deux medias sont notes
+        user.grade(1412, 'serie', 4)
+        user.grade(420818, 'movie', 6)
+        self.assertEqual(user.get_grade('serie', 1412), 4)
+        self.assertEqual(user.get_grade('movie', 420818), 6)
+
+        # On verifie enfin que la methode renvoie false si les deux medias ne sont pas dans les medias de user
+        self.assertFalse(user.get_grade('serie', 1413))
+        self.assertFalse(user.get_grade('movie', 420819))
+
+    def test_unrate(self):
+        """
+        Dans cet test on va tester la methode unrate pour les series et les films
+        On doit verifier que lorsqu'un media est note, la methode supprime la note de la table
+        On verifie egalement qu'il n'y a pas d'erreurs si le media n'est pas note ou si le media n'est pas dans
+            la liste
+        :return: void
+        """
+        # On cree un utilisateur utilise pendant tout ce test
+        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                          'password', 'password')
+
+        # On recupere l'utilisateur
+        u = User.query.filter_by(name='Name')
+        user = u[0]
+
+        # On lui ajoute deux medias
+        user.add_serie(1412)
+        user.add_movie(420818)
+
+        # On note les 2 medias
+        user.grade(id=1412, type='serie', grade=4)
+        user.grade(id=420818, type='serie', grade=8)
+
+        # On verifie que la methode supprime bien les notes de ces medias
+        user.unrate('serie', '1412')
+        user.unrate('movie', '420818')
+        serie = user.user_media.filter_by(media='serie', media_id=1412).all()[0]
+        movie = user.user_media.filter_by(media='movie', media_id=420818).all()[0]
+        self.assertIsNone(serie.media_grade)
+        self.assertIsNone(movie.media_grade)
+
+        # On verifie que la methode ne renvoie pas d'erreur lorsqu'on supprime et qu'il n'y a pas de notes
+        user.unrate('serie', '1412')
+        user.unrate('movie', '420818')
+        serie = user.user_media.filter_by(media='serie', media_id=1412).all()[0]
+        movie = user.user_media.filter_by(media='movie', media_id=420818).all()[0]
+        self.assertIsNone(serie.media_grade)
+        self.assertIsNone(movie.media_grade)
+
+        # On verifie que la methode ne renvoie pas d'erreur lorsqu'on supprime des medias non dans les medias de user
+        user.unrate('serie', '1413')
+        user.unrate('movie', '420819')
+        serie = user.user_media.filter_by(media='serie').all()
+        movie = user.user_media.filter_by(media='movie').all()
+        self.assertEqual(len(serie), 1)
+        self.assertEqual(len(movie), 1)
+
+    def test_update_all_upcoming_episodes(self):
+        """
+        Cet test verifie lamethodeupdate_all_upcoming_episodes:
+        On verifie que tous les statuts de toutes les series sont mis à jour
+        On va créer des series utd, nutd et fin pour verifier que tout est correctement mis ajour
+        :return: void
+        """
+        # On cree un utilisateur utilise pendant tout ce test
+        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                          'password', 'password')
+
+        # On recupere l'utilisateur
+        u = User.query.filter_by(name='Name')
+        user = u[0]
+
+        # On lui ajoute trois series (Friends et How I Met your Mother, series qui n'est plus en production
+        # et Flash qui l'est encore)
+        # On ajoute egalement un film pour verifier qu'il n'y a pas d'erreur
+        s1 = UserMedia(media='serie', media_id=1668, season_id=10, episode_id=18, state_serie='utd', user=user)
+        s2 = UserMedia(media='serie', media_id=1100, season_id=5, episode_id=6, state_serie='fin', user=user)
+        serie = Api.get_serie(60735)
+        latest_season, latest_ep = serie.latest['season_number'], serie.latest['episode_number']
+        s3 = UserMedia(media='serie', media_id=60735, season_id=latest_season, episode_id=latest_ep,
+                       state_serie='nutd', user=user)
+        user.add_movie(420818)
+        db.session.add(s1)
+        db.session.add(s2)
+        db.session.add(s3)
+        db.session.commit()
+
+        # On teste que les statuts sont bien mis à jour
+        user.update_all_upcoming_episodes()
+        status1 = user.user_media.filter_by(media='serie', media_id=1668).first().state_serie
+        status2 = user.user_media.filter_by(media='serie', media_id=1100).first().state_serie
+        status3 = user.user_media.filter_by(media='serie', media_id=60735).first().state_serie
+        self.assertEqual(status1, 'fin')
+        self.assertEqual(status2, 'nutd')
+        self.assertEqual(status3, 'utd')
+
+    def test_check_upcoming_episodes(self):
+        """
+        Ce test verifie la methode upcoming_episodes
+        On verifie que la valeur de retour est bien celle attendue
+        :return:
+        """
+        # On cree un utilisateur utilise pendant tout ce test
+        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                          'password', 'password')
+
+        # On recupere l'utilisateur
+        u = User.query.filter_by(name='Name')
+        user = u[0]
+
+        # On verifie que la methode marche quand il n'y a pas de series
+        self.assertEqual(user.check_upcoming_episodes(), ([], [], []))
+
+        # On lui ajoute trois series (Friends et How I Met your Mother, series qui n'est plus en production
+        # et Flash qui l'est encore)
+        # On ajoute egalement un film pour verifier qu'il n'y a pas d'erreur
+        s1 = UserMedia(media='serie', media_id=1668, season_id=10, episode_id=18, state_serie='utd', user=user)
+        s2 = UserMedia(media='serie', media_id=1100, season_id=5, episode_id=6, state_serie='fin', user=user)
+        s3 = UserMedia(media='serie', media_id=18347, season_id=5, episode_id=6, state_serie='fin', user=user)
+        s4 = UserMedia(media='serie', media_id=4608, season_id=5, episode_id=6, state_serie='utd', user=user)
+        user.add_serie(60735)
+        user.add_serie(1412)
+        user.add_movie(420818)
+        db.session.add(s1)
+        db.session.add(s2)
+        db.session.add(s3)
+        db.session.add(s4)
+        db.session.commit()
+
+        # On verifie que chaque liste possede les deux elements attendus
+        self.assertEqual(user.check_upcoming_episodes(),([1668, 4608], [60735, 1412], [1100, 18347]))
+
+    def test_get_notifications(self):
+        """
+        Ce test verifie la methode get_notifications
+        On verifie que la methode ne renvoie que les series qui ne sont pas a jour
+        :return: void
+        """
+        # On cree un utilisateur utilise pendant tout ce test
+        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                          'password', 'password')
+
+        # On recupere l'utilisateur
+        u = User.query.filter_by(name='Name')
+        user = u[0]
+
+        # On verifie que la methode marche quand il n'y a pas de series non a jour
+        self.assertEqual(user.get_notifications(), [])
+        self.assertEqual(user.nb_not_up_to_date(), 0)
+
+        # On lui ajoute des series
+        user.add_serie(1412)
+        user.add_serie(60735)
+        s1 = UserMedia(media='serie', media_id=1668, season_id=10, episode_id=18, state_serie='utd', user=user)
+        s2 = UserMedia(media='serie', media_id=1100, season_id=5, episode_id=6, state_serie='fin', user=user)
+        user.add_movie(420818)
+        db.session.add(s1)
+        db.session.add(s2)
+        db.session.commit()
+
+        # On verifie qu'on n'obtient bien que les deux series non a jour
+        self.assertEqual(user.get_notifications(), [('Arrow', 1412), ('The Flash', 60735)])
+
+        # On va egalement tester la methode nb_not_up_to_date
+        self.assertEqual(user.nb_not_up_to_date(), 2)
+
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
 #
-# class TestUser(TestCase):
-#     user = User(username='Username', email='test@test.co', name='Name', surname='Surname')
-#     user.set_password('password')
-#
-#     def test_check_password(self):
-#         """
-#         We check that the check_password method returns the correct results
-#         (True if the correct password is given in input, False if not)
-#         :return: void
-#         """
-#         assert self.user.check_password('password')
-#         assert not self.user.check_password('password2')
-#
-#     def test_list_serie(self):
-#         """
-#         We check that this function returns the correct list of series of the user
-#         We also check that if the user doesn't have any series, the correct result is returned
-#         :return: void
-#         """
-#         # Our user doesn't have any series yet
-#         assert self.user.list_serie() == "The user doesn't have any series"
-#
-#         # We now add 2 series to our user
-#         self.user.series = '1412xS1E1-69050xS1E1'
-#         assert self.user.list_serie() == ['1412', '69050']
-#
-#     def test_list_movie(self):
-#         """
-#         We check that this function returns the correct list of movies of the user
-#         We also check that if the user doesn't have any movies, the correct result is returned
-#         :return: void
-#         """
-#         # Our user doesn't have any movies yet
-#         self.assertEqual(self.user.list_movie(), "The user doesn't have any movie")
-#
-#         # We now add 2 movies to our user
-#         self.user.movies = '453405-420818'
-#         assert self.user.list_movie() == ['453405', '420818']
-#
-#     def test_is_in_series(self):
-#         """
-#         We check that the is_in_series method returns the correct answer :
-#             - True if the serie is in the serie list of the user
-#             - False if the serie isn't in the serie list of the user
-#         :return: void
-#         """
-#         # We check that the answer is True when the serie is in the user list
-#         self.user.series = '1412xS1E1-69050xS1E1'
-#         self.assertTrue(self.user.is_in_series('1412'))
-#
-#         # We check that the answer is False when the serie isn't in the  user list
-#         self.assertFalse(self.user.is_in_series('1413'))
-#
-#         # We check that when the user serie list is none no answer is raised
-#         TestUser.user.series = None
-#         self.assertFalse(self.user.is_in_series('1412'))
-#         self.user.series = ''
-#         self.assertFalse(self.user.is_in_series('1412'))
-#
-#     def test_has_movie(self):
-#         """
-#         We check that the has_movie method returns the correct answer :
-#             - True if the movie in sin the movie list of the user
-#             - False if the movie isn't in the movie list of the user
-#         :return: void
-#         """
-#         # We check that the answer is True when the serie is in the user list
-#         self.user.movies = '453405-420818'
-#         self.assertTrue(self.user.has_movie('453405'))
-#
-#         # We check that the answer is False when the movie isn't in the user list
-#         self.assertFalse(self.user.has_movie('453403'))
-#
-#         # We check that when the user movie list is none no answer is raised
-#         TestUser.user.movies = None
-#         self.assertFalse(self.user.has_movie('1412'))
-#         self.user.movies = ''
-#         self.assertFalse(self.user.has_movie('1412'))
-#
-#     def test_get_last_episode_viewed(self):
-#         """
-#         We check that the get_last_episode_viewed method returns the correct answer :
-#             - None if the serie isn't in the series list of the user
-#             - The last episode if the serie is in the list
-#         :return: void
-#         """
-#         # We check that the answer is the correct episode when the serie is in the user list
-#         self.user.series = '1412xS3E4-69050xS1E1'
-#         self.assertEqual(self.user.get_last_episode_viewed('1412'), 'S3E4')
-#
-#         # We check that the answer is None
-#         self.assertIsNone(self.user.get_last_episode_viewed('1413'))
-#
-#     def test_is_after(self):
-#         """
-#         We check that the is_after method returns the correct answer :
-#             - True if the episode is after the last episode viewed by the user
-#             - Returns true if the serie isn't in the serie list of the user
-#         :return: void
-#         """
-#         # We check that the method returns true if we take an episode from the same season as the last episode
-#         # viewed but with an higher number
-#         self.user.series = '1412xS3E4-69050xS1E1'
-#         self.assertTrue(self.user.is_after(3, 5, 1412))
-#
-#         # We also check that it returns true if the episode is from a next season
-#         self.assertTrue(self.user.is_after(4, 2, 1412))
-#
-#         # We check that it returns true if the serie isn't in the serie list
-#         self.assertTrue(self.user.is_after(1, 1, 1413))
-#
-#         # We check that it returns False if the episode is of the same season but earlier
-#         self.assertFalse(self.user.is_after(3, 3, 1412))
-#
-#         # Finally, we check that it returns True if the episode is from an earlier season
-#         self.assertFalse(self.user.is_after(1, 6, 1412))
-#
-#     def test_view_episode(self):
-#         """
-#         We check that the view_episode correctly updates the serie list to change the last viewed episode :
-#         :return: void
-#         """
-#         # We check that the method updates the last episode the user saw
-#         self.user.series = '1412xS3E4-69050xS1E1'
-#         self.user.view_episode('S4E5', 1412)
-#         self.assertEqual(self.user.get_last_episode_viewed(1412), 'S4E5')
-#
-#         # We check that no error is raised when we update a serie that isn't in the user list
-#         self.user.view_episode('S5E6', 1413)
-#         self.assertEqual(self.user.series, '1412xS4E5-69050xS1E1')
-#
-#     def test_add_serie(self):
-#         """
-#         We check that the add_serie method correctly adds the serie to the serie list of the user
-#         If the user already has this serie in his list then it musn't add it again
-#         We also need to check when the user has no serie in his list yet as the expected return is different
-#             (no - in front in the list)
-#         :return: void
-#         """
-#         # We set the serie list of our user to None and try to add a serie.
-#         # We check that the output is the expecterd one
-#         self.user.series = None
-#         self.user.add_serie('1412')
-#         self.assertEqual(self.user.series, '1412xS1E1')
-#
-#         # We now add another serie to the user serie list to check that we get the expected result (with a - in front)
-#         self.user.add_serie('69050')
-#         self.assertEqual(self.user.series, '1412xS1E1-69050xS1E1')
-#
-#         #Finally we check that when adding a serie already in the list, the method does nothing
-#         self.user.add_serie('1412')
-#         self.assertEqual(self.user.series, '1412xS1E1-69050xS1E1')
-#
-#     def test_remove_serie(self):
-#         """
-#         We check that the remove_serie method correctly removes the serie from the serie list of the user
-#         If the user doesn't have this serie in its serie list then it musn't create an error
-#         We also need to check when the user only has one serie in its list because the returned value is different
-#             (no - in front in the list)
-#         :return:
-#         """
-#         # We check that the method doesn't fail when we delete a serie that's not yet in the user's list
-#         self.user.series = '1412xS3E4-69050xS1E1'
-#         self.user.remove_serie('1413')
-#         self.assertEqual(self.user.series, '1412xS3E4-69050xS1E1')
-#
-#         # We check that the method gives us the expected result when we delete a serie in the front of the list
-#         self.user.remove_serie('1412')
-#         self.assertEqual(self.user.series, '69050xS1E1')
-#
-#         # We check that the method gives us the expected result when we delete a serie in the back of the list
-#         self.user.add_serie('1412')
-#         self.user.remove_serie('1412')
-#         self.assertEqual(self.user.series, '69050xS1E1')
-#
-#         # Finally we check that when deleting all the series from the list, no error is raised
-#         self.user.remove_serie('69050')
-#         self.assertEqual(self.user.series, '')
-#
-#     def test_add_movie(self):
-#         """
-#         We check that the add_movie method correctly adds the movie to the movie list of the user
-#         If the user already has this movie in his list then it musn't add it again
-#         We also need to check when the user has no movie in his list yet as the expected return is different
-#             (no - in front in the list)
-#         :return: void
-#         """
-#
-#         # We set the movie list of our user to None and try to add a movie.
-#         # We check that the output is the expecterd one
-#         self.user.movies = None
-#         self.user.add_movie('453405')
-#         self.assertEqual(self.user.movies, '453405')
-#
-#         # We now add another movie to the user movie list to check that we get the expected result (with a - in front)
-#         self.user.add_movie('420818')
-#         self.assertEqual(self.user.movies, '453405-420818')
-#
-#         # Finally we check that when adding a serie already in the list, the method does nothing
-#         self.user.add_movie('420818')
-#         self.assertEqual(self.user.movies, '453405-420818')
-#
-#     def test_remove_movie(self):
-#         """
-#         We check that the remove_movie method correctly removes the movie from the movie list of the user
-#         If the user doesn't have this movie in its movie list then it musn't create an error
-#         We also need to check when the user only has one movie in its list because the returned value is different
-#             (no - in front in the list)
-#         :return:
-#         """
-#         # We check that the method doesn't fail when we delete a movie that's not yet in the user's list
-#         self.user.movies = '453405-420818'
-#         self.user.remove_movie('4534053')
-#         self.assertEqual(self.user.movies, '453405-420818')
-#
-#         # We check that the method gives us the expected result when we delete a movie in the front of the list
-#         self.user.remove_movie('453405')
-#         self.assertEqual(self.user.movies, '420818')
-#
-#         # We check that the method gives us the expected result when we delete a movie in the back of the list
-#         self.user.add_movie('453405')
-#         self.user.remove_movie('453405')
-#         self.assertEqual(self.user.movies, '420818')
-#
-#         # Finally we check that when deleting all the movies from the list, no error is raised
-#         self.user.remove_movie('420818')
-#         self.assertEqual(self.user.movies, '')
-#
-#     def test_update_grade(self):
-#         """
-#         We try here to check that the update_grade method works well, we check it in two context
-#         (none current_grade and current_grade already filled)
-#         :return: void
-#         """
-#         self.user.series = '1412xS3E4-69050xS1E1'
-#         self.user.current_grade = None
-#
-#         # We test the method when the current_grade is None
-#         self.user.update_grade(4)
-#         self.assertTrue(self.user.current_grade, '4')
-#
-#         # We test the method when the current_grade is already filled
-#         self.user.update_grade(2)
-#         self.assertTrue(self.user.current_grade, '2')
-#
-#     def test_grade(self):
-#         """
-#         We need to test here that the grading of the medias is correct
-#         We need to check both cases (TV show and media)
-#         In both cases, we need to check the grading when there already is a grading before and when there isn't :
-#             the grading list isn't under the same form in both cases
-#         :return:
-#         """
-#         self.user.series_grades = None
-#         self.user.movies_grades = None
-#
-#         # We check that when adding a grade to a serie with an empty grade list there is no problem
-#         self.user.grade('1412', 'serie', 2)
-#         self.assertEqual(self.user.series_grades, '1412x2')
-#
-#         # We check that when adding a grade to a movie with an empty grade list there is no problem
-#         self.user.grade('453405', 'movie', 4)
-#         self.assertEqual(self.user.movies_grades, '453405x4')
-#
-#         # We check that the method works well when there already is a grade in the serie grade list
-#         self.user.grade('69050', 'serie', 8)
-#         self.assertEqual(self.user.series_grades, '1412x2-69050x8')
-#
-#         # We check that the method works well when there already is a grade in the movie grade list
-#         self.user.grade('420818', 'movie', 6)
-#         self.assertEqual(self.user.movies_grades, '453405x4-420818x6')
-#
-#     def test_is_graded(self):
-#         """
-#         We try here to check that the is_graded method works well, for both series and movies
-#         We need to check that when the media is graded, the method returns True
-#         The method needs to return False when the media is not graded or the graded list is null
-#         We need to check that it works for both series and movies
-#         :return: void
-#         """
-#         self.user.series_grades = None
-#         self.user.movies_grades = None
-#
-#         # We check that it returns false for both series and movies when the lists are None
-#         self.assertFalse(self.user.is_graded('serie', '1412'))
-#         self.assertFalse(self.user.is_graded('movie', '453405'))
-#
-#         # We now add a serie and a movie to the user grades lists
-#         self.user.grade('1412', 'serie', 2)
-#         self.user.grade('453405', 'movie', 8)
-#
-#         # We now check that the method returns true for both of them when we check that they are graded
-#         self.assertTrue(self.user.is_graded('serie', '1412'))
-#         self.assertTrue(self.user.is_graded('movie', '453405'))
-#
-#         # Finally we check that the method returns false when we look for others medias or other series/films
-#         self.assertFalse(self.user.is_graded('serie', '1413'))
-#         self.assertFalse(self.user.is_graded('movie', '453406'))
-#         with self.assertRaises(ValueError):
-#             self.user.is_graded('other_media', '1412')
-#
-#     def test_get_grade(self):
-#         """
-#         We try here to check that the get_grade method works well, for both series and movies
-#         We need to check that when the media is graded, the method returns the grade
-#         The method needs to return False when the media is not graded or the graded list is null
-#         We need to check that it works for both series and movies
-#         :return: void
-#         """
-#         self.user.series_grades = None
-#         self.user.movies_grades = None
-#
-#         # We check that it returns false for both series and movies when the lists are None
-#         self.assertFalse(self.user.get_grade('serie', '1412'))
-#         self.assertFalse(self.user.get_grade('movie', '453405'))
-#
-#         # we add grades to the series and movies grades lists
-#         self.user.grade('1412', 'serie', 2)
-#         self.user.grade('453405', 'movie', 8)
-#
-#         # We check that we get the grades of the medias
-#         self.assertEqual(self.user.get_grade('serie', '1412'), 2)
-#         self.assertEqual(self.user.get_grade('movie', '453405'), 8)
-#
-#         # Finally we check that the method returns false when we grade for others medias or other series/films
-#         self.assertFalse(self.user.is_graded('serie', '1413'))
-#         self.assertFalse(self.user.is_graded('movie', '453406'))
-#         with self.assertRaises(ValueError):
-#             self.user.is_graded('other_media', '1412')
-#
-#     def test_unrate(self):
-#         """
-#            We try here to check that the unrate method works well, for both series and movies
-#            We need to check that when the media is graded, the method deletes the grade and the media from the list
-#            We also need to check that there are no errors if the lists are None
-#            Finally we need to check that the delete works well when we delete the first media,
-#            or when there only is one media
-#            :return: void
-#         """
-#         self.user.series_grades = '1412x2-69050x6-62286x8'
-#         self.user.movies_grades = '453405x4-420818x8-420809x6'
-#
-#         # We check that it returns the correct list when we delete the first elements
-#         self.user.unrate('serie', '1412')
-#         self.user.unrate('movie', '453405')
-#         self.assertEqual(self.user.series_grades, '69050x6-62286x8')
-#         self.assertEqual(self.user.movies_grades, '420818x8-420809x6')
-#
-#         # We check that it returns the correct list when we delete the last elements
-#         self.user.unrate('serie', '62286')
-#         self.user.unrate('movie', '420809')
-#         self.assertEqual(self.user.series_grades, '69050x6')
-#         self.assertEqual(self.user.movies_grades, '420818x8')
-#
-#         # We check that nothing happens when we delete a media not in the lists
-#         self.user.unrate('serie', '62286')
-#         self.user.unrate('movie', '420809')
-#         self.assertEqual(self.user.series_grades, '69050x6')
-#         self.assertEqual(self.user.movies_grades, '420818x8')
-#
-#         # Finally, we check that nothing happens when the list is None or empty
-#         self.user.series_grades = None
-#         self.user.movies_grades = None
-#         self.user.unrate('serie', '62286')
-#         self.user.unrate('movie', '420809')
-#         self.assertEqual(self.user.series_grades, None)
 
 
 if __name__ == '__main__':

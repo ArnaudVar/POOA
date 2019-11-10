@@ -16,10 +16,6 @@ class User(UserMixin, db.Model):
     :param name: prenom de l'utilisateur
     :param surname: nom de famille de l'utilisateur
     :param password_hash : mot de passe hash apres inscription de l'utilisateur
-    :param series: texte avec des id series associes au code du dernier episode vu par l'utilisateur
-    :param movies: texte avec la liste des id des films vus
-    :param series_grades: texte avec des id series associes a la note donnee par l'utilisateur
-    :param movies_grades: texte avec des id movies associes a la note donnee par l'utilisateur
     :param current_grade: nombre correspondant a la note actuelle de l'utilisateur
     :param session_id: l'id_session donne par l'API MovieDB pour avoir une guest session pour l'utilisateur
     """
