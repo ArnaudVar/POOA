@@ -26,7 +26,6 @@ def home():
     for i in range(12):
         selection_serie.append(suggestions_serie[i])
         selection_movie.append(suggestions_movie[i])
-    print(current_user.series)
     return render_template('home.html', title='Home', suggestions_serie=selection_serie,
                            suggestions_movie=selection_movie, nombre_series=12,
                            tv_genres=tv_genres, movie_genres=movie_genres)
@@ -75,10 +74,7 @@ def serie(id):
         return render_template('404.html')
     else:
         if current_user.is_in_series(id):
-            user_series = current_user.series.split('-')
-            for user_serie in user_series:
-                if user_serie.split('x')[0] == str(id):
-                    serie.selected_episode = user_serie.split('x')[1]
+            serie.selected_episode = current_user.get_last_episode_viewed(id)
         episode = serie.get_episode
         app.logger.info(msg=f'Successful query for the Serie id={serie.id} page')
         return render_template('serie.html', serie=serie, episode=episode, user=current_user, tv_genres=tv_genres, movie_genres=movie_genres, similar=similar)
@@ -184,9 +180,7 @@ def remove_movie(id):
 @app.route('/myseries')
 @login_required
 def myserie():
-    user_id = current_user.id
-    u = User.query.get(user_id)
-    list_series = u.list_serie()
+    list_series = current_user.list_serie()
     list_serie_rendered = []
     nb_series = 0
     if list_series == "The user doesn't have any series":
@@ -206,9 +200,7 @@ def myserie():
 @app.route('/mymovies')
 @login_required
 def mymovies():
-    user_id = current_user.id
-    u = User.query.get(user_id)
-    list_movies = u.list_movie()
+    list_movies = current_user.list_movie()
     list_movies_rendered = []
     nb_movies = 0
     if list_movies == "The user doesn't have any movie":
@@ -284,15 +276,14 @@ def select_episode(id, season, episode):
 @app.route('/serie/<id>/season/<season>/episode/<episode>/view')
 @login_required
 def next_episode(id, season, episode):
-    string_episode = 'S' + str(season) + 'E' + str(episode)
-    current_user.view_episode(string_episode, id)
-    return (serie(id))
+    current_user.view_episode(episode, season, id)
+    return serie(id)
 
 
 @app.route('/rate/<i>')
 def rate(i):
     current_user.update_grade(float(2 * int(i)))
-    return ('', 204)
+    return '', 204
 
 
 @app.route('/serie/<id>/post/grade')
@@ -352,9 +343,7 @@ def upcomingEpisodes():
         * The user is up-to-date with the serie but we're not expecting any next episode > list_series_finished
     :return:render_template('upcoming_episode.html')
     """
-    user_id = current_user.id
-    u = User.query.get(user_id)
-    l_utd, l_nutd, l_fin = u.check_upcoming_episodes()
+    l_utd, l_nutd, l_fin = current_user.check_upcoming_episodes()
 
     # We fill the list with all the series info using the Api get_serie method
     list_up_to_date, list_not_up_to_date, list_finished = [], [], []
