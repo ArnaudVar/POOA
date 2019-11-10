@@ -248,7 +248,7 @@ class User(UserMixin, db.Model):
         :param new_grade: int
         :return: void
         """
-        self.current_grade = new_grade
+        self.current_grade = int(new_grade)
         db.session.commit()
 
     def grade(self, id, type, grade):

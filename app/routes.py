@@ -183,7 +183,7 @@ def myserie():
     list_series = current_user.list_serie()
     list_serie_rendered = []
     nb_series = 0
-    if list_series == "The user doesn't have any series":
+    if not list_series:
         list_serie_rendered = list_series
         app.logger.info(msg=f'MySeries page rendered without series')
     else:
@@ -203,7 +203,7 @@ def mymovies():
     list_movies = current_user.list_movie()
     list_movies_rendered = []
     nb_movies = 0
-    if list_movies == "The user doesn't have any movie":
+    if not list_movies:
         list_movies_rendered = list_movies
         app.logger.info(msg=f'MyMovies page rendered without movies')
     else:
@@ -277,39 +277,58 @@ def select_episode(id, season, episode):
 @login_required
 def next_episode(id, season, episode):
     current_user.view_episode(episode, season, id)
+    app.logger.info(msg=f'The user marked S{season}E{episode} from serie {id} as viewed')
     return serie(id)
 
-
 @app.route('/rate/<i>')
+@login_required
 def rate(i):
-    current_user.update_grade(float(2 * int(i)))
+    g = float(2*int(i))
+    current_user.update_grade(g)
+    app.logger.info(msg=f'The user is selecting the grade {float(2 * int(i))}')
     return '', 204
 
 
 @app.route('/serie/<id>/post/grade')
+@login_required
 def post_series_grade(id):
     grade = current_user.current_grade
     session = current_user.session_id
     current_user.grade(id, 'serie', grade)
     msg = Api.rate(id, grade, 'tv', session)
+    app.logger.info(msg=f'The user posted the grade {int(grade)} for the serie {id}')
     return serie(id)
 
 
 @app.route('/movie/<id>/post/grade')
+@login_required
 def post_movie_grade(id):
     grade = current_user.current_grade
+    session = current_user.session_id
     current_user.grade(id, 'movie', grade)
-    # requests.post("https://api.themoviedb.org/3/tv/" + str(id)+'/rating' + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US", data = { "value" : grade})
+    msg = Api.rate(id, grade, 'movie', session)
+    app.logger.info(msg=f'The user posted the grade {int(grade)} for the movie {id}')
     return movie(id)
 
 
 @app.route('/serie/<id>/unrate')
+@login_required
 def unrate_serie(id):
     current_user.unrate('serie', id)
+    app.logger.info(msg=f'The user unrated the serie {id}')
     return serie(id)
 
 
+@app.route('/movie/<id>/unrate')
+@login_required
+def unrate_movie(id):
+    current_user.unrate('movie', id)
+    app.logger.info(msg=f'The user unrated the movie {id}')
+    return movie(id)
+
+
 @app.route('/topRated/<media>/<page>')
+@login_required
 def topRated(media, page):
     """
     This function is called when the user tries to access the popular pannel from one of the pages
@@ -323,12 +342,6 @@ def topRated(media, page):
     app.logger.info(msg=f'Top Rated request on Media = {media}, Page = {page}')
     return render_template('topRatedMedias.html', list_medias=top_rated_medias, current_page=int(page),
                            media=media, page=page, nb_pages=nb_pages, tv_genres=tv_genres, movie_genres=movie_genres)
-
-
-@app.route('/movie/<id>/unrate')
-def unrate_movie(id):
-    current_user.unrate('movie', id)
-    return movie(id)
 
 
 @app.route('/upcoming')
@@ -348,12 +361,15 @@ def upcomingEpisodes():
     # We fill the list with all the series info using the Api get_serie method
     list_up_to_date, list_not_up_to_date, list_finished = [], [], []
     for s_id in l_utd:
+        app.logger.info(msg=f'Serie {s_id} added to up to date shows')
         list_up_to_date.append(Api.get_serie(s_id))
 
     for s_id in l_nutd:
+        app.logger.info(msg=f'Serie {s_id} added to not up to date shows')
         list_not_up_to_date.append(Api.get_serie(s_id))
 
     for s_id in l_fin:
+        app.logger.info(msg=f'Serie {s_id} added to finished shows')
         list_finished.append(Api.get_serie(s_id))
 
     return render_template('upcoming_episodes.html', title='Upcoming Episodes', list_next_episode=list_up_to_date,
