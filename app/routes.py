@@ -52,7 +52,9 @@ def login():
             next_page = url_for('home')
         current_user.session_id = Api.new_session()
         db.session.commit()
+        current_user.notifications = bytes(1)
         current_user.update_all_upcoming_episodes()
+        db.session.commit()
         return redirect(next_page)
     return render_template('login.html', title='Sign In', form=form, src=logo_source)
 
@@ -354,6 +356,7 @@ def upcomingEpisodes():
             while the series last episode is S4E3 > list_series_last_episode
         * The user is up to date with this serie and we're expecting an episode for this show > list_series_up_to_date
         * The user is up-to-date with the serie but we're not expecting any next episode > list_series_finished
+    On change egalement les notifications en 0
     :return:render_template('upcoming_episode.html')
     """
     l_utd, l_nutd, l_fin = current_user.check_upcoming_episodes()
@@ -371,6 +374,9 @@ def upcomingEpisodes():
     for s_id in l_fin:
         app.logger.info(msg=f'Serie {s_id} added to finished shows')
         list_finished.append(Api.get_serie(s_id))
+
+    current_user.notifications = bytes(0)
+    db.session.commit()
 
     return render_template('upcoming_episodes.html', title='Upcoming Episodes', list_next_episode=list_up_to_date,
                            list_last_episode=list_not_up_to_date, list_finished=list_finished,

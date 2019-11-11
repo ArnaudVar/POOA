@@ -114,7 +114,6 @@ class TestApplication(TestCase):
                                        'password3', 'password3x')
         assert b'Field must be equal to password.' in rv6.data
 
-
     def login(self, username, password):
         """
         This function is used to simulate a login event for a user on our login page.
@@ -137,18 +136,21 @@ class TestApplication(TestCase):
 
     def test_user_login_logout(self):
         """
-        This method allows us to check that the login of the users takes place without problems
-        We check that when a user logs in, a successful message is flashed
-
-        We also check that a user can't login if he types in the wrong info (wrong username or wrong password)
+        Cette methode nous permet de verifier que la connexion d'un utilisateur se deroule sans probleme
+        On verifie que lorsqu'il se connecte, les bons messages sont affiches
+        On verifie egalement qu'un utilisateur ne peut se connecter avec des informations erronnees
+        On verifie que les notifications sont egales a 1
         :return: void
         """
         # We check that a user can log in if all the correct info is typed in
         TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
                                      'password', 'password')
+
         with self.assertLogs() as cm:
             TestApplication.login(self, 'Username',  'password')
         self.assertEqual(cm.records[1].msg, 'Successful Login !')
+        user = User.query.filter_by(name='Name')[0]
+        self.assertEqual(user.notifications, bytes(1))
 
         # We check that the logout is succesful
         with self.assertLogs() as cm:
@@ -236,11 +238,13 @@ class TestApplication(TestCase):
         TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
                                  'password', 'password')
         TestApplication.login(self, 'Username', 'password')
+        user = User.query.filter_by(name='Name')[0]
 
         # On verifie que la route serie marche bien
         with self.assertLogs() as cm:
             self.app.get('/add_serie/1412', follow_redirects=True)
         self.assertEqual(cm.records[0].msg, 'Serie 1412 successfully added')
+        self.assertEqual(user.notifications, bytes(1))
 
         # On verifie que la bonne serie est ajoutee et que l'episode en cours est bien S1E1
         u = User.query.filter_by(name='Name')
@@ -556,6 +560,8 @@ class TestApplication(TestCase):
         self.assertEqual(cm.records[0].msg, 'Serie 60735 added to up to date shows')
         self.assertEqual(cm.records[1].msg, 'Serie 1412 added to not up to date shows')
         self.assertEqual(cm.records[2].msg, 'Serie 1668 added to finished shows')
+        u = User.query.filter_by(name='Name')
+        self.assertEqual(u[0].notifications, bytes(0))
 
 
         # On verifie egalement que si l'utilisateur n'est pas connecte, la route ne fonctionne pas
@@ -578,10 +584,11 @@ class TestApplication(TestCase):
         u = User.query.filter_by(name='Name')
         u[0].add_serie(1412)
 
-        # On verifie que l'episode est marque comme vu
+        # On verifie que l'episode est marque comme vu et que les notifications sont remises a 1
         with self.assertLogs() as cm:
             self.app.get('/serie/1412/season/3/episode/4/view', follow_redirects=True)
         self.assertEqual(cm.records[0].msg, f'The user marked S3E4 from serie 1412 as viewed')
+        self.assertEqual(u[0].notifications, bytes(1))
 
         # On verifie que la base de donnees s'est mise a jour
         u = User.query.filter_by(name='Name')
@@ -1101,6 +1108,7 @@ class TestUser(TestCase):
         self.assertEqual(user.get_last_episode_viewed(id=1668), 'S3E4')
         status = user.user_media.filter_by(media='serie', media_id=1668).first().state_serie
         self.assertEqual(status, 'nutd')
+        self.assertEqual(user.notifications, bytes(1))
 
         # On teste que la methode met a jour le dernier episode vu et le statut de ce dernier en fin quand la
         # serie est terminee (pas d'episode futur)

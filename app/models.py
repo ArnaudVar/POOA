@@ -27,6 +27,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     current_grade = db.Column(db.Float)
     session_id = db.Column(db.String(64))
+    notifications = db.Column(db.Binary)
     user_media = db.relationship('UserMedia', backref='user', lazy='dynamic')
 
     def __repr__(self):
@@ -106,6 +107,7 @@ class User(UserMixin, db.Model):
         """
         Cette methode permet d'ajoute une serie a l'utilisateur dans la table user_media
         Par defaut, la serie commence comme non a jour (nutd)
+        On met a jour les notifications de l'utilisateur
         :param id_serie: int
         :return: void
         """
@@ -116,6 +118,7 @@ class User(UserMixin, db.Model):
                           season_id=1, episode_id=1, state_serie='nutd', user=self)
             # On inscrit les changements dans la base de donnees
             db.session.add(s)
+            self.notifications = bytes(1)
             db.session.commit()
 
     def add_movie(self, id_movie):
@@ -207,6 +210,9 @@ class User(UserMixin, db.Model):
             show.season_id = season
             show.episode_id = episode
             show.state_serie = status
+
+            # On met a jour les notifications
+            self.notifications = bytes(1)
 
             db.session.commit()
 
@@ -399,6 +405,7 @@ class User(UserMixin, db.Model):
     def get_notifications(self):
         """
         Cette methode renvoie une liste contenant le nom des series et leur id
+        Elle ne renvoie la liste que si l'utilisateur doit avoir des notifications, sinon elle renvoie un liste vide
         :return: tuple list
         """
         # On recupere la liste des series ou l'utilisateur n'est pas jour
@@ -415,7 +422,10 @@ class User(UserMixin, db.Model):
         Cette methode renvoie le nombre de series non a jour (pour pouvoir creer l'icone de notifications)
         :return: int
         """
-        return len(self.check_upcoming_episodes()[1])
+        if self.notifications:
+            return len(self.get_notifications())
+        else:
+            return 0
 
 
 class UserMedia(db.Model):

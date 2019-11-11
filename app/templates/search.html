@@ -238,15 +238,11 @@
                                     </a>
                                     {% if list_series[2*i+j]['poster_path'] == None %}
                                     <img src="{{url_for('static', filename='assets/notFound.png')}}"
-                                         height="250px"
-                                         width="80%"
-                                         class="rounded">
+                                         class="rounded justify-content-center">
                                     {% else %}
                                     <img src="https://image.tmdb.org/t/p/w500{{list_series[2*i+j]['poster_path']}}"
                                          alt="{{list_series[2*i+j]['name']}}"
-                                         height="250px"
-                                         width="100%"
-                                         class="rounded">
+                                         class="rounded justify-content-center">
                                     {% endif %}
                                 </div>
                             </div>
@@ -277,15 +273,11 @@
                                     </a>
                                     {% if list_movies[2*i+j]['poster_path'] == None %}
                                     <img src="{{url_for('static', filename='assets/notFound.png')}}"
-                                         height="250px"
-                                         width="80%"
-                                         class="rounded">
+                                         class="rounded justify-content-center">
                                     {% else %}
                                     <img src="https://image.tmdb.org/t/p/w500{{list_movies[2*i+j]['poster_path']}}"
                                          alt="{{list_movies[2*i+j]['name']}}"
-                                         height="250px"
-                                         width="100%"
-                                         class="rounded">
+                                         class="rounded justify-content-center">
                                     {% endif %}
                                 </div>
                             </div>
