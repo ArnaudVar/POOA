@@ -41,21 +41,24 @@ def login():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None:
             app.logger.info(msg='Invalid Username !')
-            return redirect(url_for('login'))
+            flash("Invalid Username !")
+            render_template('login.html', title='Sign In', form=form, src=logo_source)
         elif not user.check_password(form.password.data):
             app.logger.info(msg='Invalid Password !')
-            return redirect(url_for('login'))
-        login_user(user, remember=form.remember_me.data)
-        next_page = request.args.get('next')
-        app.logger.info(msg='Successful Login !')
-        if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('home')
-        current_user.session_id = Api.new_session()
-        db.session.commit()
-        current_user.notifications = bytes(1)
-        current_user.update_all_upcoming_episodes()
-        db.session.commit()
-        return redirect(next_page)
+            flash("Invalid Password !")
+            render_template('login.html', title='Sign In', form=form, src=logo_source)
+        else:
+            login_user(user, remember=form.remember_me.data)
+            next_page = request.args.get('next')
+            app.logger.info(msg='Successful Login !')
+            if not next_page or url_parse(next_page).netloc != '':
+                next_page = url_for('home')
+            current_user.session_id = Api.new_session()
+            db.session.commit()
+            current_user.notifications = bytes(1)
+            current_user.update_all_upcoming_episodes()
+            db.session.commit()
+            return redirect(next_page)
     return render_template('login.html', title='Sign In', form=form, src=logo_source)
 
 
