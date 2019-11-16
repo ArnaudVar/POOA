@@ -9,15 +9,20 @@ from app.api import Api
 
 class User(UserMixin, db.Model):
     """
-    Classe User
-    :param id: identifiant de l'utilisateur
-    :param username: nom d'utilisateur
-    :param email: email utilisateur
-    :param name: prenom de l'utilisateur
-    :param surname: nom de famille de l'utilisateur
-    :param password_hash : mot de passe hash apres inscription de l'utilisateur
-    :param current_grade: nombre correspondant a la note actuelle de l'utilisateur
-    :param session_id: l'id_session donne par l'API MovieDB pour avoir une guest session pour l'utilisateur
+    Classe User : une classe pour definir les utilisateurs de l'application
+
+    Cette classe correspond au modele de la table user de la base de donnees.
+    On y trouve donc tous les paramètres de la table :
+
+    :param id: (int) identifiant de l'utilisateur
+    :param username: (int) nom d'utilisateur
+    :param email: (string) email utilisateur
+    :param name: (string) prenom de l'utilisateur
+    :param surname: (string) nom de famille de l'utilisateur
+    :param password_hash : (string) mot de passe hash apres inscription de l'utilisateur
+    :param current_grade: (string) nombre correspondant a la note actuelle de l'utilisateur
+    :param session_id: (string) l'id_session donne par l'API MovieDB pour avoir une guest session pour l'utilisateur
+    :param notifications: (binary) un binaire nous indiquant si les notifications ont ete vues par l'utilisateur
     """
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
@@ -30,68 +35,126 @@ class User(UserMixin, db.Model):
     notifications = db.Column(db.Binary)
     user_media = db.relationship('UserMedia', backref='user', lazy='dynamic')
 
-    def __repr__(self):
-        return f"Username : {self.username}, Name : {self.name}, Surname : {self.surname}, Email : {self.email}," \
-               f" Series : {self.series}"
+    def __init__(self, username, email, name, surname, password):
+        """
+        Constructeur de la classe User
 
+        Prend 5 parametres en compte lors de la creation de l'utilisateur
+        :param username: (String) username de l'utilisateur
+        :param email: (String) email de l'utilisateur
+        :param name: (String) name de l'utilisateur
+        :param surname: (String) surname de l'utilisateur
+        :param password: (String) password de l'utilisateur
+
+        Le password est encode avec la fonction generate_password_hash pour que les mots de passes ne soient pas
+        stockes en clair dans la base de donnees
+        Le reste des donnes est initialise a null
+        """
+        self.username = username
+        self.email = email
+        self.name = name
+        self.surname = surname
+        self.password_hash = generate_password_hash(password)
+
+    def __repr__(self):
+        """
+        Methode nous permettant de representer nos utilisateurs sous la forme de chaines de caracteres
+
+        On retourne l'username, le nom, le prenom, l'email, les series et les films de l'utilisateur
+        Pour ce faire on fait appel aux methodes list_serie et list_movie definies dans la classe User
+
+        :return: String
+        """
+        return f"Username : {self.username}, Name : {self.name}, Surname : {self.surname}, Email : {self.email},\n" \
+               f"Series : {self.list_serie()}, \n" \
+               f"Movies : {self.list_movie()}"
 
     def set_password(self, password):
+        """Methode nous permettant de mettre a jour le mot de passe d'un utilisateur"""
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
+        """
+        Methode nous permettant de verifier si un mot de passe est celui de l'utilisateur
+
+        Pour comparer le mot de passe donné avec le hash stocke dans la base de donnees,
+        on utilise la methode check_password_hash du module werkzeug.security
+
+        :return: Boolean
+        """
         return check_password_hash(self.password_hash, password)
 
     def list_serie(self):
         """
-        Cette methode permet de retourner la liste des id des series ajoutees par l'utilisateur
-        Pour ce faire on effectue une jointure avec la table user_media
-        :return: renvoie une liste de serie id
+        Methode retournant la liste des id des series ajoutees (favorites) par l'utilisateur.
+
+        On effectue une jointure de la table user_media grace a la relation one-to-many entre User et user_media.
+        En effet, les objets de la classe user ont un champ user_media que l'on utilise pour effectuer la jointure.
+
+        :return: list(int)
         """
-        # We query the list of series of this user :
-        # We only query the series and only the id of the series
-        series = self.user_media.filter_by(media = 'serie').with_entities('media_id').all()
+        # On selectionne les identifiants de tous les medias de l'utilisateur etant des series
+        # On obtient une liste de tuples de taille 1 contenant les id des series
+        series = self.user_media.filter_by(media='serie').with_entities('media_id').all()
+
+        # Liste stockant le resultat de la methode
         serie_list = []
 
+        # On parcourt cette liste de tuples pour obtenir une liste d'idenfiants
         for s in series:
             serie_list.append(s[0])
         return serie_list
 
     def list_movie(self):
         """
-        Cette méthode est similaire à la méthode précedente, elle permet de retourner la liste des id des films
-        ajoutés par l'utilisateur en utilisant la table user_media
+        Methode retournant la liste des id des films ajoutes (favoris) par l'utilisateur.
+
+        On effectue une jointure de la table user_media grace a la relation one-to-many entre User et user_media.
+        En effet, les objets de la classe user ont un champ user_media que l'on utilise pour effectuer la jointure.
+
         :return: list(int)
         """
-        # We query the list of movies of this user :
-        # We only query the series and only the id of the movies
+        # On selectionne les identifiants de tous les medias de l'utilisateur etant des films
+        # On obtient une liste de tuples de taille 1 contenant les id des films
         movies = self.user_media.filter_by(media='movie').with_entities('media_id').all()
+
+        # Liste stockant le resultat de la methode
         movie_list = []
 
+        # On parcourt cette liste de tuples pour obtenir une liste d'idenfiants
         for m in movies:
             movie_list.append(m[0])
         return movie_list
 
-    def is_in_series(self, id):
+    def is_in_series(self, id_serie):
         """
-        Cette methode permet de savoir si une serie est dans la liste des series de l'utilisateur
-        On utilise la méthode list_serie
-        :param id: int
+        Methode permettant de savoir si une serie est dans les series ajoutees par l'utilisateur
+
+        On fait appel a la methode list_serie qui nous renvoie la liste des
+            identifiants des series de l'utilisateur
+        On parcourt cette liste et on regarde si l'identifiant cherche est dans la liste
+
+        :param id_serie: (int) identifiant de la serie que l'on recherche
         :return: boolean
         """
         # On s'assure que tous les changements ont été fait dans la base de données
         db.session.commit()
 
-        # On récupère la liste des séries
+        # On récupère la liste des series de la base de donnees
         list_serie = self.list_serie()
 
-        # On renvoie true si la liste des séries contient la série recherchée
-        return int(id) in list_serie
+        # On renvoie true si la liste des series contient la serie recherchee
+        return int(id_serie) in list_serie
 
-    def has_movie(self,id):
+    def has_movie(self, id_movie):
         """
-        Cette methode permet de savoir si un film est dans la liste des films de l'utilisateur
-        On utilise la méthode list_movie
-        :param id: int
+        Methode permettant de savoir si un film est dans les films ajoutes par l'utilisateur
+
+        On fait appel a la methode list_movie qui nous renvoie la liste des
+            identifiants des films de l'utilisateur
+        On parcourt cette liste et on regarde si l'identifiant cherche est dans la liste
+
+        :param id_movie: (int) identifiant du film que l'on recherche
         :return: boolean
         """
         # On s'assure que tous les changements ont été fait dans la base de données
@@ -100,12 +163,13 @@ class User(UserMixin, db.Model):
         # On récupère la liste des films
         list_movie = self.list_movie()
 
-        # On renvoie true si la liste des films contient la film recherchée
-        return int(id) in list_movie
+        # On renvoie true si la liste des films contient la film recherche
+        return int(id_movie) in list_movie
 
     def add_serie(self, id_serie):
         """
         Cette methode permet d'ajoute une serie a l'utilisateur dans la table user_media
+
         Par defaut, la serie commence comme non a jour (nutd)
         On met a jour les notifications de l'utilisateur
         :param id_serie: int
@@ -116,6 +180,7 @@ class User(UserMixin, db.Model):
             # On ajoute la serie a l'utilisatur en la marquant comme nutd
             s = UserMedia(media='serie', media_id=int(id_serie),
                           season_id=1, episode_id=1, state_serie='nutd', user=self)
+
             # On inscrit les changements dans la base de donnees
             db.session.add(s)
             self.notifications = bytes(1)
@@ -124,6 +189,7 @@ class User(UserMixin, db.Model):
     def add_movie(self, id_movie):
         """
         Cette methode permet d'ajoute un film a l'utilisateur dans la table user_media
+
         Tous les champs spécifiques aux series sont laisses nulls
         :param id_movie: int
         :return: void
@@ -132,18 +198,20 @@ class User(UserMixin, db.Model):
         if not self.has_movie(id_movie):
             # On ajoute le film a l'utilisateur en laissant les champs specifiques des series nulls
             m = UserMedia(media='movie', media_id=int(id_movie), user=self)
+
             # On inscrit les changements dans la base de donnees
             db.session.add(m)
             db.session.commit()
 
-    def get_last_episode_viewed(self, id):
+    def get_last_episode_viewed(self, id_serie):
         """
-        Cette methode permet de retourner le dernier episode vu pour la serie ayant l'id id
-        :param id: int
+        Cette methode permet de retourner le dernier episode vu pour la serie ayant l'id id_serie
+        :param id_serie: int
         :return: string
         """
         # On effectue une requete sur la table user_media pour obtenir le dernier episode vu
-        last_ep = self.user_media.filter_by(media='serie', media_id=id).with_entities('season_id', 'episode_id').all()
+        last_ep = self.user_media.filter_by(media='serie', media_id=id_serie).\
+            with_entities('season_id', 'episode_id').all()
 
         # Si la serie n'est pas dans les series de l'utilisateur, on renvoie S1E1
         if not last_ep:

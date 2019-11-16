@@ -213,15 +213,21 @@
                                                             {{list_medias[4*i+j]['title']}}
                                                         {% endif %}
                                                     </div>
-                                                    <div class="p-0 card-body serie justify-content-center">
-                                                        <a class="w-100 h-100" href="/{{media}}/{{list_medias[4*i+j]['id']}}">
-                                                            <button class="btn btn-default btn-circle justify-content-center">
+                                                    <div class="card-body serie-search">
+                                                        <a class="w-100 h-100"
+                                                           href="/{{media}}/{{list_medias[4*i+j]['id']}}">
+                                                            <button class="btn btn-default btn-circle">
                                                                 <i class="fa fa-fw fa-plus"></i>
                                                             </button>
                                                         </a>
+                                                        {% if list_medias[4*i+j]['poster_path'] == None %}
+                                                        <img src="{{url_for('static', filename='assets/notFound.png')}}"
+                                                             class="rounded justify-content-center">
+                                                        {% else %}
                                                         <img src="https://image.tmdb.org/t/p/w500{{list_medias[4*i+j]['poster_path']}}"
                                                              alt="{{list_medias[4*i+j]['name']}}"
                                                              class="rounded justify-content-center">
+                                                        {% endif %}
                                                     </div>
                                                 </div>
                                             {% endif %}

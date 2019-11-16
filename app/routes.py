@@ -103,8 +103,8 @@ def register():
         return redirect(url_for('home'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data, name=form.name.data, surname=form.surname.data)
-        user.set_password(form.password.data)
+        user = User(username=form.username.data, email=form.email.data, name=form.name.data, surname=form.surname.data,
+                    password=form.password.data)
         db.session.add(user)
         db.session.commit()
         app.logger.info(msg='Successful registry')
@@ -252,15 +252,13 @@ def search():
 def genre(media, genre, page):
     if media == 'movie':
         list_genres = movie_genres
-    elif media == 'tv':
+    else :
         list_genres = tv_genres
     for i in range(len(list_genres)):
         if list_genres[i]['name'] == genre:
             index_genre = i
     id_genre = list_genres[index_genre]['id']
     list_media, nb_pages = Api.discover(media, id_genre, page)
-    if media == 'tv':
-        media = 'serie'
     app.logger.info(msg=f'Genre request on : Genre = {genre}, Media = {media}, Page = {page}')
     return render_template('genre.html', genre=genre, list_medias=list_media, media=media,
                            tv_genres=tv_genres, movie_genres=movie_genres, current_page=int(page), nb_pages=nb_pages)
