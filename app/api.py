@@ -90,7 +90,6 @@ class Api:
     """
     @staticmethod
     def discover(media, id_genre, page):
-        if media == 'serie': media = 'tv'
         url = f"{Api.base_url_start}discover/{media}{Api.base_url_end}" \
               f"&with_genres={id_genre}&sort_by=popularity.desc&page={page}"
         request = requests.get(url).json()

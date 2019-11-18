@@ -66,8 +66,8 @@ class User(UserMixin, db.Model):
         :return: String
         """
         return f"Username : {self.username}, Name : {self.name}, Surname : {self.surname}, Email : {self.email},\n" \
-               f"Series : {self.list_serie()}, \n" \
-               f"Movies : {self.list_movie()}"
+               f"Series : {self.list_media(media='tv')}, \n" \
+               f"Movies : {self.list_media(media='movie')}"
 
     def set_password(self, password):
         """Methode nous permettant de mettre a jour le mot de passe d'un utilisateur"""
@@ -84,120 +84,69 @@ class User(UserMixin, db.Model):
         """
         return check_password_hash(self.password_hash, password)
 
-    def list_serie(self):
+    def list_media(self, media):
         """
-        Methode retournant la liste des id des series ajoutees (favorites) par l'utilisateur.
+        Methode retournant la liste des id des medias ajoutees (favoris) par l'utilisateur.
 
         On effectue une jointure de la table user_media grace a la relation one-to-many entre User et user_media.
         En effet, les objets de la classe user ont un champ user_media que l'on utilise pour effectuer la jointure.
 
-        :return: list(int)
+        :param media: (string) type du media voulu
+        :return: int list
         """
-        # On selectionne les identifiants de tous les medias de l'utilisateur etant des series
-        # On obtient une liste de tuples de taille 1 contenant les id des series
-        series = self.user_media.filter_by(media='serie').with_entities('media_id').all()
+        # On selectionne les identifiants de tous les medias de l'utilisateur etant du bon type
+        # On obtient une liste de tuples de taille 1 contenant les id des medias voulus
+        medias = self.user_media.filter_by(media=media).with_entities('media_id').all()
 
         # Liste stockant le resultat de la methode
-        serie_list = []
+        media_list = []
 
         # On parcourt cette liste de tuples pour obtenir une liste d'idenfiants
-        for s in series:
-            serie_list.append(s[0])
-        return serie_list
+        for m in medias:
+            media_list.append(m[0])
+        return media_list
 
-    def list_movie(self):
+    def is_in_medias(self, id_media, type_media):
         """
-        Methode retournant la liste des id des films ajoutes (favoris) par l'utilisateur.
+        Methode permettant de savoir si un media est dans les medias ajoutes par l'utilisateur
 
-        On effectue une jointure de la table user_media grace a la relation one-to-many entre User et user_media.
-        En effet, les objets de la classe user ont un champ user_media que l'on utilise pour effectuer la jointure.
-
-        :return: list(int)
-        """
-        # On selectionne les identifiants de tous les medias de l'utilisateur etant des films
-        # On obtient une liste de tuples de taille 1 contenant les id des films
-        movies = self.user_media.filter_by(media='movie').with_entities('media_id').all()
-
-        # Liste stockant le resultat de la methode
-        movie_list = []
-
-        # On parcourt cette liste de tuples pour obtenir une liste d'idenfiants
-        for m in movies:
-            movie_list.append(m[0])
-        return movie_list
-
-    def is_in_series(self, id_serie):
-        """
-        Methode permettant de savoir si une serie est dans les series ajoutees par l'utilisateur
-
-        On fait appel a la methode list_serie qui nous renvoie la liste des
-            identifiants des series de l'utilisateur
+        On fait appel a la methode list_medias qui nous renvoie la liste des
+            identifiants des medias du type cherche par l'utilisateur
         On parcourt cette liste et on regarde si l'identifiant cherche est dans la liste
 
-        :param id_serie: (int) identifiant de la serie que l'on recherche
+        :param id_media: (int) identifiant du media que l'on recherche
+        :param type_media: (string) type du media cherche (serie ou movie)
         :return: boolean
         """
         # On s'assure que tous les changements ont été fait dans la base de données
         db.session.commit()
 
-        # On récupère la liste des series de la base de donnees
-        list_serie = self.list_serie()
+        # On récupère la liste des medias cherches de la base de donnees
+        list_medias = self.list_media(type_media)
 
         # On renvoie true si la liste des series contient la serie recherchee
-        return int(id_serie) in list_serie
+        return int(id_media) in list_medias
 
-    def has_movie(self, id_movie):
+    def add_media(self, id_media, type_media):
         """
-        Methode permettant de savoir si un film est dans les films ajoutes par l'utilisateur
+        Cette methode permet d'ajoute un media a l'utilisateur dans la table user_media
 
-        On fait appel a la methode list_movie qui nous renvoie la liste des
-            identifiants des films de l'utilisateur
-        On parcourt cette liste et on regarde si l'identifiant cherche est dans la liste
-
-        :param id_movie: (int) identifiant du film que l'on recherche
-        :return: boolean
-        """
-        # On s'assure que tous les changements ont été fait dans la base de données
-        db.session.commit()
-
-        # On récupère la liste des films
-        list_movie = self.list_movie()
-
-        # On renvoie true si la liste des films contient la film recherche
-        return int(id_movie) in list_movie
-
-    def add_serie(self, id_serie):
-        """
-        Cette methode permet d'ajoute une serie a l'utilisateur dans la table user_media
-
-        Par defaut, la serie commence comme non a jour (nutd)
+        Par defaut, si le media est une serie, elle commence comme non a jour (nutd)
+        sinon, les champs specifiques a une serie sont laisses vides
         On met a jour les notifications de l'utilisateur
-        :param id_serie: int
+        :param id_media: int
         :return: void
         """
-        # On commence par verifier que la serie n'est pas deja dans la liste des series de l'utilisateur
-        if not self.is_in_series(id_serie):
-            # On ajoute la serie a l'utilisatur en la marquant comme nutd
-            s = UserMedia(media='serie', media_id=int(id_serie),
-                          season_id=1, episode_id=1, state_serie='nutd', user=self)
+        # On commence par verifier que le media n'est pas deja dans la liste des medias de l'utilisateur
+        if not self.is_in_medias(id_media=id_media, type_media=type_media):
+            if type_media == 'tv':
+                # On ajoute la serie a l'utilisatur en la marquant comme nutd et on remeta jour les notifications
+                m = UserMedia(media='tv', media_id=int(id_media),
+                    season_id=1, episode_id=1, state_serie='nutd', user=self)
+                self.notifications = bytes(1)
 
-            # On inscrit les changements dans la base de donnees
-            db.session.add(s)
-            self.notifications = bytes(1)
-            db.session.commit()
-
-    def add_movie(self, id_movie):
-        """
-        Cette methode permet d'ajoute un film a l'utilisateur dans la table user_media
-
-        Tous les champs spécifiques aux series sont laisses nulls
-        :param id_movie: int
-        :return: void
-        """
-        # On commence par verifier que le film n'est pas deja dans la liste des films de l'utilisateur
-        if not self.has_movie(id_movie):
-            # On ajoute le film a l'utilisateur en laissant les champs specifiques des series nulls
-            m = UserMedia(media='movie', media_id=int(id_movie), user=self)
+            else:
+                m = UserMedia(media='movie', media_id=int(id_media), user=self)
 
             # On inscrit les changements dans la base de donnees
             db.session.add(m)
@@ -206,14 +155,21 @@ class User(UserMixin, db.Model):
     def get_last_episode_viewed(self, id_serie):
         """
         Cette methode permet de retourner le dernier episode vu pour la serie ayant l'id id_serie
+
+        L'episode est retourne sous la forme SnEm où n est le numero de la saison et m le numero de l'episode
+        Si l'episode n'est pas dans les series de l'utilisateur, on renvoie S1E1
+
         :param id_serie: int
         :return: string
         """
-        # On effectue une requete sur la table user_media pour obtenir le dernier episode vu
-        last_ep = self.user_media.filter_by(media='serie', media_id=id_serie).\
+        # On effectue une requete sur la table user_media
+        # pour obtenir le dernier episode vu de l'utilisateur pour cette serie
+        # last_ep est un tuple (numero_saison, numero_episode)
+        last_ep = self.user_media.filter_by(media='tv', media_id=id_serie).\
             with_entities('season_id', 'episode_id').all()
 
         # Si la serie n'est pas dans les series de l'utilisateur, on renvoie S1E1
+        # Sinon on recupere lenumero du dernier episode
         if not last_ep:
             return('S1E1')
         else:
@@ -222,15 +178,22 @@ class User(UserMixin, db.Model):
 
     def is_after(self, season, episode, serie):
         """
-        Cette methode sert a determiner si un episode de la saison "season" et de numero d'episode "episode"
+        Cette methode permet de comparer le dernier episode vu avec un episode de la serie
+
+        On determine si un episode de la saison "season" et de numero d'episode "episode"
         est posterieur au dernier episode vu par l'utilisateur pour la serie qui a l'ID "serie"
-        :param season: int
-        :param episode: int
-        :param serie: int
+        Elle renvoie vrai si c'est le cas, faux sinon
+
+        :param season: (int) numero de la saison de l'episode a tester
+        :param episode: (int) numero de l'episode a tester
+        :param serie: (int) identifiant de la serie
+
         :return: boolean
         """
-        last_ep = self.user_media.filter_by(media='serie', media_id=int(serie))\
+        # On recupere les informations du dernier episode de cette serie vu par l'utilisateur
+        last_ep = self.user_media.filter_by(media='tv', media_id=int(serie))\
             .with_entities('season_id', 'episode_id').all()
+
         # Si l'utilisateur n'a pas vu la serie, la reponse est forcement vraie
         if not last_ep:
             return True
@@ -241,15 +204,22 @@ class User(UserMixin, db.Model):
 
     def view_episode(self, episode, season, serie):
         """
-        Cette methode permet de remplacer le dernier episode vu par l'utilisateur pour la serie d'ID "serie"
-        par l'episode "episode".
+        Cette methode permet de modifier le dernier episode vu par un utilisateur
+
+
+        On remplace le dernier episode vu par l'utilisateur pour la serie d'ID "serie"
+        par l'episode "episode" de la saison "season".
+
         On va donc remplacer le code de l'episode et de la saison dans UserMedia par les bons codes
         Cette methode met egalement le statut de la serie a jour (utd/fin/nutd)
-        :param episode: string
-        :param serie: int
+
+        :param episode: (int) numero de l'episode a marquer comme vu
+        :param season: (int) numero de la saison de cet episode
+        :param serie: (int) identifiant de la serie
         :return: void
         """
-        show = self.user_media.filter_by(media='serie', media_id=int(serie)).first()
+        # On recupere la serie des series de l'utilisateur
+        show = self.user_media.filter_by(media='tv', media_id=int(serie)).first()
 
         # Si la serie n'est pas dans les series de l'utilisateur, on ne fait rien
         if show:
@@ -265,7 +235,6 @@ class User(UserMixin, db.Model):
             if int(latest_season) == int(season) and int(latest_ep) == int(episode):
                 # Si il n'y a pas d'episode a venir, la serie est terminee
                 if s.date == '':
-                    # On change le statut de la serie a fin
                     status = 'fin'
                 else:
                     # Sinon on change le statut de la serie a a jour (utd)
@@ -284,57 +253,50 @@ class User(UserMixin, db.Model):
 
             db.session.commit()
 
-    def remove_serie(self,id_serie):
+    def remove_media(self, id_media, type_media):
         """
-        Cette methode permet d'enlever une serie des series suivies par l'utilisateur (dans la table UserMedia)
-        :param id_serie: int
+        Cette methode permet d'enlever un media des medias suivis par l'utilisateur (dans la table UserMedia)
+
+        :param id_media: (int) identifiant du media
+        :param type_media: (string) type du media (serie ou movie)
         :return: void
         """
-        # We delete the record from the UserMedia table
-        show = self.user_media.filter_by(media='serie', media_id=int(id_serie)).first()
+        # We get the record from the UserMedia table
+        show = self.user_media.filter_by(media=type_media, media_id=int(id_media)).first()
 
         # We delete the show only if it is in the user list
         if show:
             db.session.delete(show)
             db.session.commit()
 
-    def remove_movie(self, id_movie):
-        """
-        Cette methode permet d'enlever un film des films suivis par l'utilisateur (dans la table UserMedia)
-        :param id_movie: int
-        :return: void
-        """
-        # We delete the record from the UserMedia table
-        movie = self.user_media.filter_by(media='movie', media_id=int(id_movie)).first()
-
-        # We delete the show only if it is in the user list
-        if movie:
-            db.session.delete(movie)
-            db.session.commit()
-
     def update_grade(self, new_grade):
         """
         Cette methode permet de changer la note actuelle de l'utilisateur quand il clique sur une etoile
-        :param new_grade: int
+
+        La note actuelle est la note de la page sur laquelle est l'utilisateur,
+        on la stocke donc dans la table User
+
+        :param new_grade: (int) la note selectionnee par l'utilisateur
         :return: void
         """
         self.current_grade = int(new_grade)
         db.session.commit()
 
-    def grade(self, id, type, grade):
+    def grade(self, id_media, media, grade):
         """
         Cette methde permet d'affecter une note a un film ou une serie dans la table UserMedia
-        :param id: int
-        :param type: string
-        :param grade: int
+
+        :param id_media: (int) identifiant du media
+        :param media: (string) type du media
+        :param grade: (int) grade du media
         :return: void
         """
-        # We query the correct media
-        media = self.user_media.filter_by(media=type, media_id=int(id)).first()
+        # On recupere le bon media
+        m = self.user_media.filter_by(media=media, media_id=int(id_media)).first()
 
-        # If the media is in the user's medias, we update its grade
-        if media:
-            media.media_grade = int(grade)
+        # Si le media est dans les medias de l'utilisateur, on le note
+        if m:
+            m.media_grade = int(grade)
             db.session.commit()
 
     def is_graded(self, type, id):
@@ -419,7 +381,7 @@ class User(UserMixin, db.Model):
         :return: void
         """
         # On recupere toutes les series de l'utilisateur
-        serie = self.user_media.filter_by(media='serie').all()
+        serie = self.user_media.filter_by(media='tv').all()
 
         for s in serie:
             # On recupere les infos de chaque serie grace a l'API
@@ -447,6 +409,7 @@ class User(UserMixin, db.Model):
     def check_upcoming_episodes(self):
         """
         Cette methode est pour obtenir sur quelles series l'utilisateur est a jour, ne l'est pas ou a fini
+
         On retourne
         - La liste des series ou l'utilisateur est a jour
         - La liste des series ou l'utilisateur n'est pas a jour
@@ -454,7 +417,7 @@ class User(UserMixin, db.Model):
         :return: tuple de 3 listes
         """
         # On recupere toutes les series
-        list_serie = self.user_media.filter_by(media='serie').all()
+        list_serie = self.user_media.filter_by(media='tv').all()
 
         list_series_up_to_date = []
         list_series_not_up_to_date = []
@@ -473,7 +436,9 @@ class User(UserMixin, db.Model):
     def get_notifications(self):
         """
         Cette methode renvoie une liste contenant le nom des series et leur id
-        Elle ne renvoie la liste que si l'utilisateur doit avoir des notifications, sinon elle renvoie un liste vide
+
+        Elle ne renvoie la liste que si l'utilisateur doit avoir
+        des notifications, sinon elle renvoie une liste vide
         :return: tuple list
         """
         # On recupere la liste des series ou l'utilisateur n'est pas jour

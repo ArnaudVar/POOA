@@ -78,11 +78,13 @@ def serie(id):
         app.logger.info(msg=f'Incorrect Serie id')
         return render_template('404.html')
     else:
-        if current_user.is_in_series(id):
+        if current_user.is_in_medias(id_media=id, type_media='tv'):
             serie.selected_episode = current_user.get_last_episode_viewed(id)
         episode = serie.get_episode
         app.logger.info(msg=f'Successful query for the Serie id={serie.id} page')
-        return render_template('serie.html', serie=serie, episode=episode, user=current_user, tv_genres=tv_genres, movie_genres=movie_genres, similar=similar)
+        return render_template('serie.html', serie=serie, episode=episode, user=current_user,
+                               tv_genres=tv_genres, movie_genres=movie_genres, similar=similar)
+
 
 @app.route('/movie/<id>')
 @login_required
@@ -94,7 +96,8 @@ def movie(id):
         return render_template('404.html')
     else:
         app.logger.info(msg=f'Successful query for the Movie id={id} page')
-        return render_template('movie.html', movie=movie, user=current_user, tv_genres=tv_genres, movie_genres=movie_genres, similar=similar)
+        return render_template('movie.html', movie=movie, user=current_user,
+                               tv_genres=tv_genres, movie_genres=movie_genres, similar=similar)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -150,42 +153,32 @@ def reset_password(token):
     return render_template('reset_password.html', form=form)
 
 
-@app.route('/add_serie/<id>')
+@app.route('/add/<type_media>/<id_media>')
 @login_required
-def add_serie(id):
-    current_user.add_serie(id)
-    app.logger.info(msg=f'Serie {id} successfully added')
-    return serie(id)
+def add(id_media, type_media):
+    current_user.add_media(id_media=id_media, type_media=type_media)
+    app.logger.info(msg=f'Media {type_media} {id_media} successfully added')
+    if type_media == 'tv':
+        return serie(id_media)
+    else:
+        return movie(id_media)
 
 
-@app.route('/remove_serie/<id>')
+@app.route('/remove/<type_media>/<id_media>')
 @login_required
-def remove_serie(id):
-    current_user.remove_serie(id)
-    app.logger.info(msg=f'Serie {id} successfully removed')
-    return serie(id)
-
-
-@app.route('/add_movie/<id>')
-@login_required
-def add_movie(id):
-    current_user.add_movie(id)
-    app.logger.info(msg=f'Movie {id} successfully added')
-    return (movie(id))
-
-
-@app.route('/remove_movie/<id>')
-@login_required
-def remove_movie(id):
-    current_user.remove_movie(id)
-    app.logger.info(msg=f'Movie {id} successfully removed')
-    return (movie(id))
+def remove(id_media, type_media):
+    current_user.remove_media(id_media=id_media, type_media=type_media)
+    app.logger.info(msg=f'{type_media} {id_media} successfully removed')
+    if type_media == 'tv':
+        return serie(id_media)
+    else:
+        return movie(id_media)
 
 
 @app.route('/myseries')
 @login_required
 def myserie():
-    list_series = current_user.list_serie()
+    list_series = current_user.list_media('tv')
     list_serie_rendered = []
     nb_series = 0
     if not list_series:
@@ -205,7 +198,7 @@ def myserie():
 @app.route('/mymovies')
 @login_required
 def mymovies():
-    list_movies = current_user.list_movie()
+    list_movies = current_user.list_media('movie')
     list_movies_rendered = []
     nb_movies = 0
     if not list_movies:
@@ -283,6 +276,7 @@ def next_episode(id, season, episode):
     app.logger.info(msg=f'The user marked S{season}E{episode} from serie {id} as viewed')
     return serie(id)
 
+
 @app.route('/rate/<i>')
 @login_required
 def rate(i):
@@ -292,42 +286,29 @@ def rate(i):
     return '', 204
 
 
-@app.route('/serie/<id>/post/grade')
+@app.route('/post/grade/<type_media>/<id_media>')
 @login_required
-def post_series_grade(id):
+def post_media_grade(id_media, type_media):
     grade = current_user.current_grade
     session = current_user.session_id
-    current_user.grade(id, 'serie', grade)
-    msg = Api.rate(id, grade, 'tv', session)
-    app.logger.info(msg=f'The user posted the grade {int(grade)} for the serie {id}')
-    return serie(id)
+    current_user.grade(id_media=id_media, media=type_media, grade=grade)
+    Api.rate(id=id_media, grade=grade, media=type_media, session=session)
+    app.logger.info(msg=f'The user posted the grade {int(grade)} for the {type_media} {id}')
+    if type_media == 'tv':
+        return serie(id_media)
+    else :
+        return movie(id_media)
 
 
-@app.route('/movie/<id>/post/grade')
+@app.route('/<type_media>/<id_media>/unrate')
 @login_required
-def post_movie_grade(id):
-    grade = current_user.current_grade
-    session = current_user.session_id
-    current_user.grade(id, 'movie', grade)
-    msg = Api.rate(id, grade, 'movie', session)
-    app.logger.info(msg=f'The user posted the grade {int(grade)} for the movie {id}')
-    return movie(id)
-
-
-@app.route('/serie/<id>/unrate')
-@login_required
-def unrate_serie(id):
-    current_user.unrate('serie', id)
-    app.logger.info(msg=f'The user unrated the serie {id}')
-    return serie(id)
-
-
-@app.route('/movie/<id>/unrate')
-@login_required
-def unrate_movie(id):
-    current_user.unrate('movie', id)
-    app.logger.info(msg=f'The user unrated the movie {id}')
-    return movie(id)
+def unrate_media(id_media, type_media):
+    current_user.unrate(type=type_media, id=id_media)
+    app.logger.info(msg=f'The user unrated the serie {id_media}')
+    if type_media=='tv':
+        return serie(id_media)
+    else:
+        return movie(id_media)
 
 
 @app.route('/topRated/<media>/<page>')

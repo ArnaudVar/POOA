@@ -207,19 +207,28 @@
                                             {% if 4*i + j < (list_medias| length) %}
                                                 <div class="col justify-content-center">
                                                     <div class="card-header name genre">
-                                                        {% if media == 'serie' %}
+                                                        {% if media == 'tv' %}
                                                             {{list_medias[4*i+j]['name']}}
                                                         {% else %}
                                                             {{list_medias[4*i+j]['title']}}
                                                         {% endif %}
                                                     </div>
                                                     <div class="card-body serie-search">
-                                                        <a class="w-100 h-100"
-                                                           href="/{{media}}/{{list_medias[4*i+j]['id']}}">
+                                                        {% if media == 'tv' %}
+                                                            <a class="w-100 h-100"
+                                                           href="/serie/{{list_medias[4*i+j]['id']}}">
                                                             <button class="btn btn-default btn-circle">
                                                                 <i class="fa fa-fw fa-plus"></i>
                                                             </button>
-                                                        </a>
+                                                            </a>
+                                                        {% else %}
+                                                            <a class="w-100 h-100"
+                                                               href="/{{media}}/{{list_medias[4*i+j]['id']}}">
+                                                                <button class="btn btn-default btn-circle">
+                                                                    <i class="fa fa-fw fa-plus"></i>
+                                                                </button>
+                                                            </a>
+                                                        {% endif %}
                                                         {% if list_medias[4*i+j]['poster_path'] == None %}
                                                         <img src="{{url_for('static', filename='assets/notFound.png')}}"
                                                              class="rounded justify-content-center">
