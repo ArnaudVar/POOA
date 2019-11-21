@@ -103,7 +103,6 @@ sqlparse==0.3.0
 terminado==0.8.2
 testpath==0.4.2
 textblob==0.15.3
-torch==1.0.1
 torchvision==0.4.1
 tornado==6.0.3
 tqdm==4.36.1
