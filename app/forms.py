@@ -6,6 +6,12 @@ from flask import request
 
 
 class LoginForm(FlaskForm):
+    """
+    Cette classe permet l'implemenation du login des utilisateurs
+
+    Ces doivent rentrer un username non vide, un mot de passe non vide et
+    ont l'option de choisir de ne pas se reconnecter pendant 1 h (dans les parametres du projet)
+    """
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')

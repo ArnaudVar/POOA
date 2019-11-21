@@ -26,7 +26,6 @@ def home():
     for i in range(12):
         selection_serie.append(suggestions_serie[i])
         selection_movie.append(suggestions_movie[i])
-    print(current_user.series)
     return render_template('home.html', title='Home', suggestions_serie=selection_serie,
                            suggestions_movie=selection_movie, nombre_series=12,
                            tv_genres=tv_genres, movie_genres=movie_genres)
@@ -42,19 +41,24 @@ def login():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None:
             app.logger.info(msg='Invalid Username !')
-            return redirect(url_for('login'))
+            flash("Invalid Username !")
+            render_template('login.html', title='Sign In', form=form, src=logo_source)
         elif not user.check_password(form.password.data):
             app.logger.info(msg='Invalid Password !')
-            return redirect(url_for('login'))
-        login_user(user, remember=form.remember_me.data)
-        next_page = request.args.get('next')
-        app.logger.info(msg='Successful Login !')
-        if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('home')
-        current_user.session_id = Api.new_session()
-        db.session.commit()
-        current_user.update_all_upcoming_episodes()
-        return redirect(next_page)
+            flash("Invalid Password !")
+            render_template('login.html', title='Sign In', form=form, src=logo_source)
+        else:
+            login_user(user, remember=form.remember_me.data)
+            next_page = request.args.get('next')
+            app.logger.info(msg='Successful Login !')
+            if not next_page or url_parse(next_page).netloc != '':
+                next_page = url_for('home')
+            current_user.session_id = Api.new_session()
+            db.session.commit()
+            current_user.notifications = bytes(1)
+            current_user.update_all_upcoming_episodes()
+            db.session.commit()
+            return redirect(next_page)
     return render_template('login.html', title='Sign In', form=form, src=logo_source)
 
 
@@ -74,14 +78,13 @@ def serie(id):
         app.logger.info(msg=f'Incorrect Serie id')
         return render_template('404.html')
     else:
-        if current_user.is_in_series(id):
-            user_series = current_user.series.split('-')
-            for user_serie in user_series:
-                if user_serie.split('x')[0] == str(id):
-                    serie.selected_episode = user_serie.split('x')[1]
+        if current_user.is_in_medias(id_media=id, type_media='tv'):
+            serie.selected_episode = current_user.get_last_episode_viewed(id)
         episode = serie.get_episode
         app.logger.info(msg=f'Successful query for the Serie id={serie.id} page')
-        return render_template('serie.html', serie=serie, episode=episode, user=current_user, tv_genres=tv_genres, movie_genres=movie_genres, similar=similar)
+        return render_template('serie.html', serie=serie, episode=episode, user=current_user,
+                               tv_genres=tv_genres, movie_genres=movie_genres, similar=similar)
+
 
 @app.route('/movie/<id>')
 @login_required
@@ -93,7 +96,8 @@ def movie(id):
         return render_template('404.html')
     else:
         app.logger.info(msg=f'Successful query for the Movie id={id} page')
-        return render_template('movie.html', movie=movie, user=current_user, tv_genres=tv_genres, movie_genres=movie_genres, similar=similar)
+        return render_template('movie.html', movie=movie, user=current_user,
+                               tv_genres=tv_genres, movie_genres=movie_genres, similar=similar)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -102,8 +106,8 @@ def register():
         return redirect(url_for('home'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data, name=form.name.data, surname=form.surname.data)
-        user.set_password(form.password.data)
+        user = User(username=form.username.data, email=form.email.data, name=form.name.data, surname=form.surname.data,
+                    password=form.password.data)
         db.session.add(user)
         db.session.commit()
         app.logger.info(msg='Successful registry')
@@ -149,47 +153,35 @@ def reset_password(token):
     return render_template('reset_password.html', form=form)
 
 
-@app.route('/add_serie/<id>')
+@app.route('/add/<type_media>/<id_media>')
 @login_required
-def add_serie(id):
-    current_user.add_serie(id)
-    app.logger.info(msg=f'Serie {id} successfully added')
-    return serie(id)
+def add(id_media, type_media):
+    current_user.add_media(id_media=id_media, type_media=type_media)
+    app.logger.info(msg=f'Media {type_media} {id_media} successfully added')
+    if type_media == 'tv':
+        return serie(id_media)
+    else:
+        return movie(id_media)
 
 
-@app.route('/remove_serie/<id>')
+@app.route('/remove/<type_media>/<id_media>')
 @login_required
-def remove_serie(id):
-    current_user.remove_serie(id)
-    app.logger.info(msg=f'Serie {id} successfully removed')
-    return serie(id)
-
-
-@app.route('/add_movie/<id>')
-@login_required
-def add_movie(id):
-    current_user.add_movie(id)
-    app.logger.info(msg=f'Movie {id} successfully added')
-    return (movie(id))
-
-
-@app.route('/remove_movie/<id>')
-@login_required
-def remove_movie(id):
-    current_user.remove_movie(id)
-    app.logger.info(msg=f'Movie {id} successfully removed')
-    return (movie(id))
+def remove(id_media, type_media):
+    current_user.remove_media(id_media=id_media, type_media=type_media)
+    app.logger.info(msg=f'{type_media} {id_media} successfully removed')
+    if type_media == 'tv':
+        return serie(id_media)
+    else:
+        return movie(id_media)
 
 
 @app.route('/myseries')
 @login_required
 def myserie():
-    user_id = current_user.id
-    u = User.query.get(user_id)
-    list_series = u.list_serie()
+    list_series = current_user.list_media('tv')
     list_serie_rendered = []
     nb_series = 0
-    if list_series == "The user doesn't have any series":
+    if not list_series:
         list_serie_rendered = list_series
         app.logger.info(msg=f'MySeries page rendered without series')
     else:
@@ -206,12 +198,10 @@ def myserie():
 @app.route('/mymovies')
 @login_required
 def mymovies():
-    user_id = current_user.id
-    u = User.query.get(user_id)
-    list_movies = u.list_movie()
+    list_movies = current_user.list_media('movie')
     list_movies_rendered = []
     nb_movies = 0
-    if list_movies == "The user doesn't have any movie":
+    if not list_movies:
         list_movies_rendered = list_movies
         app.logger.info(msg=f'MyMovies page rendered without movies')
     else:
@@ -255,15 +245,13 @@ def search():
 def genre(media, genre, page):
     if media == 'movie':
         list_genres = movie_genres
-    elif media == 'tv':
+    else :
         list_genres = tv_genres
     for i in range(len(list_genres)):
         if list_genres[i]['name'] == genre:
             index_genre = i
     id_genre = list_genres[index_genre]['id']
     list_media, nb_pages = Api.discover(media, id_genre, page)
-    if media == 'tv':
-        media = 'serie'
     app.logger.info(msg=f'Genre request on : Genre = {genre}, Media = {media}, Page = {page}')
     return render_template('genre.html', genre=genre, list_medias=list_media, media=media,
                            tv_genres=tv_genres, movie_genres=movie_genres, current_page=int(page), nb_pages=nb_pages)
@@ -284,41 +272,47 @@ def select_episode(id, season, episode):
 @app.route('/serie/<id>/season/<season>/episode/<episode>/view')
 @login_required
 def next_episode(id, season, episode):
-    string_episode = 'S' + str(season) + 'E' + str(episode)
-    current_user.view_episode(string_episode, id)
-    return (serie(id))
+    current_user.view_episode(episode, season, id)
+    app.logger.info(msg=f'The user marked S{season}E{episode} from serie {id} as viewed')
+    return serie(id)
 
 
 @app.route('/rate/<i>')
+@login_required
 def rate(i):
-    current_user.update_grade(float(2 * int(i)))
-    return ('', 204)
+    g = float(2*int(i))
+    current_user.update_grade(g)
+    app.logger.info(msg=f'The user is selecting the grade {float(2 * int(i))}')
+    return '', 204
 
 
-@app.route('/serie/<id>/post/grade')
-def post_series_grade(id):
+@app.route('/post/grade/<type_media>/<id_media>')
+@login_required
+def post_media_grade(id_media, type_media):
     grade = current_user.current_grade
     session = current_user.session_id
-    current_user.grade(id, 'serie', grade)
-    msg = Api.rate(id, grade, 'tv', session)
-    return serie(id)
+    current_user.grade(id_media=id_media, media=type_media, grade=grade)
+    Api.rate(id=id_media, grade=grade, media=type_media, session=session)
+    app.logger.info(msg=f'The user posted the grade {int(grade)} for the {type_media} {id}')
+    if type_media == 'tv':
+        return serie(id_media)
+    else :
+        return movie(id_media)
 
 
-@app.route('/movie/<id>/post/grade')
-def post_movie_grade(id):
-    grade = current_user.current_grade
-    current_user.grade(id, 'movie', grade)
-    # requests.post("https://api.themoviedb.org/3/tv/" + str(id)+'/rating' + "?api_key=11893590e2d73c103c840153c0daa770&language=en-US", data = { "value" : grade})
-    return movie(id)
-
-
-@app.route('/serie/<id>/unrate')
-def unrate_serie(id):
-    current_user.unrate('serie', id)
-    return serie(id)
+@app.route('/<type_media>/<id_media>/unrate')
+@login_required
+def unrate_media(id_media, type_media):
+    current_user.unrate(type=type_media, id=id_media)
+    app.logger.info(msg=f'The user unrated the serie {id_media}')
+    if type_media=='tv':
+        return serie(id_media)
+    else:
+        return movie(id_media)
 
 
 @app.route('/topRated/<media>/<page>')
+@login_required
 def topRated(media, page):
     """
     This function is called when the user tries to access the popular pannel from one of the pages
@@ -334,12 +328,6 @@ def topRated(media, page):
                            media=media, page=page, nb_pages=nb_pages, tv_genres=tv_genres, movie_genres=movie_genres)
 
 
-@app.route('/movie/<id>/unrate')
-def unrate_movie(id):
-    current_user.unrate('movie', id)
-    return movie(id)
-
-
 @app.route('/upcoming')
 @login_required
 def upcomingEpisodes():
@@ -350,22 +338,27 @@ def upcomingEpisodes():
             while the series last episode is S4E3 > list_series_last_episode
         * The user is up to date with this serie and we're expecting an episode for this show > list_series_up_to_date
         * The user is up-to-date with the serie but we're not expecting any next episode > list_series_finished
+    On change egalement les notifications en 0
     :return:render_template('upcoming_episode.html')
     """
-    user_id = current_user.id
-    u = User.query.get(user_id)
-    l_utd, l_nutd, l_fin = u.check_upcoming_episodes()
+    l_utd, l_nutd, l_fin = current_user.check_upcoming_episodes()
 
     # We fill the list with all the series info using the Api get_serie method
     list_up_to_date, list_not_up_to_date, list_finished = [], [], []
     for s_id in l_utd:
+        app.logger.info(msg=f'Serie {s_id} added to up to date shows')
         list_up_to_date.append(Api.get_serie(s_id))
 
     for s_id in l_nutd:
+        app.logger.info(msg=f'Serie {s_id} added to not up to date shows')
         list_not_up_to_date.append(Api.get_serie(s_id))
 
     for s_id in l_fin:
+        app.logger.info(msg=f'Serie {s_id} added to finished shows')
         list_finished.append(Api.get_serie(s_id))
+
+    current_user.notifications = bytes(0)
+    db.session.commit()
 
     return render_template('upcoming_episodes.html', title='Upcoming Episodes', list_next_episode=list_up_to_date,
                            list_last_episode=list_not_up_to_date, list_finished=list_finished,

@@ -27,13 +27,11 @@
                                             <img src="{{url_for('static', filename='assets/notFound.png')}}"
                                                  height="250px"
                                                  width="80%"
-                                                 class="rounded">
+                                                 class="rounded justify-content-center">
                                         {% else %}
                                             <img src="https://image.tmdb.org/t/p/w500{{serie.image}}"
                                                  alt="{{serie['name']}}"
-                                                 height="250px"
-                                                 width="100%"
-                                                 class="rounded">
+                                                 class="rounded justify-content-center">
                                         {% endif %}
                                     </div>
                                 </div>
@@ -75,15 +73,11 @@
                                     <div class="d-flex card-body serie-search">
                                         {% if serie.image == None %}
                                             <img src="{{url_for('static', filename='assets/notFound.png')}}"
-                                                 height="250px"
-                                                 width="80%"
-                                                 class="rounded">
+                                                 class="rounded justify-content-center">
                                         {% else %}
                                             <img src="https://image.tmdb.org/t/p/w500{{serie.image}}"
                                                  alt="{{serie['name']}}"
-                                                 height="250px"
-                                                 width="100%"
-                                                 class="rounded">
+                                                 class="rounded justify-content-center">
                                         {% endif %}
                                     </div>
                                 </div>

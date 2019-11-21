@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -13,3 +14,4 @@ class Config(object):
     MAIL_USE_SSL = True
     MAIL_USERNAME = 'seryegenda@gmail.com'
     MAIL_PASSWORD = 'czpuavekjtybecsr'
+    REMEMBER_COOKIE_DURATION = timedelta(seconds=3600)
