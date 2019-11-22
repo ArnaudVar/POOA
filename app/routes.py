@@ -293,7 +293,7 @@ def post_media_grade(id_media, type_media):
     session = current_user.session_id
     current_user.grade(id_media=id_media, media=type_media, grade=grade)
     Api.rate(id=id_media, grade=grade, media=type_media, session=session)
-    app.logger.info(msg=f'The user posted the grade {int(grade)} for the {type_media} {id}')
+    app.logger.info(msg=f'The user posted the grade {int(grade)} for the {type_media} {id_media}')
     if type_media == 'tv':
         return serie(id_media)
     else :
@@ -304,7 +304,7 @@ def post_media_grade(id_media, type_media):
 @login_required
 def unrate_media(id_media, type_media):
     current_user.unrate(type=type_media, id=id_media)
-    app.logger.info(msg=f'The user unrated the serie {id_media}')
+    app.logger.info(msg=f'The user unrated the {type_media} {id_media}')
     if type_media=='tv':
         return serie(id_media)
     else:
