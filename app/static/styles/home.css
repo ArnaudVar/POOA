@@ -148,4 +148,8 @@ img {
     cursor: pointer;
 }
 
+test {
+    max-width: 100%;
+}
+
 
