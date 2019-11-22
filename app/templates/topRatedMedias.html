@@ -255,7 +255,8 @@
                                                 </div>
                                                 <div class="p-0 card-body serie justify-content-center">
                                                     <a class="w-100 h-100"
-                                                       href="{{ url_for(media, id=list_medias[4*i+j]['id']) }}">
+                                                       href="{{ url_for('media', type_media=media,
+                                                       id=list_medias[4*i+j]['id']) }}">
                                                         <button class="btn btn-default btn-circle
                                                             justify-content-center">
                                                             <i class="fa fa-fw fa-plus"></i>

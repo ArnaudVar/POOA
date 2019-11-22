@@ -251,7 +251,8 @@
                                                     </div>
                                                     <div class="card-body serie-search">
                                                         <a class="w-100 h-100"
-                                                           href="{{url_for(media, id=list_medias[4*i+j]['id'])}}">
+                                                           href="{{url_for('media', type_media=media,
+                                                            id=list_medias[4*i+j]['id'])}}">
                                                             <button class="btn btn-default btn-circle">
                                                                 <i class="fa fa-fw fa-plus"></i>
                                                             </button>

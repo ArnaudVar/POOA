@@ -77,7 +77,7 @@
                      aria-labelledby="headingNotif">
                     <div class="panel-body">
                         {% for notif in current_user.get_notifications() %}
-                        <a href="{{url_for('serie', id=notif[1])}}" class="m-1 notif">
+                        <a href="{{url_for('media', type_media='tv', id=notif[1])}}" class="m-1 notif">
                             {{notif[0]}}
                         </a>
                         {% endfor %}

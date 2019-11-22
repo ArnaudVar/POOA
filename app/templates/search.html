@@ -261,7 +261,8 @@
                                     {{list_series[2*i+j]['name']}}
                                 </div>
                                 <div class="card-body serie-search">
-                                    <a class="w-100 h-100" href="{{url_for('serie', id=list_series[2*i+j]['id'])}}">
+                                    <a class="w-100 h-100"
+                                       href="{{url_for('media', type_media='tv', id=list_series[2*i+j]['id'])}}">
                                         <button class="btn btn-default btn-circle">
                                             <i class="fa fa-fw fa-plus"></i>
                                         </button>
@@ -296,7 +297,8 @@
                                     {{list_movies[2*i+j]['title']}}
                                 </div>
                                 <div class="card-body movie-search">
-                                    <a class="w-100 h-100" href="{{url_for('movie', id=list_movies[2*i+j]['id'])}}">
+                                    <a class="w-100 h-100"
+                                       href="{{url_for('media', type_media='movie', id=list_movies[2*i+j]['id'])}}">
                                         <button class="btn btn-default btn-circle">
                                             <i class="fa fa-fw fa-plus"></i>
                                         </button>
