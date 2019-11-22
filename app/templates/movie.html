@@ -80,7 +80,7 @@
 <div class="m-3 home w-100 d-flex flex-column">
     <div class="d-flex justify-content-center">
         {% for genre in movie.genre %}
-        <a href="{{url_for('genre', media='movie', genre=genre.name, page=1)}}"
+        <a href="{{url_for('genre', media='movie', genre=genre, page=1)}}"
            class="m-2 badge badge-info">{{genre}}</a>
         {% endfor %}
     </div>
