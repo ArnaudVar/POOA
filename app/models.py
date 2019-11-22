@@ -226,13 +226,17 @@ class User(UserMixin, db.Model):
             # On appelle l'API pour obtenir les informations de la serie
             s = Api.get_serie(str(serie))
 
+            # On update la saison et l'episode de l'utilisateur
+            show.season_id = season
+            show.episode_id = episode
+
             # On recupere la saison et le numero du dernier episode sorti
             latest_season, latest_ep = s.latest['season_number'], s.latest['episode_number']
 
             status = ''
             # Si le dernier episode et lepisode vu par l'utilisateur sont les memes, on regarde si il y a un
             # episode qui doit sortir
-            if int(latest_season) == int(season) and int(latest_ep) == int(episode):
+            if not self.is_after(season=latest_season, episode=latest_ep, serie=s.id):
                 # Si il n'y a pas d'episode a venir, la serie est terminee
                 if s.date == '':
                     status = 'fin'
@@ -243,9 +247,7 @@ class User(UserMixin, db.Model):
                 # Sinon la serie n'est pas a jour car il reste des episodes a voir, on change le statut en nutd
                 status = 'nutd'
 
-            # On update la saison et l'episode de l'utilisateur
-            show.season_id = season
-            show.episode_id = episode
+
             show.state_serie = status
 
             # On met a jour les notifications
@@ -393,11 +395,11 @@ class User(UserMixin, db.Model):
             status = ''
             # Si le dernier episode vu par l'utilisateur est le dernier episode selon l'API, on regarde si il y a un
             # episode attendu pour savoir si l'utilisateur est a la fin de la serie
-            if int(s.season_id) == last_season and int(s.episode_id) == last_ep:
+            if not self.is_after(season=last_season, episode=last_ep, serie=s.media_id):
                 if serie_info.date == '':
                     # On met a jour le statut de la serie en finie (fin)
                     status = 'fin'
-                else :
+                else:
                     status = 'utd'
             else:
                 status = 'nutd'
