@@ -33,10 +33,10 @@
             </form>
             {% endif %}
         </div>
-        <a href="/home">
-            <img src="{{url_for('static', filename='assets/LogoNom.png') }}" height=90 width=auto class="center">
+        <a href="{{url_for('home')}}">
+            <img src="{{url_for('static', filename='assets/LogoNom.png')}}" height=90 width=auto class="center">
         </a>
-        <a href="/logout">
+        <a href="{{url_for('logout')}}">
             <button class="btn btn-default">
                 <div>
                     Logout
@@ -54,10 +54,10 @@
                 <a href="{{ url_for('home') }}"> <i class="fa fa-home"></i> &nbsp; Home</a>
             </li>
             <li class="active">
-                <a href="{{ url_for('myserie') }}"><i class="fas fa-video"></i>&nbsp; My Series</a>
+                <a href="{{ url_for('my_media', type_media='tv') }}"><i class="fas fa-video"></i>&nbsp; My Series</a>
             </li>
             <li class="active">
-                <a href="{{ url_for('mymovies') }}"><i class="fas fa-film"></i>&nbsp; My Movies</a>
+                <a href="{{ url_for('my_media', type_media='movie') }}"><i class="fas fa-film"></i>&nbsp; My Movies</a>
             </li>
             <li class="active panel-heading" id="headingNotif" data-toggle="collapse"
                 aria-expanded="true"
@@ -77,7 +77,7 @@
                      aria-labelledby="headingNotif">
                     <div class="panel-body">
                         {% for notif in current_user.get_notifications() %}
-                        <a href="/serie/{{notif[1]}}" class="m-1 notif">
+                        <a href="{{url_for('serie', id=notif[1])}}" class="m-1 notif">
                             {{notif[0]}}
                         </a>
                         {% endfor %}

@@ -11,29 +11,29 @@
                 </button>
             </a>
             {% if user.get_grade('tv',serie.id) >= 9.0 %}
-            <a class="undergrade" href="/rate/5" title="Donner 5 étoiles">☆</a>
+            <a class="undergrade" href="{{url_for('rate', i=5)}}" title="Donner 5 étoiles">☆</a>
             {% else %}
-            <a href="/rate/5" title="Donner 5 étoiles">☆</a>
+            <a href="{{url_for('rate', i=5)}}" title="Donner 5 étoiles">☆</a>
             {% endif %}
             {% if user.get_grade('tv',serie.id) >= 7.0 %}
-            <a class="undergrade" href="/rate/4" title="Donner 4 étoiles">☆</a>
+            <a class="undergrade" href="{{url_for('rate', i=4)}}" title="Donner 4 étoiles">☆</a>
             {% else %}
-            <a href="/rate/4" title="Donner 4 étoiles">☆</a>
+            <a href="{{url_for('rate', i=4)}}" title="Donner 4 étoiles">☆</a>
             {% endif %}
             {% if user.get_grade('tv',serie.id) >= 5.0 %}
-            <a class="undergrade" href="/rate/3" title="Donner 3 étoiles">☆</a>
+            <a class="undergrade" href="{{url_for('rate', i=3)}}" title="Donner 3 étoiles">☆</a>
             {% else %}
-            <a href="/rate/3" title="Donner 3 étoiles">☆</a>
+            <a href="{{url_for('rate', i=3)}}" title="Donner 3 étoiles">☆</a>
             {% endif %}
             {% if user.get_grade('tv',serie.id) >= 3.0 %}
-            <a class="undergrade" href="/rate/2" title="Donner 2 étoiles">☆</a>
+            <a class="undergrade" href="{{url_for('rate', i=2)}}" title="Donner 2 étoiles">☆</a>
             {% else %}
-            <a href="/rate/2" title="Donner 2 étoiles">☆</a>
+            <a href="{{url_for('rate', i=2)}}" title="Donner 2 étoiles">☆</a>
             {% endif %}
             {% if user.get_grade('tv',serie.id) >= 1.0 %}
-            <a class="undergrade" href="/rate/1" title="Donner 1 étoiles">☆</a>
+            <a class="undergrade" href="{{url_for('rate', i=1)}}" title="Donner 1 étoiles">☆</a>
             {% else %}
-            <a href="/rate/1" title="Donner 1 étoiles">☆</a>
+            <a href="{{url_for('rate', i=1)}}" title="Donner 1 étoiles">☆</a>
             {% endif %}
             {% else %}
             <a href="{{url_for('post_media_grade', id_media=serie.id, type_media='tv')}}">
@@ -42,11 +42,11 @@
                     <i class="fa fa-clipboard"></i>
                 </button>
             </a>
-            <a href="/rate/5" title="Donner 5 étoiles">☆</a>
-            <a href="/rate/4" title="Donner 4 étoiles">☆</a>
-            <a href="/rate/3" title="Donner 3 étoiles">☆</a>
-            <a href="/rate/2" title="Donner 2 étoiles">☆</a>
-            <a href="/rate/1" title="Donner 1 étoile">☆</a>
+            <a href="{{url_for('rate', i=5)}}" title="Donner 5 étoiles">☆</a>
+            <a href="{{url_for('rate', i=4)}}" title="Donner 4 étoiles">☆</a>
+            <a href="{{url_for('rate', i=3)}}" title="Donner 3 étoiles">☆</a>
+            <a href="{{url_for('rate', i=2)}}" title="Donner 2 étoiles">☆</a>
+            <a href="{{url_for('rate', i=1)}}" title="Donner 1 étoile">☆</a>
             {% endif %}
         </div>
 
@@ -384,7 +384,8 @@
                 <ul class="collapse list-unstyled" id="season{{seasons}}Submenu" data-parent="#seasons">
                     {% for i in range(serie.seasons[seasons]) %}
                     <li>
-                        <a href="/serie/{{serie.id}}/season/{{seasons}}/episode/{{i+1}}">Episode {{i+1}}</a>
+                        <a href="{{url_for('select_episode', id=serie.id, season=seasons, episode=i+1)}}"
+                        >Episode {{i+1}}</a>
                     </li>
                     {% endfor %}
                 </ul>

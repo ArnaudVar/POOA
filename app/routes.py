@@ -69,6 +69,11 @@ def logout():
     return redirect(url_for('login'))
 
 
+@app.route('/tv/<id>')
+@login_required
+def tv(id):
+    return redirect(url_for('serie', id=id))
+
 @app.route('/serie/<id>')
 @login_required
 def serie(id):
@@ -175,44 +180,28 @@ def remove(id_media, type_media):
         return movie(id_media)
 
 
-@app.route('/myseries')
+@app.route('/mymedias/<type_media>')
 @login_required
-def myserie():
-    list_series = current_user.list_media('tv')
-    list_serie_rendered = []
-    nb_series = 0
-    if not list_series:
-        list_serie_rendered = list_series
-        app.logger.info(msg=f'MySeries page rendered without series')
+def my_media(type_media):
+    list_medias = current_user.list_media(media=type_media)
+    list_medias_rendered =[]
+    nb_medias = 0
+    if not list_medias:
+        list_media_rendered = list_medias
+        app.logger.info(msg=f"My{type_media} page rendered without {type_media}")
     else:
-        for tvshow in list_series:
-            nb_series += 1
-            serie = Api.get_serie(tvshow)
-            list_serie_rendered.append(serie)
-        app.logger.info(msg=f'MySeries page rendered')
-        app.logger.info(msg=f'The series list has {nb_series} series')
-    return render_template('mySeries.html', title='MySeries', list_series=list_serie_rendered, nb_series=nb_series,
-                           tv_genres=tv_genres, movie_genres=movie_genres, user=current_user)
-
-
-@app.route('/mymovies')
-@login_required
-def mymovies():
-    list_movies = current_user.list_media('movie')
-    list_movies_rendered = []
-    nb_movies = 0
-    if not list_movies:
-        list_movies_rendered = list_movies
-        app.logger.info(msg=f'MyMovies page rendered without movies')
-    else:
-        for movie in list_movies:
-            nb_movies += 1
-            m = Api.get_movie(movie)
-            list_movies_rendered.append(m)
-        app.logger.info(msg=f'MyMovies page rendered')
-        app.logger.info(msg=f'The movies list has {nb_movies} movies')
-    return render_template('myMovies.html', title='MyMovies', list_movies=list_movies_rendered, nb_movies=nb_movies,
-                           tv_genres=tv_genres, movie_genres=movie_genres)
+        for m in list_medias:
+            nb_medias += 1
+            if type_media == 'tv':
+                media = Api.get_serie(m)
+            else:
+                media = Api.get_movie(m)
+            list_medias_rendered.append(media)
+        app.logger.info(msg=f'My{type_media} page rendered')
+        app.logger.info(msg=f'The series list has {nb_medias} {type_media}')
+    return render_template('myMedias.html', title=f'My{type_media}', type_media=type_media,
+                           list_medias=list_medias_rendered, nb_medias=nb_medias, tv_genres=tv_genres,
+                           movie_genres=movie_genres, user=current_user)
 
 
 @app.route('/search2/<string>/<page>')

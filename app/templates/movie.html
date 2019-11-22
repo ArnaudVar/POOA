@@ -11,29 +11,29 @@
                 </button>
             </a>
             {% if user.get_grade('movie',movie.id) >= 9.0 %}
-            <a class="undergrade" href="/rate/5" title="Donner 5 étoiles">☆</a>
+            <a class="undergrade" href="{{url_for('rate', i=5)}}" title="Donner 5 étoiles">☆</a>
             {% else %}
-            <a href="/rate/5" title="Donner 5 étoiles">☆</a>
+            <a href="{{url_for('rate', i=5)}}" title="Donner 5 étoiles">☆</a>
             {% endif %}
             {% if user.get_grade('movie',movie.id) >= 7.0 %}
-            <a class="undergrade" href="/rate/4" title="Donner 4 étoiles">☆</a>
+            <a class="undergrade" href="{{url_for('rate', i=4)}}" title="Donner 4 étoiles">☆</a>
             {% else %}
-            <a href="/rate/4" title="Donner 4 étoiles">☆</a>
+            <a href="{{url_for('rate', i=4)}}" title="Donner 4 étoiles">☆</a>
             {% endif %}
             {% if user.get_grade('movie',movie.id) >= 5.0 %}
-            <a class="undergrade" href="/rate/3" title="Donner 3 étoiles">☆</a>
+            <a class="undergrade" href="{{url_for('rate', i=3)}}" title="Donner 3 étoiles">☆</a>
             {% else %}
-            <a href="/rate/3" title="Donner 3 étoiles">☆</a>
+            <a href="{{url_for('rate', i=3)}}" title="Donner 3 étoiles">☆</a>
             {% endif %}
             {% if user.get_grade('movie',movie.id) >= 3.0 %}
-            <a class="undergrade" href="/rate/2" title="Donner 2 étoiles">☆</a>
+            <a class="undergrade" href="{{url_for('rate', i=2)}}" title="Donner 2 étoiles">☆</a>
             {% else %}
-            <a href="/rate/2" title="Donner 2 étoiles">☆</a>
+            <a href="{{url_for('rate', i=2)}}" title="Donner 2 étoiles">☆</a>
             {% endif %}
             {% if user.get_grade('movie',movie.id) >= 1.0 %}
-            <a class="undergrade" href="/rate/1" title="Donner 1 étoiles">☆</a>
+            <a class="undergrade" href="{{url_for('rate', i=1)}}" title="Donner 1 étoiles">☆</a>
             {% else %}
-            <a href="/rate/1" title="Donner 1 étoiles">☆</a>
+            <a href="{{url_for('rate', i=1)}}" title="Donner 1 étoiles">☆</a>
             {% endif %}
             {% else %}
             <a href="{{url_for('post_media_grade', id_media=movie.id, type_media='movie')}}">
@@ -42,11 +42,11 @@
                     <i class="fa fa-clipboard"></i>
                 </button>
             </a>
-            <a href="/rate/5" title="Donner 5 étoiles">☆</a>
-            <a href="/rate/4" title="Donner 4 étoiles">☆</a>
-            <a href="/rate/3" title="Donner 3 étoiles">☆</a>
-            <a href="/rate/2" title="Donner 2 étoiles">☆</a>
-            <a href="/rate/1" title="Donner 1 étoile">☆</a>
+            <a href="{{url_for('rate', i=5)}}" title="Donner 5 étoiles">☆</a>
+            <a href="{{url_for('rate', i=4)}}" title="Donner 4 étoiles">☆</a>
+            <a href="{{url_for('rate', i=3)}}" title="Donner 3 étoiles">☆</a>
+            <a href="{{url_for('rate', i=2)}}" title="Donner 2 étoiles">☆</a>
+            <a href="{{url_for('rate', i=1)}}" title="Donner 1 étoile">☆</a>
             {% endif %}
         </div>
         <div class="name ml-3">
@@ -124,7 +124,8 @@
                                                     {{similar[i*4].name}}
                                                 </div>
                                                 <div class="p-0 card-body serie">
-                                                    <a class="w-100 h-100" href="/movie/{{similar[i*4].id}}">
+                                                    <a class="w-100 h-100"
+                                                       href="{{url_for('movie', id=similar[i*4].id)}}">
                                                         <button class="btn btn-default btn-circle">
                                                             <i class="fa fa-fw fa-plus"></i>
                                                         </button>
@@ -146,7 +147,8 @@
                                                     {{similar[i*4+1].name}}
                                                 </div>
                                                 <div class="p-0 card-body serie">
-                                                    <a class="w-100 h-100" href="/movie/{{similar[i*4+1].id}}">
+                                                    <a class="w-100 h-100"
+                                                       href="{{url_for('movie', id=similar[i*4+1].id)}}">
                                                         <button class="btn btn-default btn-circle">
                                                             <i class="fa fa-fw fa-plus"></i>
                                                         </button>
@@ -168,7 +170,8 @@
                                                     {{similar[i*4+2].name}}
                                                 </div>
                                                 <div class="p-0 card-body serie">
-                                                    <a class="w-100 h-100" href="/movie/{{similar[i*4+2].id}}">
+                                                    <a class="w-100 h-100"
+                                                       href="{{url_for('movie', id=similar[i*4+2].id)}}">
                                                         <button class="btn btn-default btn-circle">
                                                             <i class="fa fa-fw fa-plus"></i>
                                                         </button>
@@ -190,7 +193,8 @@
                                                     {{similar[i*4+3].name}}
                                                 </div>
                                                 <div class="p-0 card-body serie">
-                                                    <a class="w-100 h-100" href="/movie/{{similar[i*4+3].id}}">
+                                                    <a class="w-100 h-100"
+                                                       href="{{url_for('movie', id=similar[i*4+3].id)}}">
                                                         <button class="btn btn-default btn-circle">
                                                             <i class="fa fa-fw fa-plus"></i>
                                                         </button>
@@ -217,7 +221,8 @@
                                                     {{similar[i*4].name}}
                                                 </div>
                                                 <div class="p-0 card-body serie">
-                                                    <a class="w-100 h-100" href="/movie/{{similar[i*4].id}}">
+                                                    <a class="w-100 h-100"
+                                                       href="{{url_for('movie', id=similar[i*4].id)}}">
                                                         <button class="btn btn-default btn-circle">
                                                             <i class="fa fa-fw fa-plus"></i>
                                                         </button>
@@ -239,7 +244,8 @@
                                                     {{similar[i*4+1].name}}
                                                 </div>
                                                 <div class="p-0 card-body serie">
-                                                    <a class="w-100 h-100" href="/movie/{{similar[i*4+1].id}}">
+                                                    <a class="w-100 h-100"
+                                                       href="{{url_for('movie', id=similar[i*4+1].id)}}">
                                                         <button class="btn btn-default btn-circle">
                                                             <i class="fa fa-fw fa-plus"></i>
                                                         </button>
@@ -261,7 +267,8 @@
                                                     {{similar[i*4+2].name}}
                                                 </div>
                                                 <div class="p-0 card-body serie">
-                                                    <a class="w-100 h-100" href="/movie/{{similar[i*4+2].id}}">
+                                                    <a class="w-100 h-100"
+                                                       href="{{url_for('movie', id=similar[i*4+2].id)}}">
                                                         <button class="btn btn-default btn-circle">
                                                             <i class="fa fa-fw fa-plus"></i>
                                                         </button>
@@ -283,7 +290,8 @@
                                                     {{similar[i*4+3].name}}
                                                 </div>
                                                 <div class="p-0 card-body serie">
-                                                    <a class="w-100 h-100" href="/movie/{{similar[i*4+3].id}}">
+                                                    <a class="w-100 h-100"
+                                                       href="{{url_for('movie', id=similar[i*4+3].id)}}">
                                                         <button class="btn btn-default btn-circle">
                                                             <i class="fa fa-fw fa-plus"></i>
                                                         </button>
