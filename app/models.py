@@ -224,7 +224,7 @@ class User(UserMixin, db.Model):
         # Si la serie n'est pas dans les series de l'utilisateur, on ne fait rien
         if show:
             # On appelle l'API pour obtenir les informations de la serie
-            s = Api.get_serie(str(serie))
+            s = Api.get_media(type_media='tv', id_media=str(serie))
 
             # On update la saison et l'episode de l'utilisateur
             show.season_id = season
@@ -387,7 +387,7 @@ class User(UserMixin, db.Model):
 
         for s in serie:
             # On recupere les infos de chaque serie grace a l'API
-            serie_info = Api.get_serie(s.media_id)
+            serie_info = Api.get_media(type_media='tv', id_media=s.media_id)
 
             # On recupere les infos de l'API sur le dernier episode
             last_season, last_ep = serie_info.latest['season_number'], serie_info.latest['episode_number']
@@ -448,7 +448,7 @@ class User(UserMixin, db.Model):
         notifs = []
         for serie in list_series:
             # On recupere les infos de chaque serie non a jour avec l'API
-            serieobj = Api.get_serie(int(serie))
+            serieobj = Api.get_media(type_media='tv', id_media=int(serie))
             notifs.append((serieobj.name, int(serie)))
         return notifs
 

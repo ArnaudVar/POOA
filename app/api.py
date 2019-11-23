@@ -4,42 +4,39 @@ class Api:
     api_key = "11893590e2d73c103c840153c0daa770"
     base_url_start = "https://api.themoviedb.org/3/"
     base_url_end = f"?api_key={api_key}&language=en-US"
-    """
-    Cette methode permet de creer un objet movie a partir de son ID et d'une requete a l'API themoviedb
-    """
-    @staticmethod
-    def get_movie(id):
-        r = requests.get(f"{Api.base_url_start}movie/{id}{Api.base_url_end}").json()
-        try :
-            genre_list = []
-            for x in r['genres']:
-                genre_list.append(x['name'])
-            return Movie(id=r['id'], name=r['title'], description=r['overview'], grade=r['vote_average'],
-                         image=r['poster_path'], genre=genre_list, date=r['release_date'])
-        except :
-            movie = None
-            return movie
 
-    """
-    Cette methode permet de creer un objet serie a partir de son ID et d'une requete a l'API themoviedb
-    """
     @staticmethod
-    def get_serie(id):
-        seriejson = requests.get(f"{Api.base_url_start}tv/{id}{Api.base_url_end}").json()
-        try :
-            if seriejson['next_episode_to_air']:
-                serie = Serie(seriejson['id'], seriejson['name'], seriejson['overview'], seriejson['vote_average'],
-                              seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']),
-                              seriejson['last_episode_to_air'], seriejson['next_episode_to_air']['air_date'])
-            else:
-                serie = Serie(seriejson['id'], seriejson['name'], seriejson['overview'], seriejson['vote_average'],
-                              seriejson['genres'], seriejson['poster_path'], {}, len(seriejson['seasons']),
-                              seriejson['last_episode_to_air'], '')
-            for season in seriejson['seasons']:
-                serie.seasons[season['season_number']] = season['episode_count']
-        except :
-            serie = None
-        return serie
+    def get_media(type_media, id_media):
+        req = requests.get(f"{Api.base_url_start}{type_media}/{id_media}{Api.base_url_end}")
+        r = req.json()
+        if type_media == 'movie':
+            try:
+                genre_list = []
+                for x in r['genres']:
+                    genre_list.append(x['name'])
+                return Movie(id=r['id'], name=r['title'], description=r['overview'], grade=r['vote_average'],
+                             image=r['poster_path'], genre=genre_list, date=r['release_date'])
+            except:
+                movie = None
+                return movie
+        else:
+            try:
+                genre_list = []
+                for x in r['genres']:
+                    genre_list.append(x['name'])
+                if r['next_episode_to_air']:
+                    serie = Serie(r['id'], r['name'], r['overview'], r['vote_average'],
+                                  genre_list, r['poster_path'], {}, len(r['seasons']),
+                                  r['last_episode_to_air'], r['next_episode_to_air']['air_date'])
+                else:
+                    serie = Serie(r['id'], r['name'], r['overview'], r['vote_average'],
+                                  genre_list, r['poster_path'], {}, len(r['seasons']),
+                                  r['last_episode_to_air'], '')
+                for season in r['seasons']:
+                    serie.seasons[season['season_number']] = season['episode_count']
+            except:
+                serie = None
+            return serie
 
     """
     Cette methode permet d'obtenir les films ou les series populaires du moment a partir de l'API themoviedb
@@ -118,7 +115,7 @@ class Api:
     Cette methode permet d'avoir les films ou les series similaires au film ou a la serie d'ID "id"
     """
     @staticmethod
-    def get_similar(id,media_type):
+    def get_similar(id, media_type):
         request = requests.get(f"{Api.base_url_start}{media_type}/{id}/similar{Api.base_url_end}")
         similar_json = request.json()
         try:

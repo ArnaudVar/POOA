@@ -38,12 +38,14 @@
                                         <div class="p-0 card-body serie">
                                             {% if type_media == 'tv' %}
                                                 <a class="form-control episode-string"
-                                                    href="{{url_for(type_media, id=list_medias[4*i + j]['id'])}}">
+                                                    href="{{url_for('media', type_media=type_media,
+                                                    id=list_medias[4*i + j]['id'])}}">
                                                 {{user.get_last_episode_viewed(list_medias[4*i + j]['id'])}}
                                                 </a>
                                             {% else %}
                                                 <a class="w-100 h-100 justify-content-center"
-                                                   href="{{url_for('movie', id=list_medias[4*i + j]['id'])}}">
+                                                   href="{{url_for('media', type_media=type_media,
+                                                    id=list_medias[4*i + j]['id'])}}">
                                                     <button class="btn btn-default btn-circle   ">
                                                         <i class="fa fa-fw fa-minus"></i>
                                                     </button>
