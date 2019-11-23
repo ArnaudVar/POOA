@@ -166,15 +166,14 @@ def my_media(type_media):
     list_medias_rendered =[]
     nb_medias = 0
     if not list_medias:
-        list_media_rendered = list_medias
-        app.logger.info(msg=f"My{type_media} page rendered without {type_media}")
+        app.logger.info(msg=f"My{type_media}s page rendered without {type_media}s")
     else:
         for m in list_medias:
             nb_medias += 1
             media = Api.get_media(type_media=type_media, id_media=m)
             list_medias_rendered.append(media)
-        app.logger.info(msg=f'My{type_media} page rendered')
-        app.logger.info(msg=f'The series list has {nb_medias} {type_media}')
+        app.logger.info(msg=f'My{type_media}s page rendered')
+        app.logger.info(msg=f'The {type_media} list has {nb_medias} {type_media}s')
     return render_template('myMedias.html', title=f'My{type_media}', type_media=type_media,
                            list_medias=list_medias_rendered, nb_medias=nb_medias, tv_genres=tv_genres,
                            movie_genres=movie_genres, user=current_user)
@@ -222,7 +221,7 @@ def genre(media, genre, page):
                            tv_genres=tv_genres, movie_genres=movie_genres, current_page=int(page), nb_pages=nb_pages)
 
 
-@app.route('/tv/<id>/season/<season>/episode/<episode>')
+@app.route('/media/tv/<id>/season/<season>/episode/<episode>')
 @login_required
 def select_episode(id, season, episode):
     serie = Api.get_media(type_media='tv', id_media=id)
@@ -230,11 +229,11 @@ def select_episode(id, season, episode):
     serie.selected_episode = 'S' + str(season) + 'E' + str(episode)
     episode = serie.get_episode
     app.logger.info(msg=f'Selected Episode : Serie = {id}, Season = {season}, episode = {episode.num_episode}')
-    return render_template('serie.html', serie=serie, user=current_user, episode=episode, season=episode.num_season,
+    return render_template('serie.html', media=serie, user=current_user, episode=episode, season=episode.num_season,
                            type_media='tv', similar=similar, tv_genres=tv_genres, movie_genres=movie_genres)
 
 
-@app.route('/tv/<id>/season/<season>/episode/<episode>/view')
+@app.route('/media/tv/<id>/season/<season>/episode/<episode>/view')
 @login_required
 def next_episode(id, season, episode):
     current_user.view_episode(episode, season, id)
