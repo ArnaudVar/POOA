@@ -33,28 +33,56 @@ def home():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    Cette route correspond a la page de login
+    On verifie que l'utilisateur a bien rentré les bonnes informations de connexion sinon on refuse son authentification
+    Puis, si les informations sont bonnes, on recalcule l'etat des series de l'utilisateur (utd, nutd et fin) pour
+        pouvoir afficher les bonnes notifications (que l'on rend donc actives)
+    De plus, on lui cree un nouvel identifiant de session pour pouvoir poster sur l'API
+    Enfin, on le redirige vers la page qu'il souhaitait voir (home si il n'en a pas)
+    :return:
+    """
+
     app.logger.info(msg='The user is logging in')
+
+    # Si l'utilisateur est deja connecte, il ne peut acceder a cette page
     if current_user.is_authenticated:
         return redirect(url_for('home'))
+
+    # On utilise LoginForm du module forms.py
     form = LoginForm()
+
+    # Si le formulaire n'est pas rempli, on demande de le reremplir
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
+
+        # Si aucun utilisateur n'a ce nom on flash un message indiquant qu'il y a eu une erreur dans le nom
         if user is None:
             app.logger.info(msg='Invalid Username !')
             flash("Invalid Username !")
-            render_template('login.html', title='Sign In', form=form, src=logo_source)
+            return render_template('login.html', title='Sign In', form=form, src=logo_source)
+
+        # Si le mot de passe n'est pas bon, on l'indique egalement a l'utilisateur
         elif not user.check_password(form.password.data):
             app.logger.info(msg='Invalid Password !')
             flash("Invalid Password !")
-            render_template('login.html', title='Sign In', form=form, src=logo_source)
+            return render_template('login.html', title='Sign In', form=form, src=logo_source)
+
+        # Sinon, on connecte l'utilisateur et on met a jour ses informations
         else:
             login_user(user, remember=form.remember_me.data)
             next_page = request.args.get('next')
             app.logger.info(msg='Successful Login !')
+
+            # Si il n'a pas de pages en memoire, on le redirige vers home
             if not next_page or url_parse(next_page).netloc != '':
                 next_page = url_for('home')
+
+            # On lui ajoute une session
             current_user.session_id = Api.new_session()
             db.session.commit()
+
+            # On rend ses notifications actives et on met a jour le statut de ses series
             current_user.notifications = bytes(1)
             current_user.update_all_upcoming_episodes()
             db.session.commit()
@@ -64,6 +92,10 @@ def login():
 
 @app.route('/logout')
 def logout():
+    """
+    Cette route permet a l'utilisateur de se deconnecter, on le redirige ensuite sur la page login
+    :return:
+    """
     logout_user()
     app.logger.info(msg='Successful Logout !')
     return redirect(url_for('login'))
@@ -92,9 +124,21 @@ def media(type_media, id):
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    """
+    Cette route permet a l'utilisateur de s'inscrire sur le site
+    Il ne peut pas y acceder si il est deja connecte
+    :return:
+    """
+
+    # On verifie que l'utilisateur n'est pas connecte
     if current_user.is_authenticated:
         return redirect(url_for('home'))
+
+    # On utilise le formulaire RegistrationForm du module form.py
     form = RegistrationForm()
+
+    # Si le formulaire est valide (les champs sont remplis uniques et coherents) on redirige l'utilisateur vers
+    # la page de connexion
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data, name=form.name.data, surname=form.surname.data,
                     password=form.password.data)
