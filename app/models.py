@@ -141,10 +141,24 @@ class User(UserMixin, db.Model):
         if not self.is_in_medias(id_media=id_media, type_media=type_media):
             if type_media == 'tv':
                 # On ajoute la serie a l'utilisatur en la marquant comme nutd et on remeta jour les notifications
-                m = UserMedia(media='tv', media_id=int(id_media),
-                    season_id=1, episode_id=1, state_serie='nutd', user=self)
-                self.notifications = bytes(1)
+                serie_info = Api.get_media(type_media='tv', id_media=int(id_media))
 
+                last_season, last_ep = serie_info.latest['season_number'], serie_info.latest['episode_number']
+
+                status = ''
+                # Si le dernier episode vu par l'utilisateur est le dernier episode selon l'API, on regarde si il y a un
+                # episode attendu pour savoir si l'utilisateur est a la fin de la serie
+                if not self.is_after(season=last_season, episode=last_ep, serie=id_media):
+                    if serie_info.date == '':
+                        # On met a jour le statut de la serie en finie (fin)
+                        status = 'fin'
+                    else:
+                        status = 'utd'
+                else:
+                    status = 'nutd'
+                m = UserMedia(media='tv', media_id=int(id_media),
+                              season_id=1, episode_id=1, state_serie=status, user=self, media_name=serie_info.name)
+                self.notifications = bytes(1)
             else:
                 m = UserMedia(media='movie', media_id=int(id_media), user=self)
 
@@ -445,12 +459,11 @@ class User(UserMixin, db.Model):
         """
         # On recupere la liste des series ou l'utilisateur n'est pas jour
         list_series = self.check_upcoming_episodes()[1]
-        notifs = []
+        series_name = []
         for serie in list_series:
-            # On recupere les infos de chaque serie non a jour avec l'API
-            serieobj = Api.get_media(type_media='tv', id_media=int(serie))
-            notifs.append((serieobj.name, int(serie)))
-        return notifs
+            s = self.user_media.filter_by(media='tv', media_id=serie).first()
+            series_name.append((s.media_name, int(serie)))
+        return series_name
 
     def nb_not_up_to_date(self):
         """
@@ -458,7 +471,8 @@ class User(UserMixin, db.Model):
         :return: int
         """
         if self.notifications:
-            return len(self.get_notifications())
+            list_series = self.user_media.filter_by(media='tv', state_serie='nutd').all()
+            return len(list_series)
         else:
             return 0
 
@@ -485,6 +499,9 @@ class UserMedia(db.Model):
 
     # la note accordee par l'utilisateur au media
     media_grade = db.Column(db.Integer)
+
+    # Le nom du media (rempli uniquement pour les series ou on a besoin du nom des series non a jour)
+    media_name = db.Column(db.String(128))
 
 
     def __repr__(self):
