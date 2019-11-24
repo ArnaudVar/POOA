@@ -20,6 +20,11 @@ logo_source = "../static/assets/Logo.png"
 @app.route('/home')
 @login_required
 def home():
+    """
+    Cette fonction permet de retourner la home page de notre site qui indique les dernieres sorties de
+    series et films. On passe egalement les genres de series et de films en parametres pour la sidebar
+    :return:void
+    """
     suggestions_serie = Api.get_popular('serie', 1)
     suggestions_movie = Api.get_popular('movie', 1)
     selection_serie, selection_movie = [], []
@@ -92,8 +97,9 @@ def login():
 
 @app.route('/logout')
 def logout():
+
     """
-    Cette route permet a l'utilisateur de se deconnecter, on le redirige ensuite sur la page login
+    Fonction appelee pour deconnecter l'utilisateur de sa session et revenir a la page de connexion
     :return:
     """
     logout_user()
@@ -190,6 +196,12 @@ def reset_password(token):
 @app.route('/add/<type_media>/<id_media>')
 @login_required
 def add(id_media, type_media):
+    """
+    Fonction appelee pour ajouter un film ou une serie a la liste de l'utilisateur
+    :param id_media:
+    :param type_media:
+    :return:void
+    """
     current_user.add_media(id_media=id_media, type_media=type_media)
     app.logger.info(msg=f'Media {type_media} {id_media} successfully added')
     return media(type_media=type_media, id=id_media)
@@ -198,6 +210,12 @@ def add(id_media, type_media):
 @app.route('/remove/<type_media>/<id_media>')
 @login_required
 def remove(id_media, type_media):
+    """
+    Fonction appelee pour retirer un film ou une serie de la listre de l'utilisateur
+    :param id_media:
+    :param type_media:
+    :return:void
+    """
     current_user.remove_media(id_media=id_media, type_media=type_media)
     app.logger.info(msg=f'{type_media} {id_media} successfully removed')
     return media(type_media=type_media, id=id_media)
@@ -206,6 +224,11 @@ def remove(id_media, type_media):
 @app.route('/mymedias/<type_media>')
 @login_required
 def my_media(type_media):
+    """
+    Fonction appelee pour avoir la page correspondant a la liste des films ou des series ajoutes par l'utilisateur
+    :param type_media:
+    :return: void
+    """
     list_medias = current_user.list_media(media=type_media)
     list_medias_rendered =[]
     nb_medias = 0
@@ -226,6 +249,13 @@ def my_media(type_media):
 @app.route('/search2/<string>/<page>')
 @login_required
 def search2(string, page):
+    """
+    Fonction appelee pour la recherche de films et series correspondant a "string", permet d'aller a la page de resultats
+    de recherche
+    :param string:
+    :param page:
+    :return:
+    """
     list_series, list_movies, nb_pages = Api.search(string, page)
     app.logger.info(msg=f'Search page {page} rendered for : {string}')
     return render_template('search.html', title='Search', list_series=list_series, tv_genres=tv_genres,
@@ -245,12 +275,23 @@ def before_request():
 @app.route('/search')
 @login_required
 def search():
+    """
+    Redirection vers la fonction search2
+    :return:
+    """
     return redirect(f'/search2/{g.search_form.s.data}/1')
 
 
 @app.route('/genre/<media>/<genre>/<page>')
 @login_required
 def genre(media, genre, page):
+    """
+
+    :param media:
+    :param genre:
+    :param page:
+    :return:
+    """
     if media == 'movie':
         list_genres = movie_genres
     else :
@@ -268,6 +309,14 @@ def genre(media, genre, page):
 @app.route('/media/tv/<id>/season/<season>/episode/<episode>')
 @login_required
 def select_episode(id, season, episode):
+    """
+    Fonction utilisee pour afficher l'episode {episode} de la saison {season} dans la page serie : son image et son
+    resume
+    :param id:
+    :param season:
+    :param episode:
+    :return:
+    """
     serie = Api.get_media(type_media='tv', id_media=id)
     similar = Api.get_similar(id, 'tv')
     serie.selected_episode = 'S' + str(season) + 'E' + str(episode)
@@ -280,6 +329,13 @@ def select_episode(id, season, episode):
 @app.route('/media/tv/<id>/season/<season>/episode/<episode>/view')
 @login_required
 def next_episode(id, season, episode):
+    """
+    Fonction appelee pour marquer un episode d'une serie comme vu
+    :param id:
+    :param season:
+    :param episode:
+    :return:
+    """
     current_user.view_episode(episode, season, id)
     app.logger.info(msg=f'The user marked S{season}E{episode} from serie {id} as viewed')
     return media(type_media='tv', id=id)
@@ -288,6 +344,12 @@ def next_episode(id, season, episode):
 @app.route('/rate/<i>')
 @login_required
 def rate(i):
+    """
+    Fonction appelee pour mettre a jour la note actuelle de l'utilisateur qui sera celle envoyee
+    avec la fonction suivante
+    :param i:
+    :return:
+    """
     g = float(2*int(i))
     current_user.update_grade(g)
     app.logger.info(msg=f'The user is selecting the grade {float(2 * int(i))}')
@@ -297,6 +359,13 @@ def rate(i):
 @app.route('/post/grade/<type_media>/<id_media>')
 @login_required
 def post_media_grade(id_media, type_media):
+    """
+    Fonction appelee pour envoyer a l'API la note donnee par l'utilisateur au film ou a la serie
+
+    :param id_media:
+    :param type_media:
+    :return:
+    """
     grade = current_user.current_grade
     session = current_user.session_id
     current_user.grade(id_media=id_media, media=type_media, grade=grade)
@@ -308,6 +377,13 @@ def post_media_grade(id_media, type_media):
 @app.route('/unrate/<type_media>/<id_media>')
 @login_required
 def unrate_media(id_media, type_media):
+    """
+    Fonction appelee pour enlever la note donnee par l'utilsateur a une serie ou un film
+    
+    :param id_media:
+    :param type_media:
+    :return:
+    """
     current_user.unrate(type=type_media, id=id_media)
     app.logger.info(msg=f'The user unrated the {type_media} {id_media}')
     return media(type_media=type_media, id=id_media)
