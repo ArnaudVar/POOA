@@ -982,7 +982,7 @@ class TestUser(TestCase):
         user.add_media(id_media=1412, type_media='tv')
         user.add_media(id_media=1413, type_media='movie')
         user.add_media(id_media=453405, type_media='movie')
-        user.add_media(id_media=453406, type_media='tv')
+        user.add_media(id_media=1414, type_media='tv')
 
         # On verifie qu'il n'y a pas d'erreur lorsqu'on retire une serie qui n'est pas dans les series de l'utilisateur
         # On verifie egalement que la methode ne supprime pas un film ayant le meme id
