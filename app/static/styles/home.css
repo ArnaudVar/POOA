@@ -106,6 +106,8 @@ img {
     background: #343a40;
     color: white;
     width: 40%;
+    
+    }
 
 .movie-search:hover .btn-circle{
     display: block;
