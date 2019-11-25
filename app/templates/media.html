@@ -2,53 +2,60 @@
 {% block header %}
 <nav class="w-100 navbar navbar-expand-lg">
     <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarSupportedContent">
-        <div class="rating">
-            {% if user.is_graded(type_media, media.id) %}
-            <a href="{{url_for('unrate_media', id_media=media.id, type_media=type_media)}}">
-                <button class="btn btn-info ml-4 mt-3">
-                    Unrate
-                    <i class="fa fa-times"></i>
-                </button>
-            </a>
-            {% if user.get_grade(type_media, media.id) >= 9.0 %}
-            <a class="undergrade" href="{{url_for('rate', i=5)}}" title="Donner 5 étoiles">☆</a>
-            {% else %}
-            <a href="{{url_for('rate', i=5)}}" title="Donner 5 étoiles">☆</a>
-            {% endif %}
-            {% if user.get_grade(type_media, media.id) >= 7.0 %}
-            <a class="undergrade" href="{{url_for('rate', i=4)}}" title="Donner 4 étoiles">☆</a>
-            {% else %}
-            <a href="{{url_for('rate', i=4)}}" title="Donner 4 étoiles">☆</a>
-            {% endif %}
-            {% if user.get_grade(type_media, media.id) >= 5.0 %}
-            <a class="undergrade" href="{{url_for('rate', i=3)}}" title="Donner 3 étoiles">☆</a>
-            {% else %}
-            <a href="{{url_for('rate', i=3)}}" title="Donner 3 étoiles">☆</a>
-            {% endif %}
-            {% if user.get_grade(type_media, media.id) >= 3.0 %}
-            <a class="undergrade" href="{{url_for('rate', i=2)}}" title="Donner 2 étoiles">☆</a>
-            {% else %}
-            <a href="{{url_for('rate', i=2)}}" title="Donner 2 étoiles">☆</a>
-            {% endif %}
-            {% if user.get_grade(type_media, media.id) >= 1.0 %}
-            <a class="undergrade" href="{{url_for('rate', i=1)}}" title="Donner 1 étoiles">☆</a>
-            {% else %}
-            <a href="{{url_for('rate', i=1)}}" title="Donner 1 étoiles">☆</a>
-            {% endif %}
-            {% else %}
-            <a href="{{url_for('post_media_grade', id_media=media.id, type_media=type_media)}}">
-                <button class="btn btn-warning ml-4 mt-3">
-                    Rate
-                    <i class="fa fa-clipboard"></i>
-                </button>
-            </a>
-            <a href="{{url_for('rate', i=5)}}" title="Donner 5 étoiles">☆</a>
-            <a href="{{url_for('rate', i=4)}}" title="Donner 4 étoiles">☆</a>
-            <a href="{{url_for('rate', i=3)}}" title="Donner 3 étoiles">☆</a>
-            <a href="{{url_for('rate', i=2)}}" title="Donner 2 étoiles">☆</a>
-            <a href="{{url_for('rate', i=1)}}" title="Donner 1 étoile">☆</a>
-            {% endif %}
+        {% if user.is_in_medias(media.id, type_media) %}
+            <div class="rating">
+                {% if user.is_graded(type_media, media.id) %}
+                <a href="{{url_for('unrate_media', id_media=media.id, type_media=type_media)}}">
+                    <button class="btn btn-info ml-4 mt-3">
+                        Unrate
+                        <i class="fa fa-times"></i>
+                    </button>
+                </a>
+                {% if user.get_grade(type_media, media.id) >= 9.0 %}
+                <a class="undergrade" href="{{url_for('rate', i=5)}}" title="Donner 5 étoiles">☆</a>
+                {% else %}
+                <a href="{{url_for('rate', i=5)}}" title="Donner 5 étoiles">☆</a>
+                {% endif %}
+                {% if user.get_grade(type_media, media.id) >= 7.0 %}
+                <a class="undergrade" href="{{url_for('rate', i=4)}}" title="Donner 4 étoiles">☆</a>
+                {% else %}
+                <a href="{{url_for('rate', i=4)}}" title="Donner 4 étoiles">☆</a>
+                {% endif %}
+                {% if user.get_grade(type_media, media.id) >= 5.0 %}
+                <a class="undergrade" href="{{url_for('rate', i=3)}}" title="Donner 3 étoiles">☆</a>
+                {% else %}
+                <a href="{{url_for('rate', i=3)}}" title="Donner 3 étoiles">☆</a>
+                {% endif %}
+                {% if user.get_grade(type_media, media.id) >= 3.0 %}
+                <a class="undergrade" href="{{url_for('rate', i=2)}}" title="Donner 2 étoiles">☆</a>
+                {% else %}
+                <a href="{{url_for('rate', i=2)}}" title="Donner 2 étoiles">☆</a>
+                {% endif %}
+                {% if user.get_grade(type_media, media.id) >= 1.0 %}
+                <a class="undergrade" href="{{url_for('rate', i=1)}}" title="Donner 1 étoiles">☆</a>
+                {% else %}
+                <a href="{{url_for('rate', i=1)}}" title="Donner 1 étoiles">☆</a>
+                {% endif %}
+                {% else %}
+                <a href="{{url_for('post_media_grade', id_media=media.id, type_media=type_media)}}">
+                    <button class="btn btn-warning ml-4 mt-3">
+                        Rate
+                        <i class="fa fa-clipboard"></i>
+                    </button>
+                </a>
+                <a href="{{url_for('rate', i=5)}}" title="Donner 5 étoiles">☆</a>
+                <a href="{{url_for('rate', i=4)}}" title="Donner 4 étoiles">☆</a>
+                <a href="{{url_for('rate', i=3)}}" title="Donner 3 étoiles">☆</a>
+                <a href="{{url_for('rate', i=2)}}" title="Donner 2 étoiles">☆</a>
+                <a href="{{url_for('rate', i=1)}}" title="Donner 1 étoile">☆</a>
+                {% endif %}
+            </div>
+        {% else %}
+        <div>
         </div>
+        <div>
+        </div>
+        {% endif %}
         <div class="name-serie">
             <h1>{{media.name}}</h1>
         </div>
