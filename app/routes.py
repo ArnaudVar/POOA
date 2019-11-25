@@ -1,3 +1,7 @@
+'''
+Fichier de routage depuis lequel on accède aux différentes pages du site
+'''
+
 from flask import render_template, redirect, url_for, flash, request, g
 from app.api import Api
 from app import app, db
@@ -110,6 +114,12 @@ def logout():
 @app.route('/media/<type_media>/<id>')
 @login_required
 def media(type_media, id):
+    '''
+    Route pour accéder à la page des détails d'un média (série ou film)
+    :param type_media: string. Type du média : 'tv' ou 'movie'
+    :param id: int. Id du média
+    :return:
+    '''
     media = Api.get_media(type_media=type_media, id_media=id)
     similar = Api.get_similar(id=id, media_type=type_media)
     if media is None:
@@ -157,6 +167,10 @@ def register():
 
 @app.route('/reset_password_request', methods=['GET', 'POST'])
 def reset_password_request():
+    '''
+    Cette route affiche un formulaire pour que l'utilisateur demande un changement de mot de passe
+    :return:
+    '''
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = ResetPasswordRequestForm()
@@ -174,11 +188,21 @@ def reset_password_request():
 
 @app.route('/request_confirmed')
 def request_confirmed():
+    '''
+    Cette route correspond à la page de confirmation après avoir fait une demande de changement de mot de passe
+    :return:
+    '''
     return render_template('request_confirmed.html', title='Request confirmed', src=logo_nom_source)
 
 
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
+    '''
+    Cette route est accedé depuis le mail envoyé après une demande de changement de mot de passe
+    Elle permet à l'utilisateur de choisir un nouveau mot de passe
+    :param token: string, le token envoyé par mail
+    :return:
+    '''
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     user = User.verify_reset_password_token(token)
@@ -198,8 +222,8 @@ def reset_password(token):
 def add(id_media, type_media):
     """
     Fonction appelee pour ajouter un film ou une serie a la liste de l'utilisateur
-    :param id_media:
-    :param type_media:
+    :param id_media: int. Id du média
+    :param type_media: string. Type du média : 'tv' ou 'movie'
     :return:void
     """
     current_user.add_media(id_media=id_media, type_media=type_media)
@@ -211,9 +235,9 @@ def add(id_media, type_media):
 @login_required
 def remove(id_media, type_media):
     """
-    Fonction appelee pour retirer un film ou une serie de la listre de l'utilisateur
-    :param id_media:
-    :param type_media:
+    Fonction appelee pour retirer un film ou une serie de la liste de l'utilisateur
+    :param id_media: int. Id du média
+    :param type_media: string. Type du média : 'tv' ou 'movie'
     :return:void
     """
     current_user.remove_media(id_media=id_media, type_media=type_media)
@@ -226,7 +250,7 @@ def remove(id_media, type_media):
 def my_media(type_media):
     """
     Fonction appelee pour avoir la page correspondant a la liste des films ou des series ajoutes par l'utilisateur
-    :param type_media:
+    :param type_media: string. Type du média : 'tv' ou 'movie'
     :return: void
     """
     list_medias = current_user.list_media(media=type_media)
@@ -252,8 +276,8 @@ def search2(string, page):
     """
     Fonction appelee pour la recherche de films et series correspondant a "string", permet d'aller a la page de resultats
     de recherche
-    :param string:
-    :param page:
+    :param string: string. Recherche effectuée par l'utilisateur
+    :param page: int. Numéro de la page des résultats
     :return:
     """
     list_series, list_movies, nb_pages = Api.search(string, page)
@@ -286,10 +310,10 @@ def search():
 @login_required
 def genre(media, genre, page):
     """
-
-    :param media:
-    :param genre:
-    :param page:
+    Cette route permet d'accéder à la page qui recense tous les médias d'un certain genre
+    :param media: string. Type de média : 'tv' ou 'movie'
+    :param genre: string. Nom du genre
+    :param page: int. Numéro de la page des résultats
     :return:
     """
     if media == 'movie':
@@ -312,9 +336,9 @@ def select_episode(id, season, episode):
     """
     Fonction utilisee pour afficher l'episode {episode} de la saison {season} dans la page serie : son image et son
     resume
-    :param id:
-    :param season:
-    :param episode:
+    :param id: int. id de la série
+    :param season: numéro de la saison
+    :param episode: numéro de l'épisode
     :return:
     """
     serie = Api.get_media(type_media='tv', id_media=id)
@@ -331,9 +355,9 @@ def select_episode(id, season, episode):
 def next_episode(id, season, episode):
     """
     Fonction appelee pour marquer un episode d'une serie comme vu
-    :param id:
-    :param season:
-    :param episode:
+    :param id: int. id de la série
+    :param season: numéro de la saison
+    :param episode: numéro de l'épisode
     :return:
     """
     current_user.view_episode(episode, season, id)
@@ -347,7 +371,7 @@ def rate(i):
     """
     Fonction appelee pour mettre a jour la note actuelle de l'utilisateur qui sera celle envoyee
     avec la fonction suivante
-    :param i:
+    :param i: note
     :return:
     """
     g = float(2*int(i))
@@ -362,8 +386,8 @@ def post_media_grade(id_media, type_media):
     """
     Fonction appelee pour envoyer a l'API la note donnee par l'utilisateur au film ou a la serie
 
-    :param id_media:
-    :param type_media:
+    :param id_media: int. Id du média
+    :param type_media: string. Type du média : 'tv' ou 'movie"
     :return:
     """
     grade = current_user.current_grade
@@ -380,8 +404,8 @@ def unrate_media(id_media, type_media):
     """
     Fonction appelee pour enlever la note donnee par l'utilsateur a une serie ou un film
     
-    :param id_media:
-    :param type_media:
+    :param id_media: int. Id du média
+    :param type_media: string. Type du média : 'tv' ou 'movie"
     :return:
     """
     current_user.unrate(type=type_media, id=id_media)
@@ -416,7 +440,7 @@ def upcomingEpisodes():
             while the series last episode is S4E3 > list_series_last_episode
         * The user is up to date with this serie and we're expecting an episode for this show > list_series_up_to_date
         * The user is up-to-date with the serie but we're not expecting any next episode > list_series_finished
-    On change egalement les notifications en 0
+    We also change the notifications to 0
     :return:render_template('upcoming_episode.html')
     """
     l_utd, l_nutd, l_fin = current_user.check_upcoming_episodes()
