@@ -10,12 +10,7 @@ from classes.media import Media
 from classes.episode import Episode
 
 
-class TestApplication(TestCase):
-
-    """
-    Class allowing us to setting up our testing
-    it is creating a test database
-    """
+class TestRoutesApplication(TestCase):
     def setUp(self):
         app.config['TESTING'] = True
         app.config['WTF_CSRF_ENABLED'] = False
@@ -33,7 +28,7 @@ class TestApplication(TestCase):
         - That the hashing of the password is correct (returns false when a wrong password is typed in)
         :return: void
         """
-        user = User(username='Username', email='test@test.co', name='Name', surname='Surname')
+        user = User(username='Username', email='test@test.co', name='Name', surname='Surname', password="")
         user.set_password('Password')
         db.session.add(user)
         db.session.commit()
@@ -85,32 +80,32 @@ class TestApplication(TestCase):
         # We check that a user can register if all the correct info is typed in
         # To check if the registration took place correctly, we check the logs
         with self.assertLogs() as cm :
-            TestApplication.register(self, 'Username2',  'Name2', 'Surname2', 'test2@test.co', 'test2@test.co',
+            TestRoutesApplication.register(self, 'Username2', 'Name2', 'Surname2', 'test2@test.co', 'test2@test.co',
                                           'password2', 'password2')
         self.assertEqual(cm.records[0].msg, 'Successful registry')
 
-        #We check that a user can't register with the same username than an already existing user
-        rv2 = TestApplication.register(self, 'Username2',  'Name3', 'Surname3', 'test3@test.co', 'test3@test.co',
+        # We check that a user can't register with the same username than an already existing user
+        rv2 = TestRoutesApplication.register(self, 'Username2', 'Name3', 'Surname3', 'test3@test.co', 'test3@test.co',
                                        'password3', 'password3')
         assert b'This username is already used, please use a different username.' in rv2.data
 
         # We check that a user can't register with the same email than an already existing user
-        rv3 = TestApplication.register(self, 'Username3', 'Name3', 'Surname3', 'test2@test.co', 'test2@test.co',
+        rv3 = TestRoutesApplication.register(self, 'Username3', 'Name3', 'Surname3', 'test2@test.co', 'test2@test.co',
                                        'password3', 'password3')
         assert b'This e-mail is already used, please use a different email address.' in rv3.data
 
         # We check that the user must type in an email that matches the email format
-        rv4 = TestApplication.register(self, 'Username3', 'Name3', 'Surname3', 'test3test.co', 'test3test.co',
+        rv4 = TestRoutesApplication.register(self, 'Username3', 'Name3', 'Surname3', 'test3test.co', 'test3test.co',
                                        'password3', 'password3')
         assert b'Invalid email address.' in rv4.data
 
         # We check that a user can't register if the validation email isn't equal to the email first typed in
-        rv5 = TestApplication.register(self, 'Username3', 'Name3', 'Surname3', 'test3@test.co', 'test3@test.com',
+        rv5 = TestRoutesApplication.register(self, 'Username3', 'Name3', 'Surname3', 'test3@test.co', 'test3@test.com',
                                        'password3', 'password3')
         assert b'Field must be equal to email.' in rv5.data
 
         # We check that a user can't register if the validation password isn't equal to the password first typed in
-        rv6 = TestApplication.register(self, 'Username3', 'Name3', 'Surname3', 'test3@test.co', 'test3@test.co',
+        rv6 = TestRoutesApplication.register(self, 'Username3', 'Name3', 'Surname3', 'test3@test.co', 'test3@test.co',
                                        'password3', 'password3x')
         assert b'Field must be equal to password.' in rv6.data
 
@@ -143,11 +138,11 @@ class TestApplication(TestCase):
         :return: void
         """
         # We check that a user can log in if all the correct info is typed in
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-                                     'password', 'password')
+        TestRoutesApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                                 'password', 'password')
 
         with self.assertLogs() as cm:
-            TestApplication.login(self, 'Username',  'password')
+            TestRoutesApplication.login(self, 'Username', 'password')
         self.assertEqual(cm.records[1].msg, 'Successful Login !')
         user = User.query.filter_by(name='Name')[0]
         self.assertEqual(user.notifications, bytes(1))
@@ -159,304 +154,217 @@ class TestApplication(TestCase):
 
         # We check that a user can't log in if there is a mistake in its username
         with self.assertLogs() as cm:
-            TestApplication.login(self, 'Username2', 'password')
+            TestRoutesApplication.login(self, 'Username2', 'password')
         self.assertEqual(cm.records[1].msg, 'Invalid Username !')
 
         # We check that a user can't log in if there is a mistake in its password
         with self.assertLogs() as cm:
-            TestApplication.login(self, 'Username', 'password2')
+            TestRoutesApplication.login(self, 'Username', 'password2')
         self.assertEqual(cm.records[1].msg, 'Invalid Password !')
 
-    def test_routes_serie(self):
+    def test_routes_media(self):
         """
-        This method allows us to check the route for the serie template
-        We check that a logged in user can access a serie if the id of the serie matches a serie in the api
-        We also check that if the id is not correct, the user is correctly sent to an error template
-        Finally, we check that a user can't go to a serie page if he isn't logged in
+        Cette methode nous permet de tester la route media
+        On verifie qu'un utilisateur non connecte ne peut y acceder
+        On verifie egalement que si l'identifiant est incorrect, un message d'erreur est leve
+        La route doit marcher pour les series et pour les films
         :return: void
         """
         # We create a user that logs in that will be used throughout this test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-                                 'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
+        TestRoutesApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                                       'password', 'password')
+        TestRoutesApplication.login(self, 'Username', 'password')
 
         # We check that the serie route works well with a correct id of a serie (1412 serie : Arrow)
         with self.assertLogs() as cm:
-            self.app.get('/serie/1412', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'Successful query for the Serie id=1412 page')
-
-        # We check that an error is returned when an incorrect serie number is given
-        with self.assertLogs() as cm:
-            self.app.get('/serie/141213243', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'Incorrect Serie id')
-
-        #We now check that this route is not available if no user is logged in
-        self.logout()
-        with self.assertLogs() as cm:
-            self.app.get('/serie/1412', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'The user is logging in')
-
-    def test_routes_movie(self):
-        """
-            This method allows us to check the route for the movie template
-            We check that a logged in user can access a movie if the id of the movie matches a movie in the api
-            We also check that if the id is not correct, the user is correctly sent to an error template
-            Finally, we check that a user can't go to a movie page if he isn't logged in
-            :return: void
-        """
-        # We create a user that logs in that will be used throughout this test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-                                 'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
+            self.app.get('/media/tv/1412', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Successful query for the tv id=1412 page')
 
         # We check that the movie route works well with the 475557 movie (Joker)
         with self.assertLogs() as cm:
-            self.app.get('/movie/475557', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'Successful query for the Movie id=475557 page')
+            self.app.get('/media/movie/475557', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Successful query for the movie id=475557 page')
+
+        # We check that an error is returned when an incorrect serie number is given
+        with self.assertLogs() as cm:
+            self.app.get('/media/tv/141213243', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Incorrect tv id')
 
         # We check that an error is returned when an incorrect movie number is given
         with self.assertLogs() as cm:
-            self.app.get('/movie/141213243', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'Incorrect Movie id')
+            self.app.get('/media/movie/141213243', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Incorrect movie id')
 
-        #We now check that this route is not available if no user is logged in
+        # We now check that this route is not available if no user is logged in
         self.logout()
         with self.assertLogs() as cm:
-            self.app.get('/movie/1412', follow_redirects=True)
+            self.app.get('/media/tv/1412', follow_redirects=True)
         self.assertEqual(cm.records[0].msg, 'The user is logging in')
 
-    def test_route_addSerie(self):
+        # We now check that this route is not available if no user is logged in
+        self.logout()
+        with self.assertLogs() as cm:
+            self.app.get('/media/movie/1412', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'The user is logging in')
+
+    def test_route_add(self):
         """
-        Cette methode nous permet de tester la route pour ajouter une serie a un utilisateur dans la base de donnees
-        On verifie que quand l'utilisateur ajoute une serie, la bonne serie est ajoutee dans la table UserMedia
-        On verifie egalement qu'il n'y a pas de soucis lors de l'ajout d'une deuxieme serie
-        Puis, on verifie que lorsque l'utilisateur ajoute une serie deja presente dans ses series, rien ne se passe
-        Enfin, on verifie que le login est demande avant d'ajouter une serie
+        Cette methode nous permet de tester la route pour ajouter une serie ou un film a un utilisateur
+            dans la base de donnees
+        On verifie que quand l'utilisateur ajoute un media, le bon est ajoute dans la table UserMedia
+        On verifie egalement qu'il n'y a pas de soucis lors de l'ajout d'un deuxième media
+        Puis, on verifie que lorsque l'utilisateur ajoute un media deja presente dans ses medias, rien ne se passe
+        Enfin, on verifie que le login est demande avant d'ajouter un media
         :return: void
         """
         # On crée un utilisateur utilise dans ce test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+        TestRoutesApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
                                  'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
+        TestRoutesApplication.login(self, 'Username', 'password')
         user = User.query.filter_by(name='Name')[0]
 
-        # On verifie que la route serie marche bien
+        # On verifie que la route add marche bien pour les series et les films
         with self.assertLogs() as cm:
-            self.app.get('/add_serie/1412', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'Serie 1412 successfully added')
+            self.app.get('/add/tv/1412', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Media tv 1412 successfully added')
+        with self.assertLogs() as cm:
+            self.app.get('/add/movie/475557', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Media movie 475557 successfully added')
         self.assertEqual(user.notifications, bytes(1))
 
-        # On verifie que la bonne serie est ajoutee et que l'episode en cours est bien S1E1
+        # On verifie que le film et la serie sont bien ajoutes dans la base de donnes
+        # On verifie egalement que la serie est bien a l'epsiode S1E1
         u = User.query.filter_by(name='Name')
-        serie = u[0].user_media.filter_by(media='serie', media_id=1412).all()
-        self.assertEqual(len(serie), 1)
-        self.assertEqual(serie[0].season_id, 1)
-        self.assertEqual(serie[0].episode_id, 1)
+        serie= u[0].user_media.filter_by(media='tv').first()
+        movie = u[0].user_media.filter_by(media='movie').first()
+        self.assertEqual(serie.media_id, 1412)
+        self.assertEqual(serie.season_id, 1)
+        self.assertEqual(serie.episode_id, 1)
+        self.assertEqual(movie.media_id, 475557)
 
-        # On verifie que l'ajout d'une deuxieme serie ne pose pas de probleme
-        self.app.get('/add_serie/2190', follow_redirects=True)
+        # On verifie que l'ajout d'une deuxieme serie et d'un deuxieme film ne pose pas de probleme
+        self.app.get('/add/tv/2190', follow_redirects=True)
+        self.app.get('/add/movie/465432', follow_redirects=True)
         u = User.query.filter_by(name='Name')
         serie = u[0].user_media.all()
-        self.assertEqual(len(serie), 2)
+        self.assertEqual(len(serie), 4)
 
-        # On verifie que lorsqu'on ajoute une serie deja presente, rien ne se passe
-        self.app.get('/add_serie/1412', follow_redirects=True)
+        # On verifie que lorsqu'on ajoute une serie deja presente ou un film deja present, rien ne se passe
+        self.app.get('/add/tv/1412', follow_redirects=True)
+        self.app.get('/add/movie/475557', follow_redirects=True)
         u = User.query.filter_by(name='Name')
-        serie = u[0].user_media.filter_by(media='serie', media_id=1412).all()
+        serie = u[0].user_media.filter_by(media='tv', media_id=1412).all()
         self.assertEqual(len(serie), 1)
+        movie = u[0].user_media.filter_by(media='movie', media_id=475557).all()
+        self.assertEqual(len(movie), 1)
 
-        # Finalement, on verifie que si l'utilisateur n'est pas connecté, il ne peut ajouter une serie
+        # Finalement, on verifie que si l'utilisateur n'est pas connecté, il ne peut ajouter un media
         self.logout()
         with self.assertLogs() as cm:
-            self.app.get('/add_serie/2190', follow_redirects=True)
+            self.app.get('/add/tv/2190', follow_redirects=True)
         self.assertEqual(cm.records[0].msg, 'The user is logging in')
 
-    def test_route_removeSerie(self):
+    def test_route_remove(self):
         """
-        Cette methode nous permet de tester la route qui retire une serie d'un utilisateur dans la base de donnes
-        On verifie que lorsque l'utilisateur retire une serie, la correcte serie est retiree de la base de donnes
-        On verifie que si l'utilisateur retire une serie qu'il n'a deja pas, rien ne se passe
+        Cette methode nous permet de tester la route qui retire un media d'un utilisateur dans la base de donnes
+        On verifie que lorsque l'utilisateur retire unmedia, le bon media est retire de la base de donnes
+        On verifie que si l'utilisateur retire un media qu'il n'a deja pas, rien ne se passe
         On verifie egalement qu'il y a besoin que l'utilisateur soit login
         :return: void
         """
         # On cree l'utilisateur utilise dans ce test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+        TestRoutesApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
                                  'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
+        TestRoutesApplication.login(self, 'Username', 'password')
 
-        # On ajoute 1 serie a l'utilisateur
+        # On ajoute une serie et un film a l'utilisateur
         u = User.query.filter_by(name='Name')
-        u[0].add_serie(1412)
+        u[0].add_media(id_media=1412, type_media='tv')
+        u[0].add_media(id_media='475557', type_media='movie')
+
+        # On verifie que lorsqu'on supprime des medias non dans la base de donnees, rien ne se passe
+        self.app.get('/remove/tv/1413', follow_redirects=True)
+        self.app.get('/remove/movie/1412', follow_redirects=True)
+        # On verifie que rien n'a change dans la base de donnes
+        u = User.query.filter_by(name='Name')
+        serie = u[0].user_media.filter_by(media='tv').all()
+        movie = u[0].user_media.filter_by(media='movie').all()
+        self.assertEqual(len(serie), 1)
+        self.assertEqual(len(movie), 1)
 
         # On verifie que la route fonctionne bien
         with self.assertLogs() as cm:
-            self.app.get('/remove_serie/1412', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'Serie 1412 successfully removed')
-        # On verifie que la serie est bien retiree de la base de donnes
-        u = User.query.filter_by(name='Name')
-        serie = u[0].user_media.filter_by(media='serie', media_id=1412).all()
-        self.assertEqual(serie, [])
+            self.app.get('/remove/tv/1412', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'tv 1412 successfully removed')
+        with self.assertLogs() as cm:
+            self.app.get('/remove/movie/475557', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'movie 475557 successfully removed')
 
-        # On ajoute 1 serie a l'utilisateur
+        # On verifie que les medias sont bien retiree de la base de donnes
         u = User.query.filter_by(name='Name')
-        u[0].add_serie(1412)
-        self.app.get('/remove_serie/1413', follow_redirects=True)
-        # On verifie que rien n'a change dans la base de donnes
-        u = User.query.filter_by(name='Name')
-        serie = u[0].user_media.filter_by(media='serie', media_id=1412).all()
-        self.assertEqual(len(serie), 1)
+        serie = u[0].user_media.filter_by(media='tv', media_id=1412).all()
+        movie = u[0].user_media.filter_by(media='movie', media_id=475557).all()
+        self.assertEqual(serie, [])
+        self.assertEqual(movie, [])
 
         # On verifie que la route n'est pas atteignable lorsque l'utilisateur n'est pas connecte
         self.logout()
         with self.assertLogs() as cm:
-            self.app.get('/remove_serie/2190', follow_redirects=True)
+            self.app.get('/remove/tv/2190', follow_redirects=True)
         self.assertEqual(cm.records[0].msg, 'The user is logging in')
 
-    def test_route_addMovie(self):
+    def test_route_myMedia(self):
         """
-        Cette methode nous permet de tester la route pour l'ajout d'un film dans la base de donnes
-        On verifie que lorsque cette route est utilisee, le film est ajoute a la route
-        On verifie que lorsque le film est deja dans la base de donnees, rien ne se passe
-        On verifie egalement que le login est necessaire
-        :return: void
-        """
-        # On cree un utilisateur qui nous servira pendant ce test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-                                 'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
-
-        # On verifie que la route fonctionne bien
-        with self.assertLogs() as cm:
-            self.app.get('/add_movie/475557', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'Movie 475557 successfully added')
-        # On verifie que le film est bien ajoute dans la base de donnes
-        u = User.query.filter_by(name='Name')
-        serie = u[0].user_media.all()
-        self.assertEqual(serie[0].media_id, 475557)
-
-        # On verifie qu'on ne peut ajouter 2 fois le meme film dans la base de donnes
-        self.app.get('/add_movie/475557', follow_redirects=True)
-        u = User.query.filter_by(name='Name')
-        serie = u[0].user_media.filter_by(media='movie', media_id=475557).all()
-        self.assertEqual(len(serie), 1)
-
-        # On verifie que la route n'est pas utilisable lorsque l'utilisateur n'est pas connecte
-        self.logout()
-        with self.assertLogs() as cm:
-            self.app.get('/add_movie/420818', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'The user is logging in')
-
-    def test_route_removeMovie(self):
-        """
-        Cette methode nous permet de tester la route en charge de retirer un film aux filmsde l'utilisateur
-        On verifie que lorsqu'un utilisateur retire un film, le bon est retire de la base de donnes
-        On verifie egalement que lorsque l'utilisateur retire un film non dans la base de donnes, rien ne se passe
-        Enfin, on verifie qu'il faut etre connecte pour retirer un film
+        Avec cette methode, on teste la route my_media
+        On verifie que les medias du bon type sont affichees lorsque l'utiliseur en a
+            et que rien n'est affiche s'il n'en a pas
+        Enfin, on verifie que lorsque l'utilisateur est deconnecte, la page ne peut pas etre affichee
         :return: void
         """
         # On cree un utilisateur utilise pendant tout le test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-                                 'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
+        TestRoutesApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+                                       'password', 'password')
+        TestRoutesApplication.login(self, 'Username', 'password')
 
-        # On lui ajoute 2 films :
+        # On ajoute 2 series a l'utilisateur et 2 films
         u = User.query.filter_by(name='Name')
-        u[0].add_movie('475557')
-        u[0].add_movie(420818)
+        u[0].add_media(id_media=1412, type_media='tv')
+        u[0].add_media(id_media=2190, type_media='tv')
+        u[0].add_media(id_media=453405, type_media='movie')
+        u[0].add_media(id_media='420818', type_media='movie')
 
-        # On verifie que la route fonctionne bien
+        # On verifie que la route fonctionne correctement pour les series et pour les films
         with self.assertLogs() as cm:
-            self.app.get('/remove_movie/475557', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'Movie 475557 successfully removed')
-        # On verifie que le film est bien retire de la base de donnees
-        u = User.query.filter_by(name='Name')
-        serie = u[0].user_media.filter_by(media='movie', media_id=475557).all()
-        self.assertEqual(serie, [])
+            self.app.get('/mymedias/tv', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Mytvs page rendered')
+        self.assertEqual(cm.records[1].msg, 'The tv list has 2 tvs')
 
-        # On verifie maintenant que si l'on supprime un film qui n'est pas dans la base de donnees, rien ne se passe
-        self.app.get('/remove_movie/475557', follow_redirects=True)
-        u = User.query.filter_by(name='Name')
-        serie = u[0].user_media.filter_by(media='movie').all()
-        self.assertEqual(len(serie), 1)
-
-        # On verifie desormais que la route ne marche pas si l'utilisateur n'est pas connecte
-        self.logout()
         with self.assertLogs() as cm:
-            self.app.get('/remove_movie/420818', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'The user is logging in')
+            self.app.get('mymedias/movie', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Mymovies page rendered')
+        self.assertEqual(cm.records[1].msg, 'The movie list has 2 movies')
 
-    def test_route_mySerie(self):
-        """
-        Avec cette methode, on teste la route mySerie
-        On verifie que les series sont affichees lorsque l'utiliseur en a et que rien n'est affiche s'il n'en a pas
-        Enfin, on verifie que lorsque l'utilisateur est deconnecte, la page ne peut pas etre affiche
-        :return: void
-        """
-        # On cree un utilisateur utilise pendant tout le test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-                                 'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
-
-        # On ajoute 2 series a l'utilisateur
+        # On verifie que lorsque l'utilisateur n'a aucun media, la route indique que la page n'a pas de media
         u = User.query.filter_by(name='Name')
-        u[0].add_serie(1412)
-        u[0].add_serie(2190)
-
-        # On verifie que la route fonctionne correctement
+        u[0].remove_media(id_media=1412, type_media='tv')
+        u[0].remove_media(id_media=2190, type_media='tv')
+        u[0].remove_media(id_media=453405, type_media='movie')
+        u[0].remove_media(id_media='420818', type_media='movie')
         with self.assertLogs() as cm:
-            self.app.get('/myseries', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'MySeries page rendered')
-        self.assertEqual(cm.records[1].msg, 'The series list has 2 series')
+            self.app.get('/mymedias/tv', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Mytvs page rendered without tvs')
 
-        # On verifie que lorsque l'utilisateur n'a aucune serie, la route indique que la page n'a pas de serie
-        u = User.query.filter_by(name='Name')
-        u[0].remove_serie(1412)
-        u[0].remove_serie(2190)
         with self.assertLogs() as cm:
-            self.app.get('/myseries', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'MySeries page rendered without series')
+            self.app.get('/mymedias/movie', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'Mymovies page rendered without movies')
 
         # On verifie que la route n'est pas atteignable si l'utilisateur n'est pas connecte
         self.logout()
         with self.assertLogs() as cm:
-            self.app.get('/myseries', follow_redirects=True)
+            self.app.get('/mymedias/tv', follow_redirects=True)
         self.assertEqual(cm.records[0].msg, 'The user is logging in')
-
-    def test_route_myMovie(self):
-        """
-        Cette methode nous permet de verifier que la route myMovies fonctionne bien
-        On verifie que les films sont affiches lorsque l'utiliseur en a et que rien n'est affiche s'il n'en a pas
-        Enfin, on verifie que lorsque l'utilisateur est deconnecte, la route ne fonctionne pas
-        :return: void
-        """
-        # On cree un utilisateur pour ce test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-                                 'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
-
-        # On lui ajoute 2 films
-        u = User.query.filter_by(name='Name')
-        u[0].add_movie(453405)
-        u[0].add_movie('420818')
-
-        # On verifie que la route fonctionne bien
         with self.assertLogs() as cm:
-            self.app.get('/mymovies', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'MyMovies page rendered')
-        self.assertEqual(cm.records[1].msg, 'The movies list has 2 movies')
-
-        # On verifie que quand l'utilisateur n'a pas de film, la route indique que l'utilisateur n'a pas de films
-        u = User.query.filter_by(name='Name')
-        u[0].remove_movie(453405)
-        u[0].remove_movie('420818')
-        with self.assertLogs() as cm:
-            self.app.get('/mymovies', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'MyMovies page rendered without movies')
-
-        # Enfin, on verifie que l'utilisateur doit etre connecte pour suivre cette route
-        self.logout()
-        with self.assertLogs() as cm:
-            self.app.get('/mymovies', follow_redirects=True)
+            self.app.get('/mymedias/movie', follow_redirects=True)
         self.assertEqual(cm.records[0].msg, 'The user is logging in')
 
     def test_route_search(self):
@@ -466,9 +374,9 @@ class TestApplication(TestCase):
         :return: void
         """
         # On cree un utilisateur pour ce test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+        TestRoutesApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
                                  'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
+        TestRoutesApplication.login(self, 'Username', 'password')
 
         # On verifie que la recherche est bien celle attendue
         with self.assertLogs() as cm:
@@ -489,14 +397,14 @@ class TestApplication(TestCase):
         :return: void
         """
         # On cree un utilisateur pour ce test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+        TestRoutesApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
                                  'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
+        TestRoutesApplication.login(self, 'Username', 'password')
 
         # On verifie que la route renvoie le bon genre
         with self.assertLogs() as cm:
             self.app.get('/genre/tv/Comedy/1', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'Genre request on : Genre = Comedy, Media = serie, Page = 1')
+        self.assertEqual(cm.records[0].msg, 'Genre request on : Genre = Comedy, Media = tv, Page = 1')
 
         # On verifie que le genre n'est pas atteignable si l'utilisateur n'est pas connecte
         self.logout()
@@ -511,19 +419,19 @@ class TestApplication(TestCase):
         :return: void
         """
         # On cree un utilisateur pour ce test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+        TestRoutesApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
                                  'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
+        TestRoutesApplication.login(self, 'Username', 'password')
 
         # On verifie que la route redirige vers le bon episode de la serie
         with self.assertLogs() as cm:
-            self.app.get('/serie/1412/season/3/episode/4', follow_redirects=True)
+            self.app.get('/media/tv/1412/season/3/episode/4', follow_redirects=True)
         self.assertEqual(cm.records[0].msg, 'Selected Episode : Serie = 1412, Season = 3, episode = 4')
 
         # On verifie egalement que si l'utilisateur n'est pas connecte, on ne peut afficher les episodes
         self.logout()
         with self.assertLogs() as cm:
-            self.app.get('/serie/1412/season/3/episode/4', follow_redirects=True)
+            self.app.get('/media/tv/1412/season/3/episode/4', follow_redirects=True)
         self.assertEqual(cm.records[0].msg, 'The user is logging in')
 
     def test_route_upcomingEpisodes(self):
@@ -536,22 +444,22 @@ class TestApplication(TestCase):
         :return: void
         """
         # On cree un utilisateur pour ce test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+        TestRoutesApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
                                  'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
+        TestRoutesApplication.login(self, 'Username', 'password')
 
         # On ajoute 3 series pour l'utilisateur : Arrow(1412) qui ne sera pas une serie a jour, Friends (1668) qui sera
         # un show termine (on va mettre comme episode vu par l'utilisateur, le dernier episode) et Flash(60735) sera
         # la serie en cours : on va ajouter le dernier episode (en cours en ce moment)
         u = User.query.filter_by(name='Name')
         # on recupere les infos de la serie Flash
-        serie = Api.get_serie(60735)
+        serie = Api.get_media(type_media='tv', id_media=60735)
         latest_season, latest_ep = serie.latest['season_number'], serie.latest['episode_number']
-        u[0].add_serie(1412)
-        u[0].add_serie(1668)
+        u[0].add_media(id_media=1412, type_media='tv')
+        u[0].add_media(id_media=1668, type_media='tv')
         # pour mettre à jour au bon episode
         u[0].view_episode(18, 10, 1668)
-        u[0].add_serie(60735)
+        u[0].add_media(id_media=60735, type_media='tv')
         u[0].view_episode(latest_ep, latest_season, 60735)
 
         # On verifie que la route fonctionne bien
@@ -576,30 +484,29 @@ class TestApplication(TestCase):
         :return: void
         """
         # On cree un utilisateur pour ce test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+        TestRoutesApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
                                  'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
+        TestRoutesApplication.login(self, 'Username', 'password')
 
         # On lui ajoute une serie
         u = User.query.filter_by(name='Name')
-        u[0].add_serie(1412)
+        u[0].add_media(id_media=1412, type_media='tv')
 
         # On verifie que l'episode est marque comme vu et que les notifications sont remises a 1
         with self.assertLogs() as cm:
-            self.app.get('/serie/1412/season/3/episode/4/view', follow_redirects=True)
+            self.app.get('/media/tv/1412/season/3/episode/4/view', follow_redirects=True)
         self.assertEqual(cm.records[0].msg, f'The user marked S3E4 from serie 1412 as viewed')
         self.assertEqual(u[0].notifications, bytes(1))
 
         # On verifie que la base de donnees s'est mise a jour
-        u = User.query.filter_by(name='Name')
-        serie = u[0].user_media.filter_by(media='serie', media_id=1412).all()
+        serie = u[0].user_media.filter_by(media='tv', media_id=1412).all()
         self.assertEqual(serie[0].season_id, 3)
         self.assertEqual(serie[0].episode_id, 4)
 
         # On verifie que cette route ne peut etre suivie lorsque l'utilisateur n'est pas connecte
         self.logout()
         with self.assertLogs() as cm:
-            self.app.get('/serie/1412/season/3/episode/4/view', follow_redirects=True)
+            self.app.get('/media/tv/1412/season/3/episode/4/view', follow_redirects=True)
         self.assertEqual(cm.records[0].msg, 'The user is logging in')
 
     def test_rate(self):
@@ -608,9 +515,9 @@ class TestApplication(TestCase):
         :return: void
         """
         # On cree un utilisateur pour ce test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+        TestRoutesApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
                                  'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
+        TestRoutesApplication.login(self, 'Username', 'password')
 
         # On verifie que la route fonctionne
         with self.assertLogs() as cm:
@@ -627,128 +534,83 @@ class TestApplication(TestCase):
             self.app.get('/rate/2', follow_redirects=True)
         self.assertEqual(cm.records[0].msg, 'The user is logging in')
 
-    def test_post_serie_grade(self):
+    def test_route_post_media_grade(self):
         """
-        Cette methode permet de tester la route post_serie_grade
+        Cette methode permet de tester la route post_media_grade
         :return: void
         """
         # On cree un utilisateur pour ce test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+        TestRoutesApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
                                  'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
+        TestRoutesApplication.login(self, 'Username', 'password')
 
-        # On lui ajoute une serie
+        # On lui ajoute une serie et un film
         u = User.query.filter_by(name='Name')
-        u[0].add_serie(1412)
+        u[0].add_media(id_media=1412, type_media='tv')
+        u[0].add_media(id_media=475557, type_media='movie')
         u[0].update_grade(4)
 
-        # On verifie que la route fonctionne
+        # On verifie que la route fonctionne pour une serie
         with self.assertLogs() as cm:
-            self.app.get('/serie/1412/post/grade', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, f'The user posted the grade 4 for the serie 1412')
+            self.app.get('/post/grade/tv/1412', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, f'The user posted the grade 4 for the tv 1412')
+
+        user = User.query.filter_by(name='Name')[0]
+        user.update_grade(2)
+        # On verifie que la route fonctionne pour un film
+        with self.assertLogs() as cm2:
+            self.app.get('/post/grade/movie/475557', follow_redirects=True)
+        self.assertEqual(cm2.records[0].msg, f'The user posted the grade 2 for the movie 475557')
 
         # On verifie que la note a ete ajoutee dans la base de donnes
         u = User.query.filter_by(name='Name')
-        serie = u[0].user_media.filter_by(media='serie', media_id=1412).all()
-        self.assertEqual(serie[0].media_grade, 4)
-
-        # On verifie que cette route ne peut etre suivie lorsque l'utilisateur n'est pas connecte
-        self.logout()
-        with self.assertLogs() as cm:
-            self.app.get('/serie/1412/post/grade', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'The user is logging in')
-
-    def test_post_movie_grade(self):
-        """
-        Cette methode permet de tester la route post_movie_grade
-        :return: void
-        """
-        # On cree un utilisateur pour ce test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-                                 'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
-
-        # On lui ajoute un film
-        u = User.query.filter_by(name='Name')
-        u[0].add_movie(475557)
-        u[0].update_grade(4)
-
-        # On verifie que la route fonctionne
-        with self.assertLogs() as cm:
-            self.app.get('/movie/475557/post/grade', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, f'The user posted the grade 4 for the movie 475557')
-
-        # On verifie que la note a ete ajoutee dans la base de donnes
-        u = User.query.filter_by(name='Name')
+        serie = u[0].user_media.filter_by(media='tv', media_id=1412).all()
         movie = u[0].user_media.filter_by(media='movie', media_id=475557).all()
-        self.assertEqual(movie[0].media_grade, 4)
+        self.assertEqual(serie[0].media_grade, 4)
+        self.assertEqual(movie[0].media_grade, 2)
 
         # On verifie que cette route ne peut etre suivie lorsque l'utilisateur n'est pas connecte
         self.logout()
         with self.assertLogs() as cm:
-            self.app.get('/movie/475557/post/grade', follow_redirects=True)
+            self.app.get('/post/grade/tv/1412', follow_redirects=True)
         self.assertEqual(cm.records[0].msg, 'The user is logging in')
 
-    def test_unrate_serie(self):
+    def test_unrate_media(self):
         """
-        Cette methode permet de tester la route unrate_serie
+        Cette methode permet de tester la route unrate_media
         :return: void
         """
         # On cree un utilisateur pour ce test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-                                 'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
+        TestRoutesApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co', 'password',
+                                 'password')
+        TestRoutesApplication.login(self, 'Username', 'password')
 
-        # On lui ajoute une serie
+        # On lui ajoute une serie et un film
         u = User.query.filter_by(name='Name')
-        u[0].add_serie(1412)
-        u[0].grade(1412, 'serie', 4)
+        u[0].add_media(id_media=1412, type_media='tv')
+        u[0].add_media(id_media=475557, type_media='movie')
+        u[0].grade(475557, 'movie', 2)
+        u[0].grade(1412, 'tv', 4)
 
         # On verifie que la route fonctionne
         with self.assertLogs() as cm:
-            self.app.get('/serie/1412/unrate', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'The user unrated the serie 1412')
-
-        # On verifie que la note a ete retiree de la base de donnes
-        u = User.query.filter_by(name='Name')
-        serie = u[0].user_media.filter_by(media='serie', media_id=1412).all()
-        self.assertIsNone(serie[0].media_grade)
-
-        # On verifie que cette route ne peut etre suivie lorsque l'utilisateur n'est pas connecte
-        self.logout()
+            self.app.get('/unrate/tv/1412', follow_redirects=True)
+        self.assertEqual(cm.records[0].msg, 'The user unrated the tv 1412')
         with self.assertLogs() as cm:
-            self.app.get('/serie/1412/unrate', follow_redirects=True)
-        self.assertEqual(cm.records[0].msg, 'The user is logging in')
-
-    def test_unrate_movie(self):
-        """
-        Cette methode permet de tester la route unrate_movie
-        :return: void
-        """
-        # On cree un utilisateur pour ce test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-                                 'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
-
-        # On lui ajoute une serie
-        u = User.query.filter_by(name='Name')
-        u[0].add_movie(475557)
-        u[0].grade(475557, 'movie', 4)
-
-        # On verifie que la route fonctionne
-        with self.assertLogs() as cm:
-            self.app.get('/movie/475557/unrate', follow_redirects=True)
+            self.app.get('/unrate/movie/475557', follow_redirects=True)
         self.assertEqual(cm.records[0].msg, 'The user unrated the movie 475557')
 
         # On verifie que la note a ete retiree de la base de donnes
         u = User.query.filter_by(name='Name')
+        serie = u[0].user_media.filter_by(media='tv', media_id=1412).all()
         movie = u[0].user_media.filter_by(media='movie', media_id=475557).all()
+        self.assertIsNone(serie[0].media_grade)
         self.assertIsNone(movie[0].media_grade)
 
         # On verifie que cette route ne peut etre suivie lorsque l'utilisateur n'est pas connecte
         self.logout()
         with self.assertLogs() as cm:
-            self.app.get('/movie/475557/unrate', follow_redirects=True)
+            self.app.get('/unrate/tv/1412', follow_redirects=True)
         self.assertEqual(cm.records[0].msg, 'The user is logging in')
 
     def test_topRated(self):
@@ -758,9 +620,9 @@ class TestApplication(TestCase):
         :return: void
         """
         # On cree un utilisateur pour ce test
-        TestApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
+        TestRoutesApplication.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
                                  'password', 'password')
-        TestApplication.login(self, 'Username', 'password')
+        TestRoutesApplication.login(self, 'Username', 'password')
 
         # On verifie que la route fonctionne
         with self.assertLogs() as cm:
@@ -818,7 +680,6 @@ class TestEpisode(TestCase):
 
 
 class TestUser(TestCase):
-
     """
     Class allowing us to setting up our testing
     it is creating a test database
@@ -881,10 +742,10 @@ class TestUser(TestCase):
         assert user.check_password('password')
         assert not user.check_password('password2')
 
-    def test_list_serie(self):
+    def test_list_media(self):
         """
-        On regarde si la methode list_serie retourne bien la liste des series de l'utilisateur
-        On verifie que si l'utilisateur n'a aucune serie, le bon resultat est renvoye
+        On regarde si la methode list_media retourne bien la liste des medias de l'utilisateur
+        On verifie que si l'utilisateur n'a aucun media, le bon resultat est renvoye
         :return: void
         """
         # On cree un utilisateur utilise pendant tout le test
@@ -894,61 +755,36 @@ class TestUser(TestCase):
         # On recupere l'utilisateur
         u = User.query.filter_by(name='Name')
         user = u[0]
-        user2 = User(name='Name2', username='Username2', email='test2@test.co')
+        user2 = User(name='Name2', surname="Surname2", username='Username2', email='test2@test.co', password="")
 
-        # Notre utilisateur n'a pas encore de series
-        assert user.list_serie() == []
+        # Notre utilisateur n'a pas encore de series ou de films
+        assert user.list_media(media='tv') == []
+        assert user.list_media(media='movie') == []
 
-        # On lui ajoute deux series
-        # Pour tester que la methode fait ce que l'on veut, on ajoute une serie a un autre utilisateur (user2)
-        # On ajoute egalement un film a l'utilisateur user pour verifier que la methode fait ce que l'on veut
-        s1 = UserMedia(media='serie', media_id=1412, season_id=1, episode_id=1, state_serie='nutd', user=user)
-        s2 = UserMedia(media='serie', media_id=69050, season_id=1, episode_id=1, state_serie='nutd', user=user)
-        s3 = UserMedia(media='serie', media_id=1668, season_id=1, episode_id=1, state_serie='nutd', user=user2)
+        # On lui ajoute deux series et deux films
+        # Pour tester que la methode fait ce que l'on veut, on ajoute une serie et un film a un autre utilisateur(user2)
+        s1 = UserMedia(media='tv', media_id=1412, season_id=1, episode_id=1, state_serie='nutd', user=user)
+        s2 = UserMedia(media='tv', media_id=420818, season_id=1, episode_id=1, state_serie='nutd', user=user)
+        s3 = UserMedia(media='tv', media_id=420818, season_id=1, episode_id=1, state_serie='nutd', user=user2)
         m1 = UserMedia(media='movie', media_id=453405, user=user)
+        m2 = UserMedia(media='movie', media_id=1412, user=user)
+        m3 = UserMedia(media='movie', media_id=453405, user=user2)
         db.session.add(s1)
         db.session.add(s2)
-        db.session.commit()
-
-        # On verifie que l'utilisateur a bien les series ajoutees
-        self.assertEqual(user.list_serie(), [1412, 69050])
-
-    def test_list_movie(self):
-        """
-        Avec cette methode, on teste la methode list_movie de la classe User
-        On verifie que cette methode nous renvoie la bonne liste de series
-        On verifie egalement que si l'utilisateur n'a aucune serie, il n'y a aucune serie renvoyee
-        :return: void
-        """
-        # On cree un utilisateur utilise pendant tout ce test
-        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-                          'password', 'password')
-
-        # On recupere l'utilisateur
-        u = User.query.filter_by(name='Name')
-        user = u[0]
-        user2 = User(name='Name2', username='Username2', email='test2@test.co')
-        # Cet utilisateur n'a pas encore de series
-        self.assertEqual(user.list_movie(), [])
-
-        # On lui ajoute deux films a l'utilisateur 1
-        # Pour tester que la methode fait ce que l'on veut, on ajoute un film  a un autre utilisateur (user2)
-        # On ajoute egalement une serie a l'utilisateur 1 pour verifier que la methode fait ce que l'on veut
-        m1 = UserMedia(media='movie', media_id=453405, user=user)
-        m2 = UserMedia(media='movie', media_id=420818, user=user)
-        m3 = UserMedia(media='movie', media_id=453405, user=user2)
-        s2 = UserMedia(media='serie', media_id=1412, season_id=1, episode_id=1, state_serie='nutd', user=user)
+        db.session.add(s3)
         db.session.add(m1)
         db.session.add(m2)
-        db.session.add(s2)
         db.session.add(m3)
         db.session.commit()
-        self.assertEqual(user.list_movie(), [453405, 420818])
 
-    def test_is_in_series(self):
+        # On verifie que l'utilisateur a bien les series et les films ajoutes
+        self.assertEqual(user.list_media('tv'), [1412, 420818])
+        self.assertEqual(user.list_media('movie'), [453405, 1412])
+
+    def test_is_in_medias(self):
         """
-        On verifie que la methode is_in_series renvoie la bonne reponse :
-         - True si la serie est dans la liste de l'utilisateur
+        On verifie que la methode is_in_medias renvoie la bonne reponse :
+         - True si le media est dans la liste de l'utilisateur
          - Faux sinon
         :return: void
         """
@@ -959,67 +795,35 @@ class TestUser(TestCase):
         # On recupere l'utilisateur
         u = User.query.filter_by(name='Name')
         user = u[0]
-        user2 = User(name='Name2', username='Username2', email='test2@test.co')
+        user2 = User(name='Name2', surname="Surname2", username='Username2', email='test2@test.co', password="")
 
-        # On ajoute 2 series a user
-        # On lui ajoute egalement un film pour tester que la methode renvoie ce que l'on veut
+        # On ajoute 2 series et 2 films a user
         # On ajoute une serie a l'utilisateur user2 pour tester que la methode ne regarde que les series de user
+        s1 = UserMedia(media='tv', media_id=1412, season_id=1, episode_id=1, state_serie='nutd', user=user)
+        s2 = UserMedia(media='tv', media_id=420818, season_id=1, episode_id=1, state_serie='nutd', user=user)
+        s3 = UserMedia(media='tv', media_id=1668, season_id=1, episode_id=1, state_serie='nutd', user=user2)
         m1 = UserMedia(media='movie', media_id=453405, user=user)
-        s1 = UserMedia(media='serie', media_id=1412, season_id=1, episode_id=1, state_serie='nutd', user=user)
-        s2 = UserMedia(media='serie', media_id=69050, season_id=1, episode_id=1, state_serie='nutd', user=user)
-        s3 = UserMedia(media='serie', media_id=1668, season_id=1, episode_id=1, state_serie='nutd', user=user2)
-        db.session.add(m1)
+        m2 = UserMedia(media='movie', media_id=1412, user=user)
+        m3 = UserMedia(media='movie', media_id=8587, user=user2)
         db.session.add(s1)
         db.session.add(s2)
         db.session.add(s3)
-        db.session.commit()
-
-        # On teste que la methode marche pour les series de l'utilisateur
-        self.assertTrue(user.is_in_series(1412))
-
-        # On teste que la methode ne regarde pas les films
-        self.assertFalse(user.is_in_series(453405))
-
-        # On teste que la methode ne regarde que les series de user
-        self.assertFalse(user.is_in_series(1668))
-
-    def test_has_movie(self):
-        """
-        On verifie que la methode has_movie retourne la bonne reponse :
-        - True si le film est dans les films de l'utilisateur
-        - False sinon
-        :return: void
-        """
-        # On cree un utilisateur utilise pendant tout ce test
-        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-                          'password', 'password')
-
-        # On recupere l'utilisateur
-        u = User.query.filter_by(name='Name')
-        user = u[0]
-        user2 = User(name='Name2', username='Username2', email='test2@test.co')
-
-        # On ajoute 2 films a user
-        # On lui ajoute egalement une serie pour tester que la methode renvoie ce que l'on veut
-        # On ajoute un film a l'utilisateur user2 pour tester que la methode ne regarde que les films de user
-        s1 = UserMedia(media='serie', media_id=1412, season_id=1, episode_id=1, state_serie='nutd', user=user)
-        m1 = UserMedia(media='movie', media_id=420818, user=user)
-        m2 = UserMedia(media='movie', media_id=453405, user=user)
-        m3 = UserMedia(media='movie', media_id=501170, user=user2)
-        db.session.add(s1)
         db.session.add(m1)
         db.session.add(m2)
         db.session.add(m3)
         db.session.commit()
 
-        # On teste que la methode marche pour les films de l'utilisateur
-        self.assertTrue(user.has_movie(420818))
+        # On teste que la methode marche pour les series et les films de l'utilisateur
+        self.assertTrue(user.is_in_medias(id_media=1412, type_media='tv'))
+        self.assertTrue(user.is_in_medias(id_media=453405, type_media='movie'))
 
-        # On teste que la methode ne regarde pas les series
-        self.assertFalse(user.has_movie(1412))
+        # On teste que la methode ne regarde pas les medias de l'autre type
+        self.assertFalse(user.is_in_medias(id_media=453405, type_media='tv'))
+        self.assertFalse(user.is_in_medias(id_media=420818, type_media='movie'))
 
-        # On teste que la methode ne regarde que les films de user
-        self.assertFalse(user.is_in_series(501170))
+        # On teste que la methode ne regarde que les medias de user
+        self.assertFalse(user.is_in_medias(id_media=1668, type_media='tv'))
+        self.assertFalse(user.is_in_medias(id_media=8587, type_media='movie'))
 
     def test_get_last_episode_viewed(self):
         """
@@ -1037,7 +841,7 @@ class TestUser(TestCase):
         user = u[0]
 
         # On verifie que si la serie est dans la liste de l'utilisateur, la methode renvoie bien le dernier episode
-        s1 = UserMedia(media='serie', media_id=1412, season_id=3, episode_id=4, state_serie='nutd', user=user)
+        s1 = UserMedia(media='tv', media_id=1412, season_id=3, episode_id=4, state_serie='nutd', user=user)
         db.session.add(s1)
         db.session.commit()
         self.assertEqual(user.get_last_episode_viewed('1412'), 'S3E4')
@@ -1062,7 +866,7 @@ class TestUser(TestCase):
         user = u[0]
 
         # On lui ajoute une serie
-        s1 = UserMedia(media='serie', media_id=1412, season_id=3, episode_id=4, state_serie='nutd', user=user)
+        s1 = UserMedia(media='tv', media_id=1412, season_id=3, episode_id=4, state_serie='nutd', user=user)
         db.session.add(s1)
         db.session.commit()
 
@@ -1096,8 +900,8 @@ class TestUser(TestCase):
         user = u[0]
 
         # On lui ajoute deux series (Friends serie qui n'est plus en production et Flash qui l'est encore)
-        s1 = UserMedia(media='serie', media_id=1668, season_id=1, episode_id=1, state_serie='utd', user=user)
-        s2 = UserMedia(media='serie', media_id=60735, season_id=1, episode_id=1, state_serie='fin', user=user)
+        s1 = UserMedia(media='tv', media_id=1668, season_id=1, episode_id=1, state_serie='utd', user=user)
+        s2 = UserMedia(media='tv', media_id=60735, season_id=1, episode_id=1, state_serie='fin', user=user)
         db.session.add(s1)
         db.session.add(s2)
         db.session.commit()
@@ -1105,31 +909,31 @@ class TestUser(TestCase):
         # On teste que la methode met a jour le dernier episode vu et le statut de ce dernier en nutd quand la
         # serie n'est pas a jour
         user.view_episode(season=3, episode=4, serie=1668)
-        self.assertEqual(user.get_last_episode_viewed(id=1668), 'S3E4')
-        status = user.user_media.filter_by(media='serie', media_id=1668).first().state_serie
+        self.assertEqual(user.get_last_episode_viewed(id_serie=1668), 'S3E4')
+        status = user.user_media.filter_by(media='tv', media_id=1668).first().state_serie
         self.assertEqual(status, 'nutd')
         self.assertEqual(user.notifications, bytes(1))
 
         # On teste que la methode met a jour le dernier episode vu et le statut de ce dernier en fin quand la
         # serie est terminee (pas d'episode futur)
         user.view_episode(season=10, episode=18, serie=1668)
-        self.assertEqual(user.get_last_episode_viewed(id=1668), 'S10E18')
-        status = user.user_media.filter_by(media='serie', media_id=1668).first().state_serie
+        self.assertEqual(user.get_last_episode_viewed(id_serie=1668), 'S10E18')
+        status = user.user_media.filter_by(media='tv', media_id=1668).first().state_serie
         self.assertEqual(status, 'fin')
 
         # On teste que la methode met a jour le dernier episode vu et le statut de ce dernier en fin quand la
         # serie est a jour (dernier episode vu mai il y a un episode futur) a l'aide de l'Api
-        serie = Api.get_serie(60735)
+        serie = Api.get_media(type_media='tv', id_media=60735)
         latest_season, latest_ep = serie.latest['season_number'], serie.latest['episode_number']
         user.view_episode(season=latest_season, episode=latest_ep, serie=60735)
-        status = user.user_media.filter_by(media='serie', media_id=60735).first().state_serie
+        status = user.user_media.filter_by(media='tv', media_id=60735).first().state_serie
         self.assertEqual(status, 'utd')
 
-    def test_add_serie(self):
+    def test_add_media(self):
         """
-        Avec ce test on va tester la methode add_serie
-        Celle-ci doit ajouter une serie donnee en parametre a l'utilisateur
-        Si l'utilisateur a deja ajoute une serie, cette methode ne doit pas l'ajouter une deuxieme fois
+        Avec ce test on va tester la methode add_media
+        Celle-ci doit ajouter un media donnee en parametre a l'utilisateur
+        Si l'utilisateur a deja ajoute ce media, cette methode ne doit pas l'ajouter une deuxieme fois
         :return: void
         """
         # On cree un utilisateur utilise pendant tout ce test
@@ -1140,23 +944,30 @@ class TestUser(TestCase):
         u = User.query.filter_by(name='Name')
         user = u[0]
 
-        # On ajoute une serie a notre utilisateur
-        user.add_serie(1412)
-        serie = user.user_media.filter_by(media='serie', media_id=1412).all()[0]
+        # On ajoute une serie et un film a notre utilisateur
+        user.add_media(id_media=1412, type_media='tv')
+        user.add_media(id_media=453405, type_media='movie')
+        movie = user.user_media.filter_by(media='movie', media_id=453405).all()[0]
+        serie = user.user_media.filter_by(media='tv', media_id=1412).all()[0]
         self.assertEqual(serie.media_id, 1412)
+        self.assertEqual(movie.media_id, 453405)
         self.assertEqual(serie.season_id, 1)
         self.assertEqual(serie.episode_id, 1)
         self.assertEqual(serie.state_serie, 'nutd')
 
         # On lui rajoute une deuxieme serie et on verifie que la methode n'ajoute pas une deuxieme serie
-        user.add_serie(1412)
-        serie = user.user_media.filter_by(media='serie', media_id=1412).all()
+        # On fait de meme avec les films
+        user.add_media(id_media=1412, type_media='tv')
+        user.add_media(id_media=453405, type_media='movie')
+        serie = user.user_media.filter_by(media='tv', media_id=1412).all()
+        movie = user.user_media.filter_by(media='movie', media_id=453405).all()
         self.assertEqual(len(serie), 1)
+        self.assertEqual(len(movie), 1)
 
-    def test_remove_serie(self):
+    def test_remove_media(self):
         """
-        On regarde que la methode remove_serie retire correctement la serie des series de l'utilisateur
-        Si l'utilisateur n'a pas cette serie dans ses series, la methode ne doit pas lever une erreur
+        On regarde que la methode remove_media retire correctement le media des medias de l'utilisateur
+        Si l'utilisateur n'a pas ce media dans ses medias, la methode ne doit pas lever une erreur
         :return:
         """
         # On cree un utilisateur utilise pendant tout ce test
@@ -1167,74 +978,25 @@ class TestUser(TestCase):
         u = User.query.filter_by(name='Name')
         user = u[0]
 
-        # On ajoute une serie a notre utilisateur
-        user.add_serie(1412)
-        user.add_movie(1413)
+        # On ajoute deux series et deux films a notre utilisateur
+        user.add_media(id_media=1412, type_media='tv')
+        user.add_media(id_media=1413, type_media='movie')
+        user.add_media(id_media=453405, type_media='movie')
+        user.add_media(id_media=1414, type_media='tv')
 
         # On verifie qu'il n'y a pas d'erreur lorsqu'on retire une serie qui n'est pas dans les series de l'utilisateur
         # On verifie egalement que la methode ne supprime pas un film ayant le meme id
-        user.remove_serie(1413)
+        # On fait le meme processus avec les films
+        user.remove_media(id_media=1413, type_media='tv')
+        user.remove_media(id_media=453406, type_media='movie')
+        media = user.user_media.all()
+        self.assertEqual(len(media), 4)
+
+        # On verifie que la methode retire bien une serie et un film dans les medias de l'utilisateur
+        user.remove_media(id_media=1412, type_media='tv')
+        user.remove_media(id_media=453405, type_media='movie')
         media = user.user_media.all()
         self.assertEqual(len(media), 2)
-
-        # On verifie que la methode retire bien une serie dans les series de l'utilisateur
-        user.remove_serie(1412)
-        serie = user.user_media.filter_by(media='serie', media_id=1412).all()
-        self.assertEqual(serie, [])
-
-    def test_add_movie(self):
-        """
-        Avec ce test on va tester la methode add_movie
-        Celle-ci doit ajouter un film donnee en parametre a l'utilisateur
-        Si l'utilisateur a deja ajoute un film, cette methode ne doit pas l'ajouter une deuxieme fois
-        :return: void
-        """
-        # On cree un utilisateur utilise pendant tout ce test
-        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-                          'password', 'password')
-
-        # On recupere l'utilisateur
-        u = User.query.filter_by(name='Name')
-        user = u[0]
-
-        # On ajoute un film a notre utilisateur
-        user.add_movie(453405)
-        movie = user.user_media.filter_by(media='movie', media_id=453405).all()[0]
-        self.assertEqual(movie.media_id, 453405)
-
-        # On lui rajoute une deuxieme le meme film et on verifie que la methode n'ajoute pas une deuxieme film
-        user.add_movie(453405)
-        movie = user.user_media.filter_by(media='movie', media_id=453405).all()
-        self.assertEqual(len(movie), 1)
-
-    def test_remove_movie(self):
-        """
-        On regarde que la methode remove_movie retire correctement le film des films de l'utilisateur
-        Si l'utilisateur n'a pas ce film dans ses series, la methode ne doit pas lever une erreur
-        :return:
-        """
-        # On cree un utilisateur utilise pendant tout ce test
-        TestUser.register(self, 'Username', 'Name', 'Surname', 'test@test.co', 'test@test.co',
-                          'password', 'password')
-
-        # On recupere l'utilisateur
-        u = User.query.filter_by(name='Name')
-        user = u[0]
-
-        # On ajoute un film a notre utilisateur
-        user.add_movie(453405)
-        user.add_serie(453406)
-
-        # On verifie qu'il n'y a pas d'erreur lorsqu'on retire un film qui n'est pas dans les films de l'utilisateur
-        # On verifie egalement que la methode ne supprime pas un film ayant le meme id
-        user.remove_movie(453406)
-        media = user.user_media.all()
-        self.assertEqual(len(media), 2)
-
-        # On verifie que la methode retire bien un film dans les films de l'utilisateur
-        user.remove_movie(453405)
-        movie = user.user_media.filter_by(media='movie', media_id=453405).all()
-        self.assertEqual(movie, [])
 
     def test_update_grade(self):
         """
@@ -1275,21 +1037,21 @@ class TestUser(TestCase):
         user = u[0]
 
         # On lui ajoute une serie et un film
-        user.add_movie(453405)
-        user.add_serie(1412)
+        user.add_media(id_media=453405, type_media='movie')
+        user.add_media(id_media=1412, type_media='tv')
 
         # On note le film et la serie et on verifie que la notation marche bien
-        user.grade(1412, 'serie', 4)
+        user.grade(1412, 'tv', 4)
         user.grade(453405, 'movie', 6)
-        serie = user.user_media.filter_by(media='serie', media_id=1412).first()
+        serie = user.user_media.filter_by(media='tv', media_id=1412).first()
         movie = user.user_media.filter_by(media='movie', media_id=453405).first()
         self.assertEqual(serie.media_grade, 4)
         self.assertEqual(movie.media_grade, 6)
 
         # On change leurs notes et on verifie que la notation marche toujours bien
-        user.grade(1412, 'serie', 5)
+        user.grade(1412, 'tv', 5)
         user.grade(453405, 'movie', 7)
-        serie = user.user_media.filter_by(media='serie', media_id=1412).first()
+        serie = user.user_media.filter_by(media='tv', media_id=1412).first()
         movie = user.user_media.filter_by(media='movie', media_id=453405).first()
         self.assertEqual(serie.media_grade, 5)
         self.assertEqual(movie.media_grade, 7)
@@ -1297,9 +1059,9 @@ class TestUser(TestCase):
         # On va tenter de noter des medias qui ne sont pas dans les medias de l'utilisateur et
         # on va verifier que rien ne se passe
         # On change leurs notes et on verifie que la notation marche toujours bien
-        user.grade(1413, 'serie', 6)
+        user.grade(1413, 'tv', 6)
         user.grade(453406, 'movie', 8)
-        serie = user.user_media.filter_by(media='serie').all()
+        serie = user.user_media.filter_by(media='tv').all()
         movie = user.user_media.filter_by(media='movie').all()
         self.assertEqual(len(serie), 1)
         self.assertEqual(len(movie), 1)
@@ -1322,21 +1084,21 @@ class TestUser(TestCase):
         user = u[0]
 
         # On lui ajoute une serie et un film
-        user.add_movie(453405)
-        user.add_serie(1412)
+        user.add_media(id_media=453405, type_media="movie")
+        user.add_media(id_media=1412, type_media="tv")
 
         # On verifie que la methode renvoie False si les deux medias ne sont pas notes
-        self.assertFalse(user.is_graded('serie', 1412))
+        self.assertFalse(user.is_graded('tv', 1412))
         self.assertFalse(user.is_graded('movie', 453405))
 
         # On verifie que la methode renvoie True si les deux medias sont notes
-        user.grade(1412, 'serie', 4)
+        user.grade(1412, 'tv', 4)
         user.grade(453405, 'movie', 6)
-        self.assertTrue(user.is_graded('serie', 1412))
+        self.assertTrue(user.is_graded('tv', 1412))
         self.assertTrue(user.is_graded('movie', 453405))
 
         # On verifie enfin que la methode renvoie false si les deux medias ne sont pas dans les medias de user
-        self.assertFalse(user.is_graded('serie', 1413))
+        self.assertFalse(user.is_graded('tv', 1413))
         self.assertFalse(user.is_graded('movie', 453406))
 
     def test_get_grade(self):
@@ -1356,21 +1118,21 @@ class TestUser(TestCase):
         user = u[0]
 
         # On lui ajoute deux medias
-        user.add_serie(1412)
-        user.add_movie(420818)
+        user.add_media(id_media=1412, type_media='tv')
+        user.add_media(id_media=420818, type_media='movie')
 
         # On verifie que la methode renvoie False si les deux medias ne sont pas notes
-        self.assertFalse(user.get_grade('serie', 1412))
+        self.assertFalse(user.get_grade('tv', 1412))
         self.assertFalse(user.get_grade('movie', 420818))
 
         # On verifie que la methode renvoie True si les deux medias sont notes
-        user.grade(1412, 'serie', 4)
+        user.grade(1412, 'tv', 4)
         user.grade(420818, 'movie', 6)
-        self.assertEqual(user.get_grade('serie', 1412), 4)
+        self.assertEqual(user.get_grade('tv', 1412), 4)
         self.assertEqual(user.get_grade('movie', 420818), 6)
 
         # On verifie enfin que la methode renvoie false si les deux medias ne sont pas dans les medias de user
-        self.assertFalse(user.get_grade('serie', 1413))
+        self.assertFalse(user.get_grade('tv', 1413))
         self.assertFalse(user.get_grade('movie', 420819))
 
     def test_unrate(self):
@@ -1390,33 +1152,33 @@ class TestUser(TestCase):
         user = u[0]
 
         # On lui ajoute deux medias
-        user.add_serie(1412)
-        user.add_movie(420818)
+        user.add_media(id_media=1412, type_media='tv')
+        user.add_media(id_media=420818, type_media='movie')
 
         # On note les 2 medias
-        user.grade(id=1412, type='serie', grade=4)
-        user.grade(id=420818, type='serie', grade=8)
+        user.grade(id_media=1412, media='tv', grade=4)
+        user.grade(id_media=420818, media='movie', grade=8)
 
         # On verifie que la methode supprime bien les notes de ces medias
-        user.unrate('serie', '1412')
+        user.unrate('tv', '1412')
         user.unrate('movie', '420818')
-        serie = user.user_media.filter_by(media='serie', media_id=1412).all()[0]
+        serie = user.user_media.filter_by(media='tv', media_id=1412).all()[0]
         movie = user.user_media.filter_by(media='movie', media_id=420818).all()[0]
         self.assertIsNone(serie.media_grade)
         self.assertIsNone(movie.media_grade)
 
         # On verifie que la methode ne renvoie pas d'erreur lorsqu'on supprime et qu'il n'y a pas de notes
-        user.unrate('serie', '1412')
+        user.unrate('tv', '1412')
         user.unrate('movie', '420818')
-        serie = user.user_media.filter_by(media='serie', media_id=1412).all()[0]
+        serie = user.user_media.filter_by(media='tv', media_id=1412).all()[0]
         movie = user.user_media.filter_by(media='movie', media_id=420818).all()[0]
         self.assertIsNone(serie.media_grade)
         self.assertIsNone(movie.media_grade)
 
         # On verifie que la methode ne renvoie pas d'erreur lorsqu'on supprime des medias non dans les medias de user
-        user.unrate('serie', '1413')
+        user.unrate('tv', '1413')
         user.unrate('movie', '420819')
-        serie = user.user_media.filter_by(media='serie').all()
+        serie = user.user_media.filter_by(media='tv').all()
         movie = user.user_media.filter_by(media='movie').all()
         self.assertEqual(len(serie), 1)
         self.assertEqual(len(movie), 1)
@@ -1439,13 +1201,13 @@ class TestUser(TestCase):
         # On lui ajoute trois series (Friends et How I Met your Mother, series qui n'est plus en production
         # et Flash qui l'est encore)
         # On ajoute egalement un film pour verifier qu'il n'y a pas d'erreur
-        s1 = UserMedia(media='serie', media_id=1668, season_id=10, episode_id=18, state_serie='utd', user=user)
-        s2 = UserMedia(media='serie', media_id=1100, season_id=5, episode_id=6, state_serie='fin', user=user)
-        serie = Api.get_serie(60735)
+        s1 = UserMedia(media='tv', media_id=1668, season_id=10, episode_id=18, state_serie='utd', user=user)
+        s2 = UserMedia(media='tv', media_id=1100, season_id=5, episode_id=6, state_serie='fin', user=user)
+        serie = Api.get_media(type_media='tv', id_media=60735)
         latest_season, latest_ep = serie.latest['season_number'], serie.latest['episode_number']
-        s3 = UserMedia(media='serie', media_id=60735, season_id=latest_season, episode_id=latest_ep,
+        s3 = UserMedia(media='tv', media_id=60735, season_id=latest_season, episode_id=latest_ep,
                        state_serie='nutd', user=user)
-        user.add_movie(420818)
+        user.add_media(id_media=420818, type_media='movie')
         db.session.add(s1)
         db.session.add(s2)
         db.session.add(s3)
@@ -1453,9 +1215,9 @@ class TestUser(TestCase):
 
         # On teste que les statuts sont bien mis à jour
         user.update_all_upcoming_episodes()
-        status1 = user.user_media.filter_by(media='serie', media_id=1668).first().state_serie
-        status2 = user.user_media.filter_by(media='serie', media_id=1100).first().state_serie
-        status3 = user.user_media.filter_by(media='serie', media_id=60735).first().state_serie
+        status1 = user.user_media.filter_by(media='tv', media_id=1668).first().state_serie
+        status2 = user.user_media.filter_by(media='tv', media_id=1100).first().state_serie
+        status3 = user.user_media.filter_by(media='tv', media_id=60735).first().state_serie
         self.assertEqual(status1, 'fin')
         self.assertEqual(status2, 'nutd')
         self.assertEqual(status3, 'utd')
@@ -1480,13 +1242,13 @@ class TestUser(TestCase):
         # On lui ajoute trois series (Friends et How I Met your Mother, series qui n'est plus en production
         # et Flash qui l'est encore)
         # On ajoute egalement un film pour verifier qu'il n'y a pas d'erreur
-        s1 = UserMedia(media='serie', media_id=1668, season_id=10, episode_id=18, state_serie='utd', user=user)
-        s2 = UserMedia(media='serie', media_id=1100, season_id=5, episode_id=6, state_serie='fin', user=user)
-        s3 = UserMedia(media='serie', media_id=18347, season_id=5, episode_id=6, state_serie='fin', user=user)
-        s4 = UserMedia(media='serie', media_id=4608, season_id=5, episode_id=6, state_serie='utd', user=user)
-        user.add_serie(60735)
-        user.add_serie(1412)
-        user.add_movie(420818)
+        s1 = UserMedia(media='tv', media_id=1668, season_id=10, episode_id=18, state_serie='utd', user=user)
+        s2 = UserMedia(media='tv', media_id=1100, season_id=5, episode_id=6, state_serie='fin', user=user)
+        s3 = UserMedia(media='tv', media_id=18347, season_id=5, episode_id=6, state_serie='fin', user=user)
+        s4 = UserMedia(media='tv', media_id=4608, season_id=5, episode_id=6, state_serie='utd', user=user)
+        user.add_media(id_media=60735, type_media='tv')
+        user.add_media(id_media=1412, type_media='tv')
+        user.add_media(id_media=420818, type_media='movie')
         db.session.add(s1)
         db.session.add(s2)
         db.session.add(s3)
@@ -1515,11 +1277,11 @@ class TestUser(TestCase):
         self.assertEqual(user.nb_not_up_to_date(), 0)
 
         # On lui ajoute des series
-        user.add_serie(1412)
-        user.add_serie(60735)
-        s1 = UserMedia(media='serie', media_id=1668, season_id=10, episode_id=18, state_serie='utd', user=user)
-        s2 = UserMedia(media='serie', media_id=1100, season_id=5, episode_id=6, state_serie='fin', user=user)
-        user.add_movie(420818)
+        user.add_media(id_media=1412, type_media='tv')
+        user.add_media(id_media=60735, type_media='tv')
+        s1 = UserMedia(media='tv', media_id=1668, season_id=10, episode_id=18, state_serie='utd', user=user)
+        s2 = UserMedia(media='tv', media_id=1100, season_id=5, episode_id=6, state_serie='fin', user=user)
+        user.add_media(id_media=420818, type_media='movie')
         db.session.add(s1)
         db.session.add(s2)
         db.session.commit()
@@ -1534,7 +1296,6 @@ class TestUser(TestCase):
     def tearDown(self):
         db.session.remove()
         db.drop_all()
-#
 
 
 if __name__ == '__main__':

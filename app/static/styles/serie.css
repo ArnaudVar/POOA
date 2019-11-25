@@ -2,6 +2,7 @@
     overflow-y: auto;
 }
 
+
 .list-group {
     min-height: 300px;
     max-height: 300px;
@@ -18,7 +19,12 @@
 }
 
 .name {
-    font-family: Redemption
+    font-family: Redemption;
+}
+
+.name-serie {
+    margin-right: 200px;
+    font-family: 'Playfair Display', serif;
 }
 
 .rounded {
@@ -44,6 +50,7 @@
     float: left;
     display: flex;
     flex-direction : row-reverse;
+    margin-left: 10px;
 }
 
 .rating .undergrade {
@@ -54,7 +61,7 @@
 .rating a {
    float: left;
    text-decoration: none;
-   font-size: 3em;
+   font-size: 2.5em;
    transition: color .4s;
 }
 .rating a:hover,
@@ -77,6 +84,10 @@
     line-height: 1.42857;
     top: 150px;
     right: 90px;
+}
+
+.test {
+    overflow-x: auto;
 }
 
 

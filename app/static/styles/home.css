@@ -105,8 +105,9 @@ img {
     color: white;
     background: #343a40;
     color: white;
-    width: 30%;
-}
+    width: 40%;
+
+    }
 
 .movie-search:hover .btn-circle{
     display: block;
@@ -146,6 +147,10 @@ img {
 
 .active:hover {
     cursor: pointer;
+}
+
+test {
+    max-width: 100%;
 }
 
 

@@ -32,7 +32,9 @@
                                                 {{suggestions_serie[i*4]['name']}}
                                             </div>
                                             <div class="p-0 card-body serie">
-                                                <a class="w-100 h-100" href="/serie/{{suggestions_serie[i*4]['id']}}">
+                                                <a class="w-100 h-100"
+                                                   href="{{url_for('media', type_media='tv',
+                                                   id=suggestions_serie[i*4]['id'])}}">
                                                     <button class="btn btn-default btn-circle">
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
@@ -46,14 +48,15 @@
                                                      class="rounded">
                                                 {% endif %}
                                             </div>
-
                                         </div>
                                         <div class="col-md-3">
                                             <div class="card-header name">
                                                 {{suggestions_serie[i*4+1]['name']}}
                                             </div>
                                             <div class="p-0 card-body serie">
-                                                <a class="w-100 h-100" href="/serie/{{suggestions_serie[i*4+1]['id']}}">
+                                                <a class="w-100 h-100"
+                                                   href="{{url_for('media', type_media='tv',
+                                                   id=suggestions_serie[i*4+1]['id'])}}">
                                                     <button class="btn btn-default btn-circle">
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
@@ -74,7 +77,9 @@
                                                 {{suggestions_serie[i*4+2]['name']}}
                                             </div>
                                             <div class="p-0 card-body serie">
-                                                <a class="w-100 h-100" href="/serie/{{suggestions_serie[i*4+2]['id']}}">
+                                                <a class="w-100 h-100"
+                                                   href="{{url_for('media', type_media='tv',
+                                                   id=suggestions_serie[i*4+2]['id'])}}">
                                                     <button class="btn btn-default btn-circle">
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
@@ -94,7 +99,9 @@
                                                 {{suggestions_serie[i*4+3]['name']}}
                                             </div>
                                             <div class="p-0 card-body serie">
-                                                <a class="w-100 h-100" href="/serie/{{suggestions_serie[i*4+3]['id']}}">
+                                                <a class="w-100 h-100"
+                                                   href="{{url_for('media', type_media='tv',
+                                                   id=suggestions_serie[i*4+3]['id'])}}">
                                                     <button class="btn btn-default btn-circle">
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
@@ -119,7 +126,9 @@
                                                 {{suggestions_serie[i*4]['name']}}
                                             </div>
                                             <div class="p-0 card-body serie">
-                                                <a class="w-100 h-100" href="/serie/{{suggestions_serie[i*4]['id']}}">
+                                                <a class="w-100 h-100"
+                                                   href="{{url_for('media', type_media='tv',
+                                                   id=suggestions_serie[i*4]['id'])}}">
                                                     <button class="btn btn-default btn-circle">
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
@@ -139,7 +148,9 @@
                                                 {{suggestions_serie[i*4+1]['name']}}
                                             </div>
                                             <div class="p-0 card-body serie">
-                                                <a class="w-100 h-100" href="/serie/{{suggestions_serie[i*4+1]['id']}}">
+                                                <a class="w-100 h-100"
+                                                   href="{{url_for('media', type_media='tv',
+                                                   id=suggestions_serie[i*4+1]['id'])}}">
                                                     <button class="btn btn-default btn-circle">
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
@@ -159,7 +170,9 @@
                                                 {{suggestions_serie[i*4+2]['name']}}
                                             </div>
                                             <div class="p-0 card-body serie">
-                                                <a class="w-100 h-100" href="/serie/{{suggestions_serie[i*4+2]['id']}}">
+                                                <a class="w-100 h-100"
+                                                   href="{{url_for('media', type_media='tv',
+                                                   id=suggestions_serie[i*4+2]['id'])}}">
                                                     <button class="btn btn-default btn-circle">
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
@@ -179,7 +192,9 @@
                                                 {{suggestions_serie[i*4+3]['name']}}
                                             </div>
                                             <div class="p-0 card-body serie">
-                                                <a class="w-100 h-100" href="/serie/{{suggestions_serie[i*4+3]['id']}}">
+                                                <a class="w-100 h-100"
+                                                   href="{{url_for('media', type_media='tv',
+                                                   id=suggestions_serie[i*4+3]['id'])}}">
                                                     <button class="btn btn-default btn-circle">
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
@@ -230,7 +245,9 @@
                                                 {{suggestions_movie[i*4]['title']}}
                                             </div>
                                             <div class="p-0 card-body serie">
-                                                <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4]['id']}}">
+                                                <a class="w-100 h-100"
+                                                   href="{{url_for('media', type_media='movie',
+                                                   id=suggestions_movie[i*4]['id'])}}">
                                                     <button class="btn btn-default btn-circle">
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
@@ -251,7 +268,9 @@
                                                 {{suggestions_movie[i*4+1]['title']}}
                                             </div>
                                             <div class="p-0 card-body serie">
-                                                <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4+1]['id']}}">
+                                                <a class="w-100 h-100"
+                                                   href="{{url_for('media', type_media='movie',
+                                                   id=suggestions_movie[i*4+1]['id'])}}">
                                                     <button class="btn btn-default btn-circle">
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
@@ -272,7 +291,9 @@
                                                 {{suggestions_movie[i*4+2]['title']}}
                                             </div>
                                             <div class="p-0 card-body serie">
-                                                <a class="w-100 h-100" href="/title/{{suggestions_movie[i*4+2]['id']}}">
+                                                <a class="w-100 h-100"
+                                                   href="{{url_for('media', type_media='movie',
+                                                   id=suggestions_movie[i*4+2]['id'])}}">
                                                     <button class="btn btn-default btn-circle">
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
@@ -292,7 +313,9 @@
                                                 {{suggestions_movie[i*4+3]['title']}}
                                             </div>
                                             <div class="p-0 card-body serie">
-                                                <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4+3]['id']}}">
+                                                <a class="w-100 h-100"
+                                                   href="{{url_for('media', type_media='movie',
+                                                   id=suggestions_movie[i*4+3]['id'])}}">
                                                     <button class="btn btn-default btn-circle">
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
@@ -317,7 +340,9 @@
                                                 {{suggestions_movie[i*4]['title']}}
                                             </div>
                                             <div class="p-0 card-body serie">
-                                                <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4]['id']}}">
+                                                <a class="w-100 h-100"
+                                                   href="{{url_for('media', type_media='movie',
+                                                   id=suggestions_movie[i*4]['id'])}}">
                                                     <button class="btn btn-default btn-circle">
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
@@ -337,7 +362,9 @@
                                                 {{suggestions_movie[i*4+1]['title']}}
                                             </div>
                                             <div class="p-0 card-body serie">
-                                                <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4+1]['id']}}">
+                                                <a class="w-100 h-100"
+                                                   href="{{url_for('media', type_media='movie',
+                                                   id=suggestions_movie[i*4+1]['id'])}}">
                                                     <button class="btn btn-default btn-circle">
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
@@ -357,7 +384,9 @@
                                                 {{suggestions_movie[i*4+2]['title']}}
                                             </div>
                                             <div class="p-0 card-body serie">
-                                                <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4+2]['id']}}">
+                                                <a class="w-100 h-100"
+                                                   href="{{url_for('media', type_media='movie',
+                                                   id=suggestions_movie[i*4+2]['id'])}}">
                                                     <button class="btn btn-default btn-circle">
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>
@@ -377,7 +406,9 @@
                                                 {{suggestions_movie[i*4+3]['title']}}
                                             </div>
                                             <div class="p-0 card-body serie">
-                                                <a class="w-100 h-100" href="/movie/{{suggestions_movie[i*4+3]['id']}}">
+                                                <a class="w-100 h-100"
+                                                   href="{{url_for('media', type_media='movie',
+                                                   id=suggestions_movie[i*4+3]['id'])}}">
                                                     <button class="btn btn-default btn-circle">
                                                         <i class="fa fa-fw fa-plus"></i>
                                                     </button>

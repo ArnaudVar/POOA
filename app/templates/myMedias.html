@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/home.css') }}">
+</head>
+<div class="m-3 home w-100 d-flex flex-column">
+    <div class="w-100 d-flex flex-column justify-content-center welcome">
+        <h1> Hi {{current_user.username}} </h1>
+        {% if type_media == 'tv' %}
+            <h2>Welcome to your TV Show section, here are all the shows you added to your list !</h2>
+        {% else %}
+            <h2>Welcome to your Movie section, here are all the movies you added to your list !</h2>
+        {% endif %}
+    </div>
+    <div class="w-100 h-100% card suggestion">
+        <div class="card-header">
+            {% if type_media == 'tv' %}
+                Your shows
+            {% else %}
+                Your movies
+            {% endif %}
+        </div>
+        <div class="card-body list">
+            <div class="container">
+                {% if nb_medias == 0 %}
+                    <p>You don't have any {{type_media}} added to your list yet !</p>
+                {% else %}
+                    {% for i in range (1+nb_medias // 4)  %}
+                        <div class="d-flex flex-row justify-content-around m-3">
+                            {% for j in range (4) %}
+                                {% if 4*i + j < nb_medias %}
+                                    <div class="col-md-3 justify-content-center">
+                                        <div class="card-header name justify-content-center ">
+                                            {{list_medias[4*i + j]['name']}}
+                                        </div>
+                                        <div class="p-0 card-body serie">
+                                            {% if type_media == 'tv' %}
+                                                <a class="form-control episode-string"
+                                                    href="{{url_for('media', type_media=type_media,
+                                                    id=list_medias[4*i + j]['id'])}}">
+                                                {{user.get_last_episode_viewed(list_medias[4*i + j]['id'])}}
+                                                </a>
+                                            {% else %}
+                                                <a class="w-100 h-100 justify-content-center"
+                                                   href="{{url_for('media', type_media=type_media,
+                                                    id=list_medias[4*i + j]['id'])}}">
+                                                    <button class="btn btn-default btn-circle   ">
+                                                        <i class="fa fa-fw fa-minus"></i>
+                                                    </button>
+                                                </a>
+                                            {% endif %}
+                                            <img src="https://image.tmdb.org/t/p/w500{{list_medias[4*i + j]['image']}}"
+                                                 alt="{{list_medias[4*i + j]['name']}}"
+                                                 class="rounded">
+                                        </div>
+                                    </div>
+                                {%endif%}
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

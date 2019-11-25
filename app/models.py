@@ -141,10 +141,24 @@ class User(UserMixin, db.Model):
         if not self.is_in_medias(id_media=id_media, type_media=type_media):
             if type_media == 'tv':
                 # On ajoute la serie a l'utilisatur en la marquant comme nutd et on remeta jour les notifications
-                m = UserMedia(media='tv', media_id=int(id_media),
-                    season_id=1, episode_id=1, state_serie='nutd', user=self)
-                self.notifications = bytes(1)
+                serie_info = Api.get_media(type_media='tv', id_media=int(id_media))
 
+                last_season, last_ep = serie_info.latest['season_number'], serie_info.latest['episode_number']
+
+                status = ''
+                # Si le dernier episode vu par l'utilisateur est le dernier episode selon l'API, on regarde si il y a un
+                # episode attendu pour savoir si l'utilisateur est a la fin de la serie
+                if not self.is_after(season=last_season, episode=last_ep, serie=id_media):
+                    if serie_info.date == '':
+                        # On met a jour le statut de la serie en finie (fin)
+                        status = 'fin'
+                    else:
+                        status = 'utd'
+                else:
+                    status = 'nutd'
+                m = UserMedia(media='tv', media_id=int(id_media),
+                              season_id=1, episode_id=1, state_serie=status, user=self, media_name=serie_info.name)
+                self.notifications = bytes(1)
             else:
                 m = UserMedia(media='movie', media_id=int(id_media), user=self)
 
@@ -224,7 +238,11 @@ class User(UserMixin, db.Model):
         # Si la serie n'est pas dans les series de l'utilisateur, on ne fait rien
         if show:
             # On appelle l'API pour obtenir les informations de la serie
-            s = Api.get_serie(str(serie))
+            s = Api.get_media(type_media='tv', id_media=str(serie))
+
+            # On update la saison et l'episode de l'utilisateur
+            show.season_id = season
+            show.episode_id = episode
 
             # On recupere la saison et le numero du dernier episode sorti
             latest_season, latest_ep = s.latest['season_number'], s.latest['episode_number']
@@ -232,7 +250,7 @@ class User(UserMixin, db.Model):
             status = ''
             # Si le dernier episode et lepisode vu par l'utilisateur sont les memes, on regarde si il y a un
             # episode qui doit sortir
-            if int(latest_season) == int(season) and int(latest_ep) == int(episode):
+            if not self.is_after(season=latest_season, episode=latest_ep, serie=s.id):
                 # Si il n'y a pas d'episode a venir, la serie est terminee
                 if s.date == '':
                     status = 'fin'
@@ -243,9 +261,7 @@ class User(UserMixin, db.Model):
                 # Sinon la serie n'est pas a jour car il reste des episodes a voir, on change le statut en nutd
                 status = 'nutd'
 
-            # On update la saison et l'episode de l'utilisateur
-            show.season_id = season
-            show.episode_id = episode
+
             show.state_serie = status
 
             # On met a jour les notifications
@@ -384,7 +400,7 @@ class User(UserMixin, db.Model):
         serie = self.user_media.filter_by(media='tv').all()
         for s in serie:
             # On recupere les infos de chaque serie grace a l'API
-            serie_info = Api.get_serie(s.media_id)
+            serie_info = Api.get_media(type_media='tv', id_media=s.media_id)
 
             # On recupere les infos de l'API sur le dernier episode
             last_season, last_ep = serie_info.latest['season_number'], serie_info.latest['episode_number']
@@ -392,11 +408,11 @@ class User(UserMixin, db.Model):
             status = ''
             # Si le dernier episode vu par l'utilisateur est le dernier episode selon l'API, on regarde si il y a un
             # episode attendu pour savoir si l'utilisateur est a la fin de la serie
-            if int(s.season_id) == last_season and int(s.episode_id) == last_ep:
+            if not self.is_after(season=last_season, episode=last_ep, serie=s.media_id):
                 if serie_info.date == '':
                     # On met a jour le statut de la serie en finie (fin)
                     status = 'fin'
-                else :
+                else:
                     status = 'utd'
             else:
                 status = 'nutd'
@@ -442,12 +458,11 @@ class User(UserMixin, db.Model):
         """
         # On recupere la liste des series ou l'utilisateur n'est pas jour
         list_series = self.check_upcoming_episodes()[1]
-        notifs = []
+        series_name = []
         for serie in list_series:
-            # On recupere les infos de chaque serie non a jour avec l'API
-            serieobj = Api.get_serie(int(serie))
-            notifs.append((serieobj.name, int(serie)))
-        return notifs
+            s = self.user_media.filter_by(media='tv', media_id=serie).first()
+            series_name.append((s.media_name, int(serie)))
+        return series_name
 
     def nb_not_up_to_date(self):
         """
@@ -455,7 +470,8 @@ class User(UserMixin, db.Model):
         :return: int
         """
         if self.notifications:
-            return len(self.get_notifications())
+            list_series = self.user_media.filter_by(media='tv', state_serie='nutd').all()
+            return len(list_series)
         else:
             return 0
 
@@ -482,6 +498,9 @@ class UserMedia(db.Model):
 
     # la note accordee par l'utilisateur au media
     media_grade = db.Column(db.Integer)
+
+    # Le nom du media (rempli uniquement pour les series ou on a besoin du nom des series non a jour)
+    media_name = db.Column(db.String(128))
 
 
     def __repr__(self):
