@@ -16,6 +16,8 @@ class Api:
         if request.status_code == 200:
             Api.update_remaining(request)
             return request.json()
+        elif request.status_code != 429:
+            return request.json()
         else:
             time.sleep(1)
             return Api.requete(url)
