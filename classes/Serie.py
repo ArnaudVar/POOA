@@ -1,6 +1,5 @@
 from classes.Exception import SetterException
 from classes.media import Media
-import requests
 from classes.episode import Episode
 from app.api import Api
 
