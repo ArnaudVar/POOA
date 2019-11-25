@@ -292,7 +292,7 @@ def post_media_grade(id_media, type_media):
     grade = current_user.current_grade
     session = current_user.session_id
     current_user.grade(id_media=id_media, media=type_media, grade=grade)
-    Api.rate(id=id_media, grade=grade, media=type_media, session=session)
+    Api.rate(id=id_media, grade=grade, media=type_media, session=session, user=current_user)
     app.logger.info(msg=f'The user posted the grade {int(grade)} for the {type_media} {id}')
     if type_media == 'tv':
         return serie(id_media)

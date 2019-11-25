@@ -1,5 +1,4 @@
 from classes.Exception import SetterException, AttributeException
-import requests
 from classes.episode import Episode
 from app.api import Api
 

@@ -1,15 +1,51 @@
 # noinspection DuplicatedCode
+import time
+from app import db
+
 class Api:
 
     api_key = "11893590e2d73c103c840153c0daa770"
     base_url_start = "https://api.themoviedb.org/3/"
     base_url_end = f"?api_key={api_key}&language=en-US"
+    remaining_call = -1
+    reset = int(time.time())
+
+    @staticmethod
+    def requete(url):
+        request = requests.get(url)
+        if request.status_code == 200:
+            Api.update_remaining(request)
+            return request.json()
+        else:
+            time.sleep(1)
+            return Api.requete(url)
+
+    @staticmethod
+    def check_api():
+        now = int(time.time())
+        if Api.remaining_call > 1 :
+            return None
+        else:
+            temps = Api.reset - now
+            time.sleep(abs(temps))
+            return None
+
+    @staticmethod
+    def update_remaining(request):
+        now = int(time.time())
+        headers = request.headers
+        Api.remaining_call = int(headers['X-RateLimit-Remaining'])
+        if now > Api.reset:
+            Api.reset = now + 10
+        return None
     """
     Cette methode permet de creer un objet movie a partir de son ID et d'une requete a l'API themoviedb
     """
     @staticmethod
     def get_movie(id):
-        r = requests.get(f"{Api.base_url_start}movie/{id}{Api.base_url_end}").json()
+        Api.check_api()
+        url = f"{Api.base_url_start}movie/{id}{Api.base_url_end}"
+        r = Api.requete(url)
         try :
             genre_list = []
             for x in r['genres']:
@@ -25,7 +61,9 @@ class Api:
     """
     @staticmethod
     def get_serie(id):
-        seriejson = requests.get(f"{Api.base_url_start}tv/{id}{Api.base_url_end}").json()
+        Api.check_api()
+        url = f"{Api.base_url_start}tv/{id}{Api.base_url_end}"
+        seriejson = Api.requete(url)
         try :
             if seriejson['next_episode_to_air']:
                 serie = Serie(seriejson['id'], seriejson['name'], seriejson['overview'], seriejson['vote_average'],
@@ -46,14 +84,12 @@ class Api:
     """
     @staticmethod
     def get_popular(media, page, nb_page=False):
+        Api.check_api()
         if media=='serie':
-            result = requests.get(f"{Api.base_url_start}tv/popular{Api.base_url_end}&"
-                                  f"sort_by=popularity.desc&page={page}").json()
+            url = f"{Api.base_url_start}tv/popular{Api.base_url_end}&sort_by=popularity.desc&page={page}"
         elif media=='movie':
-            result = requests.get(f"{Api.base_url_start}movie/popular{Api.base_url_end}&"
-                                  f"sort_by=popularity.desc&page={page}").json()
-        else:
-            raise ValueError("The type of this media is unknown")
+            url = f"{Api.base_url_start}movie/popular{Api.base_url_end}&sort_by=popularity.desc&page={page}"
+        result = Api.requete(url)
         if nb_page:
             return result['results'], result['total_pages']
         else:
@@ -65,12 +101,15 @@ class Api:
     """
     @staticmethod
     def search(string, page):
+        Api.check_api()
         base_url_tv = f"{Api.base_url_start}search/tv{Api.base_url_end}&query={string}&page={page}&"\
                       "sort_by=popularity.desc"
         base_url_movies = f"{Api.base_url_start}search/movie{Api.base_url_end}&query={string}&page={page}&"\
                           "sort_by=popularity.desc"
-        search_serie = requests.get(base_url_tv).json()
-        search_movie = requests.get(base_url_movies).json()
+        Api.check_api()
+        search_serie = Api.requete(base_url_tv)
+        Api.check_api()
+        search_movie = Api.requete(base_url_movies)
         list_series = search_serie['results']
         list_movies = search_movie['results']
         nb_pages = max(int(search_serie['total_pages']), int(search_movie['total_pages']))
@@ -82,7 +121,10 @@ class Api:
     """
     @staticmethod
     def get_genre(media):
-        media_genre = requests.get(f"{Api.base_url_start}genre/{media}/list{Api.base_url_end}").json()['genres']
+        Api.check_api()
+        url = f"{Api.base_url_start}genre/{media}/list{Api.base_url_end}"
+        request = Api.requete(url)
+        media_genre = request['genres']
         return media_genre
 
     """
@@ -90,9 +132,10 @@ class Api:
     """
     @staticmethod
     def discover(media, id_genre, page):
+        Api.check_api()
         url = f"{Api.base_url_start}discover/{media}{Api.base_url_end}" \
               f"&with_genres={id_genre}&sort_by=popularity.desc&page={page}"
-        request = requests.get(url).json()
+        request = Api.requete(url)
         list_media = request['results']
         nb_pages = int(request['total_pages'])
         return list_media, nb_pages
@@ -103,9 +146,9 @@ class Api:
     """
     @staticmethod
     def get_episode(id_serie, season, episode_number):
-        request_episode = requests.get(f"{Api.base_url_start}tv/{id_serie}/season/{season}/episode/{episode_number}"\
-                f"{Api.base_url_end}")
-        episode_json = request_episode.json()
+        Api.check_api()
+        url = f"{Api.base_url_start}tv/{id_serie}/season/{season}/episode/{episode_number}{Api.base_url_end}"
+        episode_json = Api.requete(url)
         episode_code = 'S' + str(episode_json['season_number']) + 'E' + str(episode_json['episode_number'])
         episode = Episode(id=episode_code, name=episode_json['name'], description=episode_json["overview"],
                           cast=episode_json["guest_stars"], grade=episode_json["vote_average"],
@@ -119,8 +162,9 @@ class Api:
     """
     @staticmethod
     def get_similar(id,media_type):
-        request = requests.get(f"{Api.base_url_start}{media_type}/{id}/similar{Api.base_url_end}")
-        similar_json = request.json()
+        Api.check_api()
+        url = f"{Api.base_url_start}{media_type}/{id}/similar{Api.base_url_end}"
+        similar_json = Api.requete(url)
         try:
             results = similar_json["total_results"]
             media_list = []
@@ -156,18 +200,34 @@ class Api:
     """
     @staticmethod
     def new_session():
-        request = requests.get(f"{Api.base_url_start}authentication/guest_session/new?api_key={Api.api_key}")
-        session = request.json()['guest_session_id']
+        Api.check_api()
+        url = f"{Api.base_url_start}authentication/guest_session/new?api_key={Api.api_key}"
+        request = Api.requete(url)
+        session = request['guest_session_id']
         return session
 
     """
     Cette methode permet d'envoyer une note a themoviedb pour le film ou la serie d'ID "id"
     """
     @staticmethod
-    def rate(id, grade, media, session):
-        request = requests.post(f"{Api.base_url_start}{media}/{id}/rating?api_key={Api.api_key}" \
-                                f"&guest_session_id={session}", params={"value": int(grade)}, headers={"Content-Type": "application/json;charset=utf-8"})
-        return request.json()
+    def rate(id, grade, media, session, user):
+        Api.check_api()
+        url = f"{Api.base_url_start}{media}/{id}/rating?api_key={Api.api_key}&guest_session_id={session}"
+        params = {"value": int(grade)}
+        headers = {"Content-Type": "application/json;charset=utf-8"}
+        request_passed = False
+        while not request_passed:
+            request = requests.post(url=url, params=params, headers=headers)
+            if request.status_code == 401:
+                new_session = Api.new_session()
+                user.session_id = new_session
+                db.session.commit()
+                url = f"{Api.base_url_start}{media}/{id}/rating?api_key={Api.api_key}&guest_session_id={new_session}"
+            if request.status_code == 201:
+                Api.update_remaining(request)
+                result = request.json()
+                request_passed = True
+        return result
 
 
     """
@@ -175,10 +235,9 @@ class Api:
     """
     @staticmethod
     def get_top_rated(media, page):
-        result = requests.get(f"{Api.base_url_start}{media}/top_rated{Api.base_url_end}&"
-                                  f"sort_by=vote_average.desc&page={page}").json()
-        print(f"{Api.base_url_start}{media}/top_rated{Api.base_url_end}&"
-                                  f"sort_by=vote_average.desc&page={page}")
+        Api.check_api()
+        url = f"{Api.base_url_start}{media}/top_rated{Api.base_url_end}&sort_by=vote_average.desc&page={page}"
+        result=Api.requete(url)
         return result['results'], result['total_pages']
         
 import requests

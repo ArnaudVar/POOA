@@ -382,7 +382,6 @@ class User(UserMixin, db.Model):
         """
         # On recupere toutes les series de l'utilisateur
         serie = self.user_media.filter_by(media='tv').all()
-
         for s in serie:
             # On recupere les infos de chaque serie grace a l'API
             serie_info = Api.get_serie(s.media_id)
