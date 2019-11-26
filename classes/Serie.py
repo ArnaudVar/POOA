@@ -68,22 +68,44 @@ class Serie(Media):
         return len(self.seasons)
 
     def set_selected_episode(self, i, j):
+        '''
+        Méthode appelée pour changer l'épisode sélectionné de la série
+        :param i: int, numéro de la saison
+        :param j: int, numéro de l'épisode
+        :return: Void
+        '''
         self.selected_episode = 'S'+str(i)+'E'+str(j)
 
     def get_current_season(self):
+        '''
+        Méthode appelée pour avoir la saison ou en est l'utilisateur
+        :return: le numéro de la saison
+        '''
         step1 = self.selected_episode.split('S')
         season = int(step1[1].split('E')[0])
         return(season)
 
     def get_current_episode(self):
+        '''
+        Méthode appelée pour avoir le numéro de l'episode où en est l'utilisateur
+        :return: le numéro de l'épisode
+        '''
         episode = int(self.selected_episode.split('E')[1])
         return(episode)
 
     @property
     def get_episode(self):
+        '''
+        Méthode utilisée pour recupérer l'épisode actuel depuis l'API
+        :return: Un objet épisode correspondant à l'épisode actuel
+        '''
         return Api.get_episode(self.id, self.get_current_season(), self.get_current_episode())
 
     def get_previous_episode(self):
+        '''
+        Méthode utilisée pour avoir le numéro de saison et numéro d'épisode de l'épisode précédant
+        :return: un couple numéro saison, numéro épisode ou False
+        '''
         if self.get_current_episode() > 1:
             return self.get_current_season(), self.get_current_episode()-1
         elif self.get_current_season() > min(self.seasons):
@@ -92,6 +114,10 @@ class Serie(Media):
             return False
 
     def get_next_episode(self):
+        '''
+        Méthode utilisée pour avoir le numéro de saison et numéro d'épisode de l'épisode suivant
+        :return: un couple numéro saison, numéro épisode ou False
+        '''
         if self.get_current_episode() < self.seasons[self.get_current_season()]:
             return self.get_current_season(), self.get_current_episode()+1
         elif self.get_current_season() < max(self.seasons):

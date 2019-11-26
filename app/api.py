@@ -4,6 +4,10 @@ from app import db
 
 class Api:
 
+    '''
+    Classe statique utilisée pour communiquer avec l'api de The Movie Database.
+    Chaque requête envers l'api se fait grâce à cette classe
+    '''
     api_key = "11893590e2d73c103c840153c0daa770"
     base_url_start = "https://api.themoviedb.org/3/"
     base_url_end = f"?api_key={api_key}&language=en-US"
@@ -12,6 +16,13 @@ class Api:
 
     @staticmethod
     def requete(url):
+        '''
+        Méthode utilisée pour effectuer une requete GET
+        Une vérification de la réponse est réalisé.
+        Si la réponse n'est correcte, cette méthode s'auto appelle
+        :param url: string. L'url de la requête a effectuer
+        :return: Le resultat de la requete en format json
+        '''
         request = requests.get(url)
         if request.status_code == 200:
             Api.update_remaining(request)
@@ -24,6 +35,12 @@ class Api:
 
     @staticmethod
     def check_api():
+        '''
+        Méthode utilisée pour vérifier combien de requête à l'Api il reste.
+        Il peut y avoir 40 requetes toutes les 10 secondes.
+        Dans le cas où il n'y a plus de requête disponible, cette méthode attend jusqu'au retour d'une requête
+        :return: None
+        '''
         now = int(time.time())
         if Api.remaining_call > 1 :
             return None
@@ -34,6 +51,8 @@ class Api:
 
     @staticmethod
     def update_remaining(request):
+        '''Méthode qui regarde combien de requêtes disponibles il reste et met a jour la variable "remaining_call"
+        :return None'''
         now = int(time.time())
         headers = request.headers
         Api.remaining_call = int(headers['X-RateLimit-Remaining'])
@@ -44,6 +63,12 @@ class Api:
 
     @staticmethod
     def get_media(type_media, id_media):
+        '''
+        Méthode qui donne un média en fonction de son id
+        :param type_media: string. Type du média recherché : 'tv' ou 'movie'
+        :param id_media: int. Id du média
+        :return: Un objet correspondant au média demandé
+        '''
         Api.check_api()
         url = f"{Api.base_url_start}{type_media}/{id_media}{Api.base_url_end}"
         r = Api.requete(url)
@@ -80,7 +105,14 @@ class Api:
     Cette methode permet d'obtenir les films ou les series populaires du moment a partir de l'API themoviedb
     """
     @staticmethod
-    def get_popular(media, page, nb_page=False):
+    def get_popular(media, page, nb_page=0):
+        '''
+        Méthode qui donne la liste des médias populaire
+        :param media: string. Type du média : 'tv' ou 'movie'
+        :param page: int: Numéro de la page demandée
+        :param nb_page: int. Nombre de page maximum
+        :return: Un dictionnaire des médias les plus populaires
+        '''
         Api.check_api()
         if media=='serie':
             url = f"{Api.base_url_start}tv/popular{Api.base_url_end}&sort_by=popularity.desc&page={page}"
