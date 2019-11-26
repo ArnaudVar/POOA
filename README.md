@@ -8,9 +8,9 @@ Members :
 	- Victor Le Fourn
 
 ##  Pour commencer
-    - Se rendre à l'adresse https://seriegenda.herokuapp.com/
+    - Se rendre à l'adresse https://seriegenda.herokuapp.com/ (site un peu plus rapide)
     Ou 
-    - pip install -r /app/requirements.txt
+    - pip install -r requirements.txt
     - python main.py
     - Go to http://localhost:5000
 
@@ -48,20 +48,20 @@ Members :
         Les résultats seront affichés avec les séries à gauche et les films à droite
      
 ## Serie/Film
-    Pour ajouter une série/un film à sa liste, l'utilisateur doit cliquer d'abord sur le bouton 
-    plus qui s'affiche quand la souris passe sur l'image de la série.
-    Une fois sur la page de la série ou du film :
-    Il est possible dans la headbar de noter la série sur 5 à l'aide des étoiles et du bouton "Rate"
-    (d'abord établir la note avec les étoiles puis la valider avec Rate pour l'envoyer à l'API
-    TheMovieDB). 
-    - Pour les séries : on trouve sur le côté une barre permettant de sélectionner l'épisode 
-    affiché, on a le résumé de l'épisode sélectionné avec son image et les séries similaires 
-    en dessous de ce résumé. Pour indiquer qu'un épisode a été vu, il suffit de cliquer 
-    sur l'icone oeil barré à côté de "Not viewed" et il passera à Viewed comme tous les 
-    épisodes précédents
-    
-    - Pour les films, on peut trouver le synopsis du film avec son image et en dessous les 
-    films similaires.
+        Pour ajouter une série/un film à sa liste, l'utilisateur doit cliquer d'abord sur le bouton 
+        plus qui s'affiche quand la souris passe sur l'image de la série.
+        Une fois sur la page de la série ou du film :
+        Il est possible dans la headbar de noter la série sur 5 à l'aide des étoiles et du bouton "Rate"
+        (d'abord établir la note avec les étoiles puis la valider avec Rate pour l'envoyer à l'API
+        TheMovieDB). 
+        - Pour les séries : on trouve sur le côté une barre permettant de sélectionner l'épisode 
+        affiché, on a le résumé de l'épisode sélectionné avec son image et les séries similaires 
+        en dessous de ce résumé. Pour indiquer qu'un épisode a été vu, il suffit de cliquer 
+        sur l'icone oeil barré à côté de "Not viewed" et il passera à Viewed comme tous les 
+        épisodes précédents
+        
+        - Pour les films, on peut trouver le synopsis du film avec son image et en dessous les 
+        films similaires.
         
      
          
