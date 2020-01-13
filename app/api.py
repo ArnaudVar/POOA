@@ -8,7 +8,7 @@ class Api:
     Classe statique utilisée pour communiquer avec l'api de The Movie Database.
     Chaque requête envers l'api se fait grâce à cette classe
     '''
-    api_key = "11893590e2d73c103c840153c0daa770"
+    api_key = "4166d77f434aadc0fe7e430ab824f602"
     base_url_start = "https://api.themoviedb.org/3/"
     base_url_end = f"?api_key={api_key}&language=en-US"
     remaining_call = -1
