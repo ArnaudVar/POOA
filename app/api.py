@@ -55,7 +55,7 @@ class Api:
         :return None'''
         now = int(time.time())
         headers = request.headers
-        Api.remaining_call = int(headers['X-RateLimit-Remaining'])
+        Api.remaining_call = 40
         if now > Api.reset:
             Api.reset = now + 10
         return None
